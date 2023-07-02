@@ -1,14 +1,15 @@
 const _ = require('lodash');
 
-function toPathValuePairs(ob, mapLeaf = (x) => x) {
+/** from object to path-value pairs */
+function toLeaves(ob, mapLeaf = (x) => x) {
   // flatten
   const toReturn = {};
   _.forEach(ob, (value, key) => {
     if (!_.isObject(value)) {
-      toReturn[key] = value;
+      toReturn[key] = value; // leaf
       return;
     }
-    const flat = toPathValuePairs(value);
+    const flat = toLeaves(value);
     _.forEach(flat, (subValue, subKey) => {
       const arr = _.isArray(value);
       const k = key + (arr ? `[${subKey}]` : `.${subKey}`);
@@ -22,7 +23,8 @@ function toPathValuePairs(ob, mapLeaf = (x) => x) {
   return toReturn;
 }
 
-function fromPathValuePairs(obj, mapLeaf = (x) => x) {
+/** from path-value pairs to object */
+function toTree(obj, mapLeaf = (x) => x) {
   let toReturn = {};
   _.forEach(obj, (value, path) => {
     // setPathValue(toReturn, path, mapLeaf(value, path));
@@ -68,14 +70,14 @@ const ob3 = {
 };
 
 function test(ob) {
-  const record = toPathValuePairs(ob);
-  // const inversed = fromPathValuePairs(record);
+  const record = toLeaves(ob);
+  const inversed = toTree(record);
   console.log(JSON.stringify(ob, null, 0));
   console.log(JSON.stringify(record, null, 0));
-  // console.log(JSON.stringify(inversed, null, 0));
+  console.log(JSON.stringify(inversed, null, 0));
 }
 
-test(ob1);
+test(ob2);
 // console.log();
 // test(ob2);
 
