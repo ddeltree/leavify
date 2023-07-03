@@ -1,4 +1,5 @@
-const _ = require('lodash');
+import _ from 'lodash';
+import { setPathValue, get } from './setGet.js';
 
 /** from object to path-value pairs */
 function toLeaves(ob, mapLeaf = (x) => x) {
@@ -78,8 +79,6 @@ function test(ob) {
 }
 
 test(ob2);
-// console.log();
-// test(ob2);
 
 // console.log(_.toPath('a[0].2.f'));
 
