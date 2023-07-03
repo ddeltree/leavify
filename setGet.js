@@ -38,27 +38,40 @@ function set(obj, path, value) {
   console.log(final);
 
   let ref = obj;
-  final.forEach((keys) => {
+  final.forEach((keys, i) => {
     const len = keys.length;
     if (len === 1) {
-      // if (ref === undefined) ref = {};
-      ref[keys[0]] = {};
+      ref[keys[0]] = ref[keys[0]] ?? {};
       ref = ref[keys[0]];
     } else {
-      keys.forEach((key, i) => {
-        // if (ref === undefined) ref = [];
-        ref[key] = i === keys.length - 1 ? {} : [];
+      keys.forEach((key, j) => {
+        if (j === len - 1 && i === final.length - 1) return;
+        ref[key] ??= j === len - 1 ? {} : [];
         ref = ref[key];
       });
-      // ref = ref[keys[keys.length - 1]];
     }
   });
-  // ref[_.last(final.flat())] = value;
-  // keys.slice(0, -1).map((k) => (ref = ref[k]));
-  // ref[keys[keys.length - 1]] = value;
+  ref[final.flat().slice(-1)[0]] = value;
   return obj;
 }
 
 const path = 'a[2].b.c.f[4]';
-// console.log(path.split(/[\.]/).map((x) => x.split(/(?<!\\)\[(.*?)(?<!\\)\]/)));
-console.log(JSON.stringify(set({}, path, 42)));
+const sett = {
+  a: [
+    1,
+    2,
+    {
+      b: {
+        c: {
+          g: 2,
+          f: [1],
+        },
+      },
+    },
+    4,
+    5,
+    6,
+  ],
+};
+
+console.log(JSON.stringify(set(sett, path, 'VALOR'), null, 2));
