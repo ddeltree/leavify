@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import { setPathValue, get } from './setGet.js';
+import { set, get } from './setGet.js';
 
 /** from object to path-value pairs */
 function toLeaves(ob, mapLeaf = (x) => x) {
@@ -29,7 +29,7 @@ function toTree(obj, mapLeaf = (x) => x) {
   let toReturn = {};
   _.forEach(obj, (value, path) => {
     // setPathValue(toReturn, path, mapLeaf(value, path));
-    _.set(toReturn, path, mapLeaf(value, path));
+    set(toReturn, path, mapLeaf(value, path));
   });
   return toReturn;
 }

@@ -5,16 +5,20 @@ export function get(obj, path) {
 }
 
 /** in-place set value of a deep nested value */
-function set(obj, path, value) {
-  const final = [];
-  const points = /(?<!\\)\./,
-    brackets = /(?<!\\)\[(.*?)(?<!\\)\]/;
+export function set(obj, path, value) {
+  // split by dots or bracket pairs, except when preceded by backslash
+  const points = /(?<!\\)\./;
+  const brackets = /(?<!\\)\[(.*?)(?<!\\)\]/;
+  // group keys by whether they refer to directly nested array or object keys
+  // --> object key   ==> single-element array, with the key
+  // --> arr[][][]... ==> > 2 elements; the last one is an object key
+  const groups = [];
   for (const sub of path.split(points)) {
     const match = sub.split(brackets);
     const len = match.length;
     // .any.
     if (len === 1) {
-      final.push([match[0]]);
+      groups.push([match[0]]);
       continue;
     }
     // .[number]. or .m[number]. or .m[number][number]. (...)
@@ -24,38 +28,39 @@ function set(obj, path, value) {
         `The notation 'prop.[any]' is not supported
         Use 'prop[number]' or 'prop.any' instead`,
       );
-    const tmp = [key];
+    const keys = [key];
     for (const i of indices) {
       if (isNaN(i))
         throw new Error(
           `The notation 'prop[string]' is not supported, only for numbers, when 'prop' is an array.
           Use 'prop.string' instead.`,
         );
-      tmp.push(i);
+      keys.push(i);
     }
-    final.push(tmp);
+    groups.push(keys);
   }
-  console.log(final);
-
+  // [a]        => {a: {}}
+  // [a, 1, 0]  => {a: [ ___, [ {} ] ]}
   let ref = obj;
-  final.forEach((keys, i) => {
-    const len = keys.length;
-    if (len === 1) {
-      ref[keys[0]] = ref[keys[0]] ?? {};
-      ref = ref[keys[0]];
-    } else {
-      keys.forEach((key, j) => {
-        if (j === len - 1 && i === final.length - 1) return;
-        ref[key] ??= j === len - 1 ? {} : [];
-        ref = ref[key];
-      });
+  for (const group of groups) {
+    const isLastGroup = group === _.last(groups);
+    if (group.length === 1) {
+      if (isLastGroup) break;
+      ref[group[0]] ??= {};
+      ref = ref[group[0]];
+      continue;
     }
-  });
-  ref[final.flat().slice(-1)[0]] = value;
+    for (const key of group) {
+      const isLastKey = key === _.last(group);
+      if (isLastGroup && isLastKey) break;
+      ref[key] ??= isLastKey ? {} : [];
+      ref = ref[key];
+    }
+  }
+  ref[groups.flat().slice(-1)[0]] = value;
   return obj;
 }
 
-const path = 'a[2].b.c.f[4]';
 const sett = {
   a: [
     1,
@@ -73,5 +78,5 @@ const sett = {
     6,
   ],
 };
-
+const path = 'a[2].b.c.f[4]';
 console.log(JSON.stringify(set(sett, path, 'VALOR'), null, 2));
