@@ -4,7 +4,7 @@ import _ from 'lodash';
 export const get = (obj, path) => _.property(path)(obj);
 
 /** in-place set value of a deep nested value */
-export function set(obj, path, value) {
+export function set(obj, path: string, value) {
   // split by dots or bracket pairs, except when preceded by backslash
   const points = /(?<!\\)\./;
   const brackets = /(?<!\\)\[(.*?)(?<!\\)\]/;
@@ -12,31 +12,26 @@ export function set(obj, path, value) {
   // group keys by whether they refer to directly nested array or object keys
   // --> object key   ==> single-element array, with the key
   // --> arr[][][]... ==> > 2 elements; the last one is an object key
-  const groups: any[] = [];
+  const groups: string[][] = [];
   for (const sub of path.split(points)) {
     const match = sub.split(brackets);
-    const len = match.length;
     // .any.
-    if (len === 1) {
+    if (match.length === 1) {
       groups.push([match[0]]);
       continue;
     }
     // .any[number].
-    const [key, ...indices] = match.filter((x) => x);
-    if (indices.length < 1)
+    const keys = match.filter((x) => x);
+    if (keys.length === 1 && isNaN(parseInt(keys[0])))
       throw new Error(
-        `The notation 'prop.[any]' is not supported
-        Use 'prop[number]' or 'prop.any' instead`,
+        `The notation '.[string].' is not supported
+          Use '.string.' instead`,
       );
-    const keys = [key];
-    for (const i of indices) {
-      if (isNaN(i))
-        throw new Error(
-          `The notation 'prop[string]' is not supported, only for numbers, when 'prop' is an array.
-          Use 'prop.string' instead.`,
-        );
-      keys.push(i);
-    }
+    else if (keys.slice(1).some((x) => isNaN(parseInt(x))))
+      throw new Error(
+        `The notation 'array[string]' is not supported, only for numbers.
+          Use 'any.string' instead.`,
+      );
     groups.push(keys);
   }
   // [a]        => {a: {}}
@@ -46,12 +41,13 @@ export function set(obj, path, value) {
     const isLastGroup = group === _.last(groups);
     if (group.length === 1) {
       if (isLastGroup) break;
-      ref[group[0]] ??= {};
-      ref = ref[group[0]];
+      const key = group[0];
+      ref[key] ??= {};
+      ref = ref[key];
       continue;
     }
-    for (const key of group) {
-      const isLastKey = key === _.last(group);
+    for (const [i, key] of group.entries()) {
+      const isLastKey = i === group.length - 1;
       if (isLastGroup && isLastKey) break;
       ref[key] ??= isLastKey ? {} : [];
       ref = ref[key];
@@ -60,3 +56,8 @@ export function set(obj, path, value) {
   ref[groups.flat().slice(-1)[0]] = value;
   return obj;
 }
+// console.log(set([], '0[0]', 'seted'));
+// console.log(set({}, '0[0]', 'seted'));
+// console.log(set([], '0.0', 'seted'));
+// console.log(set([], '[0].0', 'seted'));
+// console.log(set({}, '00', 'seted'));

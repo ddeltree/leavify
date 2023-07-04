@@ -1,1 +1,4 @@
 /node_modules
+/__generated
+*.js
+*.js.map
