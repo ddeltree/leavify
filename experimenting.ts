@@ -1,11 +1,16 @@
 import _ from 'lodash';
 import { set, get } from './setGet.js';
 
-/** from object to path-value pairs */
-function toLeaves(obj, mapLeaf = (x, __) => x) {
+/** Converts an object to a pair of it's leaf (non object) values and their respective paths
+ * @param mapLeaf allows to transform the leaf value into any other
+ */
+function toLeaves<TLeaf>(
+  obj: any,
+  mapLeaf: (value: unknown, path: string) => TLeaf = (x) => x as TLeaf,
+): Leaves<TLeaf> {
   // flatten
-  function flatten(ob) {
-    const result = {};
+  function flatten(ob: any) {
+    const result: Leaves<TLeaf> = {};
     _.forEach(ob, (value, key) => {
       result[key] = value;
       if (!_.isObject(value)) return; // leaf
@@ -30,25 +35,25 @@ function toLeaves(obj, mapLeaf = (x, __) => x) {
 }
 
 /** from path-value pairs to object */
-function toTree(obj, mapLeaf = (x, __) => x) {
-  const first = _.first(_.keys(obj));
-  if (first === undefined) return null;
-  const toReturn = first?.startsWith('[') ? [] : {} ?? {};
-  _.forEach(obj, (value, path) => {
-    set(toReturn, path, mapLeaf(value, path));
-  });
+function toTree<TLeaf>(
+  leaves: Leaves<TLeaf>,
+  mapLeaf: (value: TLeaf, path: string) => any = (x) => x,
+): any {
+  const first = _.first(_.keys(leaves));
+  if (first === undefined) return undefined;
+  const toReturn: any = first?.startsWith('[') ? [] : {} ?? {};
+  _.forEach(leaves, (value, path) => set(toReturn, path, mapLeaf(value, path)));
   return toReturn;
 }
 
-function test(tree) {
+function test<T>(tree: T) {
   const leaves = toLeaves(tree);
   const inversed = toTree(leaves);
-  const str = (v) => JSON.stringify(v, null, 0);
+  const str = (v: any) => JSON.stringify(v, null, 0);
   console.log(str(tree));
   console.log(str(inversed));
   console.log(str(tree) === str(inversed));
   // console.log(JSON.stringify(leaves, null, 2));
 }
 
-const ob = {};
-test(ob);
+type Leaves<T> = Record<string, T>;

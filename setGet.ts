@@ -1,10 +1,10 @@
 import _ from 'lodash';
 
 /** returns the property value at path on a given object */
-export const get = (obj, path) => _.property(path)(obj);
+export const get = (obj: any, path: string) => _.property(path)(obj);
 
 /** in-place set value of a deep nested value */
-export function set(obj, path: string, value) {
+export function set(obj: any, path: string, value: any) {
   // split by dots or bracket pairs, except when preceded by backslash
   const points = /(?<!\\)\./;
   const brackets = /(?<!\\)\[(.*?)(?<!\\)\]/;
