@@ -1,10 +1,10 @@
 import _ from 'lodash';
-import { set, get } from './setGet.js';
+import { set, get } from './setter';
 
 /** Converts an object to a pair of it's leaf (non object) values and their respective paths
  * @param mapLeaf allows to transform the leaf value into any other
  */
-function toLeaves<TLeaf>(
+export function toLeaves<TLeaf>(
   obj: any,
   mapLeaf: (value: unknown, path: string) => TLeaf = (x) => x as TLeaf,
 ): Leaves<TLeaf> {
@@ -35,7 +35,7 @@ function toLeaves<TLeaf>(
 }
 
 /** from path-value pairs to object */
-function toTree<TLeaf>(
+export function toTree<TLeaf>(
   leaves: Leaves<TLeaf>,
   mapLeaf: (value: TLeaf, path: string) => any = (x) => x,
 ): any {
