@@ -39,21 +39,11 @@ export function toTree<TLeaf>(
   leaves: Leaves<TLeaf>,
   mapLeaf: (value: TLeaf, path: string) => any = (x) => x,
 ): any {
-  const first = _.first(_.keys(leaves));
-  if (first === undefined) return undefined;
-  const toReturn: any = first?.startsWith('[') ? [] : {} ?? {};
+  if (_.isEmpty(leaves)) return undefined;
+  const first = _.first(_.keys(leaves))!;
+  const toReturn: any = first.startsWith('[') ? [] : {} ?? {};
   _.forEach(leaves, (value, path) => set(toReturn, path, mapLeaf(value, path)));
   return toReturn;
-}
-
-function test<T>(tree: T) {
-  const leaves = toLeaves(tree);
-  const inversed = toTree(leaves);
-  const str = (v: any) => JSON.stringify(v, null, 0);
-  console.log(str(tree));
-  console.log(str(inversed));
-  console.log(str(tree) === str(inversed));
-  // console.log(JSON.stringify(leaves, null, 2));
 }
 
 type Leaves<T> = Record<string, T>;
