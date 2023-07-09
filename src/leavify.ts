@@ -86,26 +86,3 @@ export function toTree<TLeaf>(
 }
 
 type Leaves<T> = Record<string, T>;
-
-function create() {
-  const branches: any[] = [];
-
-  _.range(1, 5).forEach((digitCount) =>
-    _.range(0, 2 ** digitCount).forEach((value) => {
-      const bits = value.toString(2);
-      const bitArr = '0'.repeat(digitCount - bits.length) + bits;
-      const arrDict: ({} | [])[] = _.map(bitArr, (bit) =>
-        bit === '0' ? {} : [],
-      );
-      const branch = arrDict.reduce((prev, curr) => {
-        if (prev === null) return curr;
-        const res: any = curr;
-        res[0] = prev;
-        return res;
-      }, null as any);
-      branches.push(branch);
-    }),
-  );
-  console.log(JSON.stringify(branches, null, 1));
-}
-create();
