@@ -7,6 +7,7 @@ import { set, get } from './setter';
 // TODO write tests for every combination of nested list or object up to level 4 of nesting
 // This way, level 3 is the analogous case of all the sub-objects,
 // since it has both a parent and a child, each of which may be list or object.
+// 2^4 + 2^3 + ... = 31
 
 // TODO The analogy of the rest can probably be prooved by mathematical induction. Find out how
 // principio da indução finita
@@ -85,3 +86,26 @@ export function toTree<TLeaf>(
 }
 
 type Leaves<T> = Record<string, T>;
+
+function create() {
+  const branches: any[] = [];
+
+  _.range(1, 5).forEach((digitCount) =>
+    _.range(0, 2 ** digitCount).forEach((value) => {
+      const bits = value.toString(2);
+      const bitArr = '0'.repeat(digitCount - bits.length) + bits;
+      const arrDict: ({} | [])[] = _.map(bitArr, (bit) =>
+        bit === '0' ? {} : [],
+      );
+      const branch = arrDict.reduce((prev, curr) => {
+        if (prev === null) return curr;
+        const res: any = curr;
+        res[0] = prev;
+        return res;
+      }, null as any);
+      branches.push(branch);
+    }),
+  );
+  console.log(JSON.stringify(branches, null, 1));
+}
+create();
