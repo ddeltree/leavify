@@ -1,17 +1,21 @@
 import _ from 'lodash';
 
-export function generateBranches() {
+export function generateBranches(params?: { withLeaf: boolean }) {
   const branches: any[] = [];
   _.range(2, 5).forEach((n) => {
-    nBitWords(n).forEach((word) => branches.push(bitWordToBranch(word)));
+    nBitWords(n).forEach((word) =>
+      branches.push(bitWordToBranch(word, params?.withLeaf ?? true)),
+    );
   });
   return branches;
 }
 
 /** Creates a single-path "tree" given a bit word.
  * * 010 --> {"0": [{}]} */
-function bitWordToBranch(word: string) {
+function bitWordToBranch(word: string, withLeaf = true) {
+  // the first bit is for the inner object
   const arrDict: ({} | [])[] = _.map(word, (bit) => (bit === '0' ? {} : []));
+  if (withLeaf) (arrDict[0] as any)[0] = 'leaf';
   const branch = arrDict.reduce((prev, curr) => {
     if (prev === null) return curr;
     const res: any = curr;

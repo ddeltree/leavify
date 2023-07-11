@@ -17,6 +17,18 @@ test('nesting combinations up to level 5', () => {
     expect(is_tree_equal_leavesToTree(branch)).toBe(true);
 });
 
+test('toLeaves returns single value for proper branch inputs', () => {
+  const branches = generateBranches();
+  for (const branch of branches)
+    expect(_.keys(toLeaves(branch)).length).toBe(1);
+});
+
+test('toLeaves returns empty for branches with no leaf values', () => {
+  const branches = generateBranches({ withLeaf: false });
+  for (const branch of branches)
+    expect(_.keys(toLeaves(branch)).length).toBe(0);
+});
+
 function is_tree_equal_leavesToTree<T>(tree: T) {
   const inversed = toTree(toLeaves(tree));
   return str(tree) === str(inversed);

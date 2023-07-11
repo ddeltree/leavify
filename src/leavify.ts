@@ -17,8 +17,7 @@ export function toLeaves<TLeaf>(
   function flatten(ob: any) {
     const result: Leaves<TLeaf> = {};
     _.forEach(ob, (value, key) => {
-      result[key] = value;
-      if (!_.isObject(value)) return; // leaf
+      if (!_.isObject(value)) return (result[key] = value); // leaf
       const flat = flatten(value);
       _.forEach(flat, (subValue, subKey) => {
         const k = key + (_.isArray(value) ? '[' : '.') + subKey;
