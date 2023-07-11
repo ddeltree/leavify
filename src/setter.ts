@@ -56,8 +56,3 @@ export function set(obj: any, path: string, value: any) {
   ref[groups.flat().slice(-1)[0]] = value;
   return obj;
 }
-// console.log(set([], '0[0]', 'seted'));
-// console.log(set({}, '0[0]', 'seted'));
-// console.log(set([], '0.0', 'seted'));
-// console.log(set([], '[0].0', 'seted'));
-// console.log(set({}, '00', 'seted'));
