@@ -21,7 +21,7 @@ export function set(obj: any, path: string, value: any) {
       continue;
     }
     // .any[number].
-    const keys = match.filter((x) => x);
+    const keys = match.filter((x) => x); // ignore empty ones (from the brackets)
     if (keys.length === 1 && isNaN(parseInt(keys[0])))
       throw new Error(
         `The notation '.[string].' is not supported

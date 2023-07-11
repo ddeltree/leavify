@@ -12,7 +12,7 @@ export function generateBranches(params?: { withLeaf: boolean }) {
 
 /** Creates a single-path "tree" given a bit word.
  * * 010 --> {"0": [{}]} */
-function bitWordToBranch(word: string, withLeaf = true) {
+export function bitWordToBranch(word: string, withLeaf = true) {
   // the first bit is for the inner object
   const arrDict: ({} | [])[] = _.map(word, (bit) => (bit === '0' ? {} : []));
   if (withLeaf) (arrDict[0] as any)[0] = 'leaf';
