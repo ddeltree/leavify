@@ -41,7 +41,7 @@ export function toLeaves<TLeaf>(
 export function toTree<TLeaf>(
   leaves: Leaves<TLeaf>,
   mapLeaf: (value: TLeaf, path: string) => any = (x) => x,
-): any {
+): any | undefined {
   if (_.isEmpty(leaves)) return undefined;
   const first = _.first(_.keys(leaves))!;
   const toReturn: any = first.startsWith('[') ? [] : {} ?? {};
@@ -49,4 +49,4 @@ export function toTree<TLeaf>(
   return toReturn;
 }
 
-type Leaves<T> = Record<string, T>;
+export type Leaves<T> = Record<string, T>;
