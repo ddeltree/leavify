@@ -4,9 +4,8 @@ import { set, get } from './setter';
 // TODO? decide whether the input is Leaves or Tree by object depth
 // if the level is 1, toLeaves gives the same output as toTree
 
-// TODO implement functions to compare changes, and define a type for a object subset (a recursive Partial type)
-
 /** Converts an object to a pair of it's leaf (non object) values and their respective paths
+ * * brackets are used to identify arrays, so `[string]` never happens
  * @param mapLeaf allows to transform the leaf value into any other
  */
 export function toLeaves<TLeaf>(
@@ -51,16 +50,3 @@ export function toTree<TLeaf>(
 }
 
 type Leaves<T> = Record<string, T>;
-
-// FOREACH (key of Type):
-//  IF   (value is array of U)  make it array of partial U
-//  ELIF (value is object)      make its entries partial
-//  ELSE                        return leaf value
-// stackoverflow.com/a/51365037
-type RecursivePartial<T> = {
-  [K in keyof T]?: T[K] extends (infer U)[]
-    ? RecursivePartial<U>[]
-    : T[K] extends object | undefined
-    ? RecursivePartial<T[K]>
-    : T[K];
-};

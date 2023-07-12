@@ -3,18 +3,19 @@ import { toLeaves, toTree } from './leavify';
 import { generateBranches, str } from './testHelpers';
 
 test('empty array', () => {
-  expect(is_tree_equal_leavesToTree([])).toBe(false);
+  expect(treeFromLeavesOf([])).toBe(undefined);
 });
 
 test('empty object', () => {
-  expect(is_tree_equal_leavesToTree({})).toBe(false);
+  expect(treeFromLeavesOf({})).toBe(undefined);
 });
 
 test('nesting combinations up to level 5', () => {
   const branches = generateBranches();
-  expect(is_tree_equal_leavesToTree(branches)).toBe(true);
-  for (const branch of branches)
-    expect(is_tree_equal_leavesToTree(branch)).toBe(true);
+  expect(treeFromLeavesOf(branches)).toEqual(branches);
+  for (const branch of branches) {
+    expect(treeFromLeavesOf(branch)).toEqual(branch);
+  }
 });
 
 test('toLeaves returns single value for proper branch inputs', () => {
@@ -29,7 +30,6 @@ test('toLeaves returns empty for branches with no leaf values', () => {
     expect(_.keys(toLeaves(branch)).length).toBe(0);
 });
 
-function is_tree_equal_leavesToTree<T>(tree: T) {
-  const inversed = toTree(toLeaves(tree));
-  return str(tree) === str(inversed);
+function treeFromLeavesOf<T>(tree: T) {
+  return toTree(toLeaves(tree));
 }
