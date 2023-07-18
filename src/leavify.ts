@@ -8,13 +8,13 @@ import { set, get } from './setter';
  * * brackets are used to identify arrays, so `[string]` never happens
  * @param mapLeaf allows to transform the leaf value into any other
  */
-export function toLeaves<TLeaf>(
+export function toLeaves<T extends Leaf>(
   obj: any,
-  mapLeaf: (value: unknown, path: string) => TLeaf = (x) => x as TLeaf,
-): Leaves<TLeaf> {
+  mapLeaf: (value: unknown, path: string) => T = (x) => x as T,
+): Leaves<T> {
   // flatten
   function flatten(ob: any) {
-    const result: Leaves<TLeaf> = {};
+    const result: Leaves<T> = {};
     _.forEach(ob, (value, key) => {
       if (!_.isObject(value)) return (result[key] = value); // leaf
       const flat = flatten(value);
@@ -38,9 +38,9 @@ export function toLeaves<TLeaf>(
 }
 
 /** from path-value pairs to object */
-export function toTree<TLeaf>(
-  leaves: Leaves<TLeaf>,
-  mapLeaf: (value: TLeaf, path: string) => any = (x) => x,
+export function toTree<T extends Leaf>(
+  leaves: Leaves<T>,
+  mapLeaf: (value: T, path: string) => any = (x) => x,
 ): any | undefined {
   if (_.isEmpty(leaves)) return undefined;
   const first = _.first(_.keys(leaves))!;
@@ -49,4 +49,5 @@ export function toTree<TLeaf>(
   return toReturn;
 }
 
-export type Leaves<T> = Record<string, T>;
+export type Leaves<T extends Leaf> = Record<string, T>;
+export type Leaf = string | number | boolean | null | undefined;
