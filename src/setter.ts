@@ -5,7 +5,6 @@ import { Leaf } from './leavify';
  * Returns an empty object if the value isn't a leaf or it doesn't exist.
  */
 export function get(obj: any, path: string): Leaf | {} {
-  parsePath(path); // throw error if path is invalid
   return has(obj, path) ? _.get(obj, path) : {};
 }
 
@@ -13,7 +12,8 @@ export function get(obj: any, path: string): Leaf | {} {
 export function has(obj: any, path: string) {
   const parent = _.get(obj, _.toPath(path).slice(0, -1));
   if (typeof parent === 'string') return false;
-  const value: Leaf | object | symbol = _.get(obj, path);
+  const value = _.get(obj, path, new Error());
+  if (value instanceof Error) return false;
   switch (typeof value) {
     case 'function':
     case 'symbol':
@@ -24,7 +24,7 @@ export function has(obj: any, path: string) {
   }
 }
 
-/** in-place set value of a deep nested value */
+/** in-place setter for a deeply nested value */
 export function set(obj: any, path: string, value: any) {
   const groups = parsePath(path);
   // [a]        => {a: {}}

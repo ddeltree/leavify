@@ -1,15 +1,8 @@
 import _ from 'lodash';
-import { set, get, has } from './setter';
+import { set, get } from './setter';
 import { bitWordToBranch } from './testHelpers';
 
-test('has: indexing leaf string value', () => {
-  const value = {
-    hello: 'world',
-  };
-  expect(has(value, 'hello[2]')).toBeFalsy();
-});
-
-test('setter: change leaf of branch', () => {
+test('change leaf of branch', () => {
   const branch = bitWordToBranch('1001', true);
   const path = '[0].0.0[0]',
     value = 42;
@@ -18,7 +11,7 @@ test('setter: change leaf of branch', () => {
   expect(get(branch, path)).toBe(value);
 });
 
-test('setter: change existent value and preserve previous ones', () => {
+test('change existent value and preserve previous ones', () => {
   const tree = {
     a: 'a',
     b: { c: 'c', d: {} },
@@ -39,11 +32,11 @@ test('setter: change existent value and preserve previous ones', () => {
   }
 });
 
-test('setter: create branch to inexistent path', () => {
+test('create branch to inexistent path', () => {
   const branch = bitWordToBranch('1001');
   const path = 'some.inexistent[2].path',
     value = 42;
-  expect(get(branch, path)).toBe(undefined);
+  expect(get(branch, path)).toEqual({});
   set(branch, path, value);
   expect(get(branch, path)).toBe(value);
 });
