@@ -1,7 +1,3 @@
-import _ from 'lodash';
-import { Leaf, Leaves, toLeaves } from './leavify';
-import { get, has } from './setter';
-
 // FOREACH (key of Type):
 //  IF   (value is array of U)  make it array of partial U
 //  ELIF (value is object)      make its entries partial
@@ -14,3 +10,5 @@ type RecursivePartial<T> = {
     ? RecursivePartial<T[K]>
     : T[K];
 };
+
+export default RecursivePartial;
