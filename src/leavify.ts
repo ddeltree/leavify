@@ -1,8 +1,7 @@
 import _ from 'lodash';
 import { set, get } from './setter';
 
-/** Converts an object to a pair of it's leaf (non object) values and their respective paths
- * * brackets are used to identify arrays, so `[string]` never happens
+/** Create a path-value pair record of all the leaf values within an object
  * @param mapLeaf allows to transform the leaf value into any other
  */
 export function toLeaves<T extends Leaf>(
@@ -38,10 +37,10 @@ export function toLeaves<T extends Leaf>(
 export function toTree<T extends Leaf>(
   leaves: Leaves<T>,
   mapLeaf: (value: T, path: string) => any = (x) => x,
-): any | undefined {
+): unknown | undefined {
   if (_.isEmpty(leaves)) return undefined;
   const first = _.first(_.keys(leaves))!;
-  const toReturn: any = first.startsWith('[') ? [] : {} ?? {};
+  const toReturn: any = first.startsWith('[') ? [] : {};
   _.forEach(leaves, (value, path) => set(toReturn, path, mapLeaf(value, path)));
   return toReturn;
 }

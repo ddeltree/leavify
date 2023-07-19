@@ -1,6 +1,13 @@
 import _ from 'lodash';
-import { set, get } from './setter';
+import { set, get, has } from './setter';
 import { bitWordToBranch } from './testHelpers';
+
+test('has: indexing leaf string value', () => {
+  const value = {
+    hello: 'world',
+  };
+  expect(has(value, 'hello[2]')).toBeFalsy();
+});
 
 test('setter: change leaf of branch', () => {
   const branch = bitWordToBranch('1001', true);

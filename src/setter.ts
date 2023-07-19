@@ -1,14 +1,18 @@
 import _ from 'lodash';
 import { Leaf } from './leavify';
 
-/** Returns the leaf value at path on a given object */
-export function get(obj: any, path: string): Leaf | null {
+/** Get the leaf value at the given path.
+ * Returns an empty object if the value isn't a leaf or it doesn't exist.
+ */
+export function get(obj: any, path: string): Leaf | {} {
   parsePath(path); // throw error if path is invalid
-  return has(obj, path) ? _.get(obj, path) : null;
+  return has(obj, path) ? _.get(obj, path) : {};
 }
 
 /** Checks whether the path refers to a leaf value */
 export function has(obj: any, path: string) {
+  const parent = _.get(obj, _.toPath(path).slice(0, -1));
+  if (typeof parent === 'string') return false;
   const value: Leaf | object | symbol = _.get(obj, path);
   switch (typeof value) {
     case 'function':
