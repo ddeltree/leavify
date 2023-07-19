@@ -14,7 +14,7 @@ export function findChanges<T>(
   original: T,
   fragment: Fragment<T>,
   compareFn: (original: Leaf, change: Leaf) => boolean = (a, b) => a !== b,
-): Fragment<T> {
+): Fragment<T, Change> {
   const changes: Changes = {};
   _.forEach(toLeaves(fragment), (newValue, path) => {
     const originalValue = get(original, path) as Leaf;
@@ -28,17 +28,17 @@ export function findChanges<T>(
 }
 
 /** Build the tree from the change record paths */
-export function toFragment<T>(
+export function toFragment<T, U = Change>(
   changes: Changes,
-  mapLeaf?: (change: Change) => unknown,
+  mapLeaf?: (change: Change) => U,
 ) {
-  return toTree<any>(changes, mapLeaf) as Fragment<T>;
+  return toTree<any>(changes, mapLeaf) as Fragment<T, U>;
 }
 
 /** Create Changes object from the leaves of a fragment of T */
 export function toChangeSet<T>(
   fragment: Fragment<T>,
-  mapLeaf: (value: unknown, path: string) => Change,
+  mapLeaf: (value: Leaf, path: string) => Change,
 ): Changes {
   const changes: Changes = _.reduce(
     _.entries(toLeaves(fragment)),
@@ -66,14 +66,17 @@ export type Change = { original: Leaf; change: Leaf };
 /** An object which is a subset of another of type T
  * (recursive partial T).
  * */
-export type Fragment<Tree> = Tree extends object
-  ? RecursivePartial<Tree>
+type Fragment<T, TLeaf = undefined> = T extends object
+  ? Tree<RecursivePartial<T>, TLeaf>
   : never;
+// export type Fragment<T> = T extends object ? RecursivePartial<T> : never;
 
-type MappedLeaf<T, Map = T[keyof T]> = {
+type Tree<T, TLeaf = undefined> = {
   [K in keyof T]: T[K] extends (infer U)[]
-    ? MappedLeaf<U, Map>[]
+    ? Tree<U, TLeaf>[]
     : T[K] extends object | undefined
-    ? MappedLeaf<T[K], Map>
-    : Map;
+    ? Tree<T[K], TLeaf>
+    : TLeaf extends undefined
+    ? T[K]
+    : TLeaf;
 };
