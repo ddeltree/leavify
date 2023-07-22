@@ -70,6 +70,7 @@ export type Change = { original: Leaf; change: Leaf };
 
 /** An object which is a subset of another of type T
  * (recursive partial T).
+ * @param TLeaf types a mapped leaf
  * */
 type Fragment<T, TLeaf = undefined> = T extends object
   ? Tree<RecursivePartial<T>, TLeaf>

@@ -1,15 +1,16 @@
+import _ from 'lodash';
 import { Change, findChanges } from './changes';
 import { Leaf, toLeaves } from './leavify';
-import { get } from './setter';
+import { get, set } from './setter';
 
 test('flat value change', () => {
   const original = {
-    changed: 'x',
+    changed: 'X',
     unchanged: 42,
   };
   const fragment: typeof original = {
     ...original,
-    changed: 'y',
+    changed: 'Y',
   };
   const changes = findChanges(original, fragment);
   expect(changes).toEqual({
@@ -23,20 +24,18 @@ test('flat value change', () => {
 
 test('nested value change', () => {
   const original = {
-    changed: [1, { prop: 'x' }],
+    changed: [1, { prop: 'X' }],
     unchanged: { other: [0, 1] },
   };
-  const fragment: typeof original = {
-    ...original,
-    changed: [1, { prop: 'y' }],
-  };
+  const fragment: typeof original = _.cloneDeep(original);
+  const changePath = 'changed[1].prop';
+  set(fragment, changePath, 'change value');
   const changedLeaves = toLeaves(
     findChanges(original, fragment, {
       mapLeaf: (__, change) => change,
     }),
   );
-  const path = 'changed[1].prop';
   expect(changedLeaves).toEqual({
-    [path]: get(fragment, path),
+    [changePath]: get(fragment, changePath),
   });
 });
