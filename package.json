@@ -3,10 +3,10 @@
   "type": "module",
   "version": "0.1.0",
   "description": "Map objects to path-value pairs and track changes to it",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "files": [
-    "dist"
+    "./dist"
   ],
   "dependencies": {
     "@types/lodash": "^4.14.195",
@@ -19,7 +19,9 @@
   },
   "scripts": {
     "dev": "ts-node src/index.ts",
-    "test": "vitest"
+    "test": "vitest",
+    "build": "tsc",
+    "prepublishOnly": "npm run test && npm run build"
   },
   "author": "Davi Alexandre",
   "license": "MIT",
