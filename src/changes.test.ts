@@ -1,7 +1,8 @@
 import _ from 'lodash';
-import { Change, findChanges } from './changes';
-import { Leaf, toLeaves } from './leavify';
-import { get, set } from './setter';
+import { test, expect } from 'vitest';
+import { Change, findChanges } from './findChanges';
+import { Leaf, toLeaves } from './treeLeaves';
+import { get, set } from './properties';
 
 test('flat value change', () => {
   const original = {

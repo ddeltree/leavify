@@ -1,4 +1,5 @@
-import { has } from './setter';
+import { test, expect } from 'vitest';
+import { has } from './properties';
 
 test('indexing leaf string value', () => {
   const value = {

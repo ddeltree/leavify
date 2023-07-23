@@ -1,7 +1,7 @@
 import _ from 'lodash';
-import RecursivePartial from './RecursivePartial';
-import { Leaf, toLeaves, toTree } from './leavify';
-import { get } from './setter';
+import RecursivePartial from './RecursivePartial.js';
+import { Leaf, toLeaves, toTree } from './treeLeaves.js';
+import { get } from './properties.js';
 
 /** Find the differences between an object and it's modified clone (of same type)
  * @param original imagined as an imutable object,

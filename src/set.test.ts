@@ -1,6 +1,7 @@
 import _ from 'lodash';
-import { set, get } from './setter';
-import { bitWordToBranch } from './testHelpers';
+import { test, expect } from 'vitest';
+import { set, get } from './properties';
+import { bitWordToBranch } from './_testHelpers';
 
 test('change leaf of branch', () => {
   const branch = bitWordToBranch('1001', true);

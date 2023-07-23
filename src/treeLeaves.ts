@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import { set, get } from './setter';
+import { set } from './properties.js';
 
 /** Create a path-value pair record of all the leaf values within an object
  * @param mapLeaf allows to transform the leaf value into any other
@@ -25,7 +25,8 @@ export function toLeaves<T extends Leaf>(
   const isRootArr = _.isArray(obj);
   const toReturn = _.fromPairs(
     _.map(flatten(obj), (value, p) => {
-      let path = p.replaceAll(/\[(\d+)/g, '[$1]');
+      let path = _.replace(p, /\[(\d+)/g, '[$1]');
+      // let path = p.replaceAll(/\[(\d+)/g, '[$1]');
       if (isRootArr) path = path.replace(/^(\d+)(\..+)?/, '[$1]$2');
       return [path, mapLeaf(value, path)];
     }),
