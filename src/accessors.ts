@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import { Leaf } from './treeLeaves.js';
+import { Leaf } from './Leaves.js';
 import { parsePath } from './parsePath.js';
 
 /** Get the leaf value at the given path.

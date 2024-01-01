@@ -1,5 +1,5 @@
 import { test, expect } from 'vitest';
-import { has } from '../properties';
+import { has } from '../accessors';
 
 test('indexing leaf string value', () => {
   const value = {

@@ -1,6 +1,7 @@
 import _ from 'lodash';
 import { test, expect } from 'vitest';
-import { toLeaves, toTree } from '../treeLeaves';
+import { toLeaves } from '../toLeaves';
+import { toTree } from '../toTree';
 import { generateBranches } from './helpers';
 
 test('empty array', () => {

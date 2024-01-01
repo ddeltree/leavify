@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import { test, expect } from 'vitest';
-import { set, get } from '../properties';
+import { set, get } from '../accessors';
 import { bitWordToBranch } from './helpers';
 
 test('change leaf of branch', () => {

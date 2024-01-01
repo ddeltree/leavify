@@ -1,8 +1,8 @@
 import _ from 'lodash';
 import { test, expect } from 'vitest';
-import { findChanges } from '../findChanges';
-import { toLeaves } from '../treeLeaves';
-import { get, set } from '../properties';
+import { findDifference } from '../findDifference';
+import { toLeaves } from '../toLeaves';
+import { get, set } from '../accessors';
 
 test('flat value change', () => {
   const original = {
@@ -13,7 +13,7 @@ test('flat value change', () => {
     ...original,
     changed: 'Y',
   };
-  const changes = findChanges(original, fragment);
+  const changes = findDifference(original, fragment);
   expect(changes).toEqual({
     changed: fragment.changed,
   });
@@ -28,7 +28,7 @@ test('nested value change', () => {
   const fragment: typeof original = _.cloneDeep(original);
   const changePath = 'changed[1].prop';
   set(fragment, changePath, 'change value');
-  const changedLeaves = toLeaves(findChanges(original, fragment));
+  const changedLeaves = toLeaves(findDifference(original, fragment));
   expect(changedLeaves).toEqual({
     [changePath]: get(fragment, changePath),
   });
