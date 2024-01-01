@@ -13,14 +13,8 @@ import { Fragment } from './Fragment.js';
 export function findChanges<T>(
   original: T,
   fragment: Fragment<T>,
-  options?: {
-    compareFn?: (original: Leaf, change: Leaf) => boolean;
-  },
+  compareFn: (original: Leaf, change: Leaf) => boolean = (a, b) => a !== b,
 ): Fragment<T, Leaf> {
-  const { compareFn }: Required<NonNullable<typeof options>> = {
-    compareFn: (a, b) => a !== b,
-    ...options,
-  };
   const changes: Leaves = {};
   _.forEach(toLeaves(fragment), (changeValue, path) => {
     // TODO remove type assertion after changing get()'s return type
