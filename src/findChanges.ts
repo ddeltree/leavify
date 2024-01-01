@@ -29,34 +29,9 @@ export function findChanges<T, MappedLeaf = Change>(
     if (!compareFn(originalValue, changeValue)) return;
     changes[path] = mapLeaf(originalValue, changeValue) as any;
   });
-  // return toFragment(changes);
   return toTree<any>(changes) as Fragment<T, MappedLeaf>;
-}
-
-/** Build the tree from the change record paths */
-export function toFragment<T, U = Change>(
-  changes: Changes,
-  mapLeaf?: (change: Change) => U,
-) {
-  return toTree<any>(changes, mapLeaf) as Fragment<T, U>;
 }
 
 /** Path record of the changes on a tree */
 export type Changes = Record<string, Change>;
 export type Change = { original: Leaf; change: Leaf };
-
-/** Create Changes object from the leaves of a fragment of T */
-// export function toChangeSet<T>(
-//   fragment: Fragment<T>,
-//   mapLeaf: (value: Leaf, path: string) => Change,
-// ): Changes {
-//   const changes: Changes = _.reduce(
-//     _.entries(toLeaves(fragment)),
-//     (acc, [path, value]) => ({
-//       ...acc,
-//       [path]: mapLeaf(value, path),
-//     }),
-//     {},
-//   );
-//   return changes;
-// }
