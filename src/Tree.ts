@@ -1,0 +1,10 @@
+// export type Fragment<T> = T extends object ? RecursivePartial<T> : never;
+export type Tree<T, TLeaf = undefined> = {
+  [K in keyof T]: T[K] extends (infer U)[]
+    ? Tree<U, TLeaf>[]
+    : T[K] extends object | undefined
+    ? Tree<T[K], TLeaf>
+    : TLeaf extends undefined
+    ? T[K]
+    : TLeaf;
+};
