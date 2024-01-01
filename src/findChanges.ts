@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import RecursivePartial from './RecursivePartial.js';
+import RecursivePartial from './RecursivePartial/index.js';
 import { Leaf, toLeaves, toTree } from './treeLeaves.js';
 import { get } from './properties.js';
 

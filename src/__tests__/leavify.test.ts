@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import { test, expect } from 'vitest';
 import { toLeaves, toTree } from '../treeLeaves';
-import { generateBranches } from './_testHelpers';
+import { generateBranches } from './helpers';
 
 test('empty array', () => {
   expect(treeFromLeavesOf([])).toBe(undefined);

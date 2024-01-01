@@ -1,8 +1,8 @@
 // FOREACH (key of Type):
 //  IF   (value is array of U)  make it array of partial U
-//  ELIF (value is object)      make its entries partial
+//  ELIF (value is object)      make its values partial
 //  ELSE                        return leaf value
-// stackoverflow.com/a/51365037
+
 type RecursivePartial<T> = {
   [K in keyof T]?: T[K] extends (infer U)[]
     ? RecursivePartial<U>[]

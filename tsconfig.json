@@ -107,7 +107,7 @@
     "skipLibCheck": true /* Skip type checking all .d.ts files. */
   },
   "include": ["src/**/*.ts"],
-  "exclude": ["node_modules", "src/**/*.test.ts", "dist"],
+  "exclude": ["node_modules", "**/__tests__/**", "dist"],
   "ts-node": {
     "esm": true,
     "experimentalSpecifierResolution": "node"
