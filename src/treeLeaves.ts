@@ -37,10 +37,10 @@ export function toLeaves<T extends Leaf>(
 /** from path-value pairs to object */
 export function toTree<T extends Leaf>(leaves: Leaves<T>): unknown | undefined {
   if (_.isEmpty(leaves)) return undefined;
-  const first = _.first(_.keys(leaves))!;
-  const toReturn: any = first.startsWith('[') ? [] : {};
-  _.forEach(leaves, (value, path) => set(toReturn, path, value));
-  return toReturn;
+  const firstPath = _.first(_.keys(leaves))!;
+  const tree: any = firstPath.startsWith('[') ? [] : {};
+  _.forEach(leaves, (value, path) => set(tree, path, value));
+  return tree;
 }
 
 export type Leaves<T extends Leaf = Leaf> = Record<string, T>;

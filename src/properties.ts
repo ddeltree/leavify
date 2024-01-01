@@ -6,7 +6,7 @@ import { parsePath } from './parsePath.js';
  * Returns an empty object if the value isn't a leaf or it doesn't exist.
  */
 export function get(obj: any, path: string): Leaf {
-  if (!has(obj, path)) throw new Error('No leaf value found');
+  if (!has(obj, path)) throw new Error('No leaf value found at the given path');
   return _.get(obj, path);
 }
 
