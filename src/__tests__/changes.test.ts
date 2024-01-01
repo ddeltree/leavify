@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import { test, expect } from 'vitest';
-import { findDifference } from '../findDifference';
-import { toLeaves } from '../toLeaves';
+import findDifference from '../findDifference';
+import toLeaves from '../toLeaves';
 import { get, set } from '../accessors';
 
 test('flat value change', () => {

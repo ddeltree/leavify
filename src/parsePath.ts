@@ -1,4 +1,4 @@
-export function parsePath(path: string) {
+export default function parsePath(path: string) {
   // split by dots or bracket pairs, except when preceded by backslash
   const points = /(?<!\\)\./;
   const brackets = /(?<!\\)\[(.*?)(?<!\\)\]/;

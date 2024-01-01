@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import { Leaf } from './Leaves.js';
-import { parsePath } from './parsePath.js';
+import parsePath from './parsePath.js';
 
 /** Get the leaf value at the given path.
  * Returns an empty object if the value isn't a leaf or it doesn't exist.

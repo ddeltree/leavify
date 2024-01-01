@@ -4,7 +4,7 @@ import { Leaves, Leaf } from './Leaves.js';
 /** Create a path-value pair record of all the leaf values within an object
  * @param mapLeaf allows to transform the leaf value into any other
  */
-export function toLeaves<T extends Leaf>(
+export default function toLeaves<T extends Leaf>(
   obj: any,
   mapLeaf: (value: unknown, path: string) => T = (x) => x as T,
 ): Leaves<T> {

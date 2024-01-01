@@ -1,9 +1,9 @@
 import _ from 'lodash';
-import { toLeaves } from './toLeaves.js';
+import toLeaves from './toLeaves.js';
 import { Leaves, Leaf } from './Leaves.js';
-import { toTree } from './toTree.js';
+import toTree from './toTree.js';
 import { get } from './accessors.js';
-import { Fragment } from './Fragment.js';
+import Fragment from './Fragment.js';
 
 /** Find the differences between an object and it's modified clone (of same type)
  * @param original imagined as an immutable state object,
@@ -12,7 +12,7 @@ import { Fragment } from './Fragment.js';
  * imagined as mutable and intended for making changes to.
  * @returns a fragment with only the changed properties
  */
-export function findDifference<T>(
+export default function findDifference<T>(
   original: T,
   fragment: Fragment<T>,
   compareFn: (original: Leaf, change: Leaf) => boolean = (a, b) => a !== b,
