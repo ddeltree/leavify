@@ -5,8 +5,9 @@ import { parsePath } from './parsePath.js';
 /** Get the leaf value at the given path.
  * Returns an empty object if the value isn't a leaf or it doesn't exist.
  */
-export function get(obj: any, path: string): Leaf | {} {
-  return has(obj, path) ? _.get(obj, path) : {};
+export function get(obj: any, path: string): Leaf {
+  if (!has(obj, path)) throw new Error('No leaf value found');
+  return _.get(obj, path);
 }
 
 /** Checks whether the path refers to a leaf value */

@@ -37,7 +37,7 @@ test('create branch to inexistent path', () => {
   const branch = bitWordToBranch('1001');
   const path = 'some.inexistent[2].path',
     value = 42;
-  expect(get(branch, path)).toEqual({});
+  expect(() => get(branch, path)).toThrow();
   set(branch, path, value);
   expect(get(branch, path)).toBe(value);
 });

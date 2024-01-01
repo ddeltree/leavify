@@ -17,8 +17,7 @@ export function findChanges<T>(
 ): Fragment<T, Leaf> {
   const changes: Leaves = {};
   _.forEach(toLeaves(fragment), (changeValue, path) => {
-    // TODO remove type assertion after changing get()'s return type
-    const originalValue = get(original, path) as Leaf;
+    const originalValue = get(original, path);
     if (!compareFn(originalValue, changeValue)) return;
     changes[path] = changeValue;
   });
