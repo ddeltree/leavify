@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import { Leaf, toLeaves, toTree } from './treeLeaves.js';
+import { Leaf, Leaves, toLeaves, toTree } from './treeLeaves.js';
 import { get } from './properties.js';
 import { Fragment } from './Fragment.js';
 
@@ -10,28 +10,23 @@ import { Fragment } from './Fragment.js';
  * imagined as mutable and intended for making changes to
  * @returns a fragment with only the changed properties
  */
-export function findChanges<T, MappedLeaf = Change>(
+export function findChanges<T>(
   original: T,
   fragment: Fragment<T>,
   options?: {
     compareFn?: (original: Leaf, change: Leaf) => boolean;
-    mapLeaf?: (original: Leaf, change: Leaf) => MappedLeaf;
   },
-): Fragment<T, MappedLeaf> {
-  const { compareFn, mapLeaf }: Required<NonNullable<typeof options>> = {
+): Fragment<T, Leaf> {
+  const { compareFn }: Required<NonNullable<typeof options>> = {
     compareFn: (a, b) => a !== b,
-    mapLeaf: (original, change) => ({ original, change } as any),
     ...options,
   };
-  const changes: Changes = {};
+  const changes: Leaves = {};
   _.forEach(toLeaves(fragment), (changeValue, path) => {
+    // TODO remove type assertion after changing get()'s return type
     const originalValue = get(original, path) as Leaf;
     if (!compareFn(originalValue, changeValue)) return;
-    changes[path] = mapLeaf(originalValue, changeValue) as any;
+    changes[path] = changeValue;
   });
-  return toTree<any>(changes) as Fragment<T, MappedLeaf>;
+  return toTree<any>(changes) as Fragment<T, Leaf>;
 }
-
-/** Path record of the changes on a tree */
-export type Changes = Record<string, Change>;
-export type Change = { original: Leaf; change: Leaf };
