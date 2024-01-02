@@ -23,12 +23,12 @@
     "lodash": "^4.17.21"
   },
   "devDependencies": {
-    "ts-node": "^10.9.1",
+    "tsx": "^4.7.0",
     "typescript": "^5.1.6",
     "vitest": "^0.33.0"
   },
   "scripts": {
-    "dev": "ts-node src/index.ts",
+    "dev": "npx tsx src/index.ts",
     "test": "vitest",
     "build": "tsc",
     "prepublishOnly": "npm run test && npm run build"
