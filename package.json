@@ -1,7 +1,7 @@
 {
   "name": "leavify",
   "type": "module",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "A package to find object leaf values, compare changes of leaves by path, and reconstruct the 'tree' object from its leaves",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
