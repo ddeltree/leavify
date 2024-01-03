@@ -1,7 +1,26 @@
+import _ from 'lodash';
 import Fragment from './Fragment.js';
-import { Leaf } from './Leaves.js';
+import toLeaves from './toLeaves.js';
 
-/** @param T a single leaf object, that generates a single path-leaf pair */
-type Branch<T> = Fragment<T, Leaf>;
+export default class Branch<T> {
+  /** @param branch a single-leaf object, which generates a single path-value pair */
+  constructor(branch: Fragment<T, unknown>) {
+    if (!this.isBranch(branch))
+      throw new Error(
+        `Expected a branch of single leaf, but received this instead: ${JSON.stringify(
+          branch,
+        )}`,
+      );
+    Object.assign(this, branch);
+  }
 
-export default Branch;
+  getLeaf() {
+    return _.entries(this)[0];
+  }
+
+  private isBranch(tree: object) {
+    // TODO a more efficient way to check
+    const leaves = toLeaves<string | undefined>(tree);
+    return _.keys(leaves).length === 1;
+  }
+}
