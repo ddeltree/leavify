@@ -5,6 +5,7 @@ import findDifference from './findDifference.js';
 
 import type { Leaves, Leaf } from './Leaves.js';
 import type Fragment from './Fragment.js';
+import Branch from './Branch.js';
 
 const leaves = {
   get,
@@ -16,4 +17,4 @@ const leaves = {
 };
 
 export default leaves;
-export type { Leaves, Leaf, Fragment };
+export { Leaves, Leaf, Fragment, Branch };
