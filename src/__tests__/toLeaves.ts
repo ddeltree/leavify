@@ -4,15 +4,15 @@ import toLeaves from '../toLeaves';
 import toTree from '../toTree';
 import { generateBranches } from './helpers';
 
-test('empty array', () => {
+test('inverse of toLeaves for empty array argument', () => {
   expect(treeFromLeavesOf([])).toBe(undefined);
 });
 
-test('empty object', () => {
+test('inverse of toLeaves for empty object argument', () => {
   expect(treeFromLeavesOf({})).toBe(undefined);
 });
 
-test('nesting combinations up to level 5', () => {
+test('inverse of toLeaves for all nesting combinations up to level 5', () => {
   const branches = generateBranches();
   expect(treeFromLeavesOf(branches)).toEqual(branches);
   for (const branch of branches) {

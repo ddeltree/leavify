@@ -7,7 +7,7 @@ export default class Branch<T> {
   constructor(branch: Fragment<T, unknown>) {
     if (!this.isBranch(branch))
       throw new Error(
-        `Expected a branch of single leaf, but received this instead: ${JSON.stringify(
+        `Expected a branch of single leaf, received this instead: ${JSON.stringify(
           branch,
         )}`,
       );
