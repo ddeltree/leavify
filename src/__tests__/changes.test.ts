@@ -28,7 +28,7 @@ test('nested value change', () => {
   const fragment: typeof original = _.cloneDeep(original);
   const changePath = 'changed[1].prop';
   set(fragment, changePath, 'change value');
-  const changedLeaves = toLeaves(findDifference(original, fragment));
+  const changedLeaves = findDifference(original, fragment);
   expect(changedLeaves).toEqual({
     [changePath]: get(fragment, changePath),
   });
