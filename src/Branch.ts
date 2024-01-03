@@ -2,7 +2,7 @@ import _ from 'lodash';
 import Fragment from './Fragment.js';
 import toLeaves from './toLeaves.js';
 
-export default class Branch<T> {
+export default class Branch<T extends object> {
   /** @param branch a single-leaf object, which generates a single path-value pair */
   constructor(branch: Fragment<T, unknown>) {
     if (!this.isBranch(branch))
