@@ -8,6 +8,7 @@ import toLeaves from './toLeaves.js';
 type Branch<T extends object> = Fragment<T, unknown>;
 export default Branch;
 
+/** Return the path this branch represents along with its leaf */
 export function fromBranch<T extends object>(branch: Branch<T>) {
   if (!isBranch(branch))
     throw new Error(
