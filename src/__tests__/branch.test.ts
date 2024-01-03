@@ -1,5 +1,6 @@
 import { test, expect } from 'vitest';
-import Branch, { fromBranch } from '../Branch';
+import Branch from '../Branch';
+import fromBranch from '../fromBranch';
 
 test('basic branch case', () => {
   const tree = {
@@ -24,5 +25,7 @@ test('a tree is not a branch', () => {
       c: 13,
     },
   };
-  expect(() => new Branch(tree)).toThrowError();
+  expect(() => fromBranch(tree)).toThrowError(
+    'Expected a branch of single leaf',
+  );
 });
