@@ -14,8 +14,8 @@ export default class Branch<T> {
     Object.assign(this, branch);
   }
 
-  getLeaf() {
-    return _.entries(this)[0];
+  asPathValue() {
+    return _.entries(toLeaves(this))[0];
   }
 
   private isBranch(tree: object) {
