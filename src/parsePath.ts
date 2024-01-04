@@ -30,3 +30,5 @@ export default function parsePath(path: string) {
   }
   return groups;
 }
+
+// TODO this might become part of the package in the future, if I ever write the inverse function and use to rewrite toLeaves

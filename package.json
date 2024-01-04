@@ -9,11 +9,11 @@
     "./dist"
   ],
   "exports": {
-    "./*": "./dist/index"
+    ".": "./dist/index.js"
   },
   "typesVersions": {
     "*": {
-      "./": [
+      ".": [
         "./dist/index"
       ]
     }
