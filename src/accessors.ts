@@ -3,7 +3,7 @@ import { Leaf } from './Leaves.js';
 import parsePath from './parsePath.js';
 
 /** Get the leaf value at the given path.
- * Returns an empty object if the value isn't a leaf or it doesn't exist.
+ * Throws an error if the value returned isn't a leaf or doesn't exist.
  */
 export function get(obj: any, path: string): Leaf {
   if (!has(obj, path)) throw new Error('No leaf value found at the given path');
