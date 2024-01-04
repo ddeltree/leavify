@@ -10,7 +10,7 @@ import Fragment from './Fragment.js';
  * @param fragment a modified clone or subset of `original`,
  * imagined as mutable and intended for making changes to.
  * @param compareFn a predicate for deciding if the leaves differ
- * @returns a fragment with only the changed properties
+ * @returns the changed leaves
  */
 export default function findDifference<T>(
   original: T,
