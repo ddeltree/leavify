@@ -4,14 +4,19 @@
   "version": "0.2.1",
   "description": "A package to find object leaf values, compare changes of leaves by path, and reconstruct the 'tree' object from its leaves",
   "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
+  "module": "./dist/index.js",
   "files": [
     "./dist"
   ],
   "exports": {
-    ".": "./dist/index.js",
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./*": "./dist/*.js",
     "./package.json": "./package.json"
   },
+  "types": "./dist/index.d.ts",
   "typesVersions": {
     "*": {
       ".": [
