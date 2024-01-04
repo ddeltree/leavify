@@ -42,5 +42,16 @@
   "bugs": {
     "url": "https://github.com/davi-alexandre/leavify/issues"
   },
-  "homepage": "https://github.com/davi-alexandre/leavify#readme"
+  "homepage": "https://github.com/davi-alexandre/leavify#readme",
+  "keywords": [
+    "object",
+    "leaves",
+    "leaf",
+    "path",
+    "value",
+    "path-value",
+    "change",
+    "difference",
+    "tree"
+  ]
 }
