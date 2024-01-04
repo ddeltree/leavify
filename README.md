@@ -10,7 +10,6 @@ A package to find object leaf values, compare changes of leaves by path, and rec
 
 ```ts
 import leaves from 'leavify';
-import _ from 'lodash';
 
 const oldState = {
   status: 'ok',
