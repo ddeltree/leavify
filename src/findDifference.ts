@@ -12,17 +12,12 @@ import Fragment from './Fragment.js';
  * @param compareFn a predicate for deciding if the leaves differ
  * @returns the changed leaves
  */
-export default function findDifference<T>(
-  original: T,
-  fragment: Fragment<T>,
-  compareFn: (original: Leaf, change: Leaf) => boolean = (a, b) => a !== b,
-) {
+export default function findDifference<T>(original: T, fragment: Fragment<T>) {
   const differentLeaves: Leaves = {};
   _.forEach(toLeaves(fragment), (changeValue, path) => {
     const originalValue = get(original, path);
-    if (!compareFn(originalValue, changeValue)) return;
+    if (!(originalValue !== changeValue)) return;
     differentLeaves[path] = changeValue;
   });
-  // return toTree(changes) as Fragment<T, Leaf>;
   return differentLeaves;
 }
