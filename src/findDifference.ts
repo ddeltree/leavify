@@ -14,10 +14,13 @@ import Fragment from './Fragment.js';
  */
 export default function findDifference<T>(original: T, fragment: Fragment<T>) {
   const differentLeaves: Leaves = {};
-  _.forEach(toLeaves(fragment), (changeValue, path) => {
+
+  for (const [path, changeValue] of Object.entries(toLeaves(fragment))) {
     const originalValue = get(original, path);
-    if (!(originalValue !== changeValue)) return;
-    differentLeaves[path] = changeValue;
-  });
+    if (originalValue !== changeValue) {
+      differentLeaves[path] = changeValue;
+    }
+  }
+
   return differentLeaves;
 }
