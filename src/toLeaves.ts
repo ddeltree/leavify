@@ -4,35 +4,12 @@ import { Leaves, Leaf } from './Leaves.js';
 /** Create a path-value pair record of all the leaf values within an object
  * @param mapLeaf allows to transform the leaf value into any other
  */
-export default function toLeaves<T extends Leaf>(
-  obj: any,
-  mapLeaf: (value: unknown, path: string) => T = (x) => x as T,
-): Leaves<T> {
-  const isRootArr = _.isArray(obj);
-  const toReturn = _.fromPairs(
-    _.map(flatten(obj), (value, p) => {
-      let path = _.replace(p, /\[(\d+)/g, '[$1]');
-      if (isRootArr) path = path.replace(/^(\d+)(\..+)?/, '[$1]$2');
-      return [path, mapLeaf(value, path)];
-    }),
-  );
+export default function toLeaves<T extends Leaf>(obj: object): Leaves<T> {
+  const toReturn = _.fromPairs([...walkLeaves(obj)]);
   return toReturn;
 }
 
-function flatten(ob: any) {
-  const result: Leaves = {};
-  _.forEach(ob, (value, key) => {
-    if (!_.isObject(value)) return (result[key] = value); // leaf
-    const flat = flatten(value);
-    _.forEach(flat, (subValue, subKey) => {
-      const k = key + (_.isArray(value) ? '[' : '.') + subKey;
-      result[k] = subValue;
-    });
-  });
-  return result;
-}
-
-function* walkLeaves(ob: object) {
+export function* walkLeaves(ob: object) {
   const keys: string[] = [];
   const generators = [generate(ob)];
 
@@ -50,30 +27,16 @@ function* walkLeaves(ob: object) {
       generators.push(generate(value));
       keys.push(key);
     } else {
-      yield [[...keys, key], value];
+      yield [[...keys, key].join(''), value];
     }
   }
 }
 
 function* generate(ob: object) {
   for (const [key, value] of Object.entries(ob)) {
-    yield [key, value];
+    let k = _.isArray(ob) ? `[${key}]` : key;
+    // [num].prop || prop1.prop2 <=> child is object and not array
+    if (_.isObject(value) && !_.isArray(value)) k += '.';
+    yield [k, value];
   }
-}
-
-const ob = {
-  name: 'davi',
-  dados: [
-    1,
-    [2, 3, 4],
-    {
-      name: 'alexandre',
-      resposta: 42,
-    },
-  ],
-};
-const iter = walkLeaves(ob);
-// console.log(iter.next());
-for (const [keys, leaf] of iter) {
-  console.log(keys, leaf);
 }
