@@ -1,9 +1,7 @@
 import _ from 'lodash';
 import { Leaves, Leaf } from './Leaves.js';
 
-/** Create a path-value pair record of all the leaf values within an object
- * @param mapLeaf allows to transform the leaf value into any other
- */
+/** Create a path-value pair record of all the leaf values within an object */
 export default function toLeaves<T extends Leaf>(obj: object): Leaves<T> {
   const toReturn = _.fromPairs([...walkLeaves(obj)]);
   return toReturn;
