@@ -15,7 +15,7 @@ test('basic branch case', () => {
     },
   };
   const branch: Branch<typeof tree> = tree; // this tree is a branch
-  // TODO expect(fromBranch(branch)).toEqual(['a.b[0][0].c', 42]);
+  // expect(fromBranch(branch)).toEqual(['a.b[0][0].c', 42]);
 });
 
 test('a tree is not a branch', () => {

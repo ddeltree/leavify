@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import toLeaves, { walkLeaves } from './toLeaves.js';
+import { walkLeaves } from './walkLeaves.js';
 import Branch from './Branch.js';
 
 /** Return the path this branch represents along with its leaf */
@@ -7,6 +7,7 @@ import Branch from './Branch.js';
 export default function fromBranch<T extends object>(branch: Branch<T>) {
   const iter = walkLeaves(branch);
   const { value, done } = iter.next();
+
   const isBranch = !done && iter.next().done;
   if (!isBranch)
     throw new Error(

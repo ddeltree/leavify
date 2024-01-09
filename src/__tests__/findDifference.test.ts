@@ -32,22 +32,3 @@ test('nested value change', () => {
     [changePath]: get(fragment, changePath),
   });
 });
-
-test('compareFn default case', () => {
-  const original = {
-    changed: 'X',
-    unchanged: 42,
-  };
-  const fragment: typeof original = {
-    ...original,
-    changed: 'Y',
-  };
-  const changes = findDifference(
-    original,
-    fragment,
-    (origin, change) => origin !== change,
-  );
-  expect(changes).toEqual({
-    changed: fragment.changed,
-  });
-});

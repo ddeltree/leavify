@@ -32,6 +32,6 @@ test('toLeaves returns empty for branches with no leaf values', () => {
     expect(_.keys(toLeaves(branch)).length).toBe(0);
 });
 
-function treeFromLeavesOf<T>(tree: T) {
+function treeFromLeavesOf<T>(tree: object) {
   return toTree(toLeaves(tree));
 }
