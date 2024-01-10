@@ -1,8 +1,10 @@
 import _ from 'lodash';
 import Fragment from '../Fragment.js';
 import walkLeaves from '../walkLeaves.js';
-import { set, get } from '../accessors.js';
+import { set, get, has } from '../accessors.js';
 import findDifference from '../findDifference.js';
+import Branch from '../Branch.js';
+import fromBranch from '../fromBranch.js';
 
 export type Changeable<T = unknown> = T & {
   _original?: Readonly<Fragment<T>>;
@@ -18,7 +20,7 @@ export function asOriginal<T extends object>(ob: Changeable<T>) {
   return clone as T;
 }
 
-export function saveChanges<T extends object>(ob: Changeable<T>) {
+export function save<T extends object>(ob: Changeable<T>) {
   if (_.isEmpty(ob._unsaved)) return;
   const original = asOriginal(ob);
   const saved = _.cloneDeep(ob);
@@ -46,3 +48,40 @@ export function saveChanges<T extends object>(ob: Changeable<T>) {
   }
   return changeLeaves;
 }
+
+export function undo<T extends object>(ob: Changeable<T>, branch: Branch<T>) {
+  // TODO undo fragment instead of branch?
+  const [path] = fromBranch(branch);
+  if (ob._original === undefined || !has(ob._original, path))
+    throw new Error(`Branch of path ${path} does not have a change to undo`);
+  const value = get(ob._original, path);
+  const changes = _.cloneDeep(branch);
+  set(changes, path, value);
+  propose(ob, changes);
+}
+
+export function propose<T extends object>(
+  ob: Changeable<T>,
+  change: Fragment<T>,
+) {
+  ob._unsaved ??= {} as Fragment<T>;
+  for (const [path, value] of walkLeaves(change)) {
+    set(ob._unsaved, path, value);
+  }
+}
+
+type A = { prop: string; leavemealone: boolean; other: number };
+const base: Changeable<A> = {
+  prop: 'saved',
+  other: 42,
+  leavemealone: true,
+  _original: {
+    prop: 'original',
+    other: 43,
+  },
+  _unsaved: {
+    prop: 'proposed',
+  },
+};
+
+undo(base, { prop: '' });

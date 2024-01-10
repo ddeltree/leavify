@@ -1,5 +1,5 @@
 import { expect, test } from 'vitest';
-import { Changeable, asOriginal, saveChanges } from '../experimenting.js';
+import { Changeable, asOriginal, save } from '../experimenting.js';
 import _ from 'lodash';
 
 type A = { prop: string; leavemealone: boolean; other: number };
@@ -27,7 +27,7 @@ test('originals', () => {
 
 test('change a single property', () => {
   const obj = _.cloneDeep(base);
-  saveChanges(obj);
+  save(obj);
   expect(obj).toEqual({
     prop: base._unsaved!.prop,
     other: base.other,
