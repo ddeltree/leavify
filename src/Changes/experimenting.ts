@@ -4,24 +4,25 @@ import walkLeaves from '../walkLeaves.js';
 import { set, get } from '../accessors.js';
 import findDifference from '../findDifference.js';
 
-type Changes<T = unknown> = {
+export type Changeable<T = unknown> = T & {
   _original?: Readonly<Fragment<T>>;
   _unsaved?: Fragment<T>;
 };
 
-function asOriginal<T extends object>(ob: T & Changes<T>) {
+export function asOriginal<T extends object>(ob: Changeable<T>) {
   const clone = _.cloneDeep(ob);
-  delete clone._original, clone._unsaved;
+  delete clone._original, delete clone._unsaved;
   for (const [path, value] of walkLeaves(ob._original ?? {})) {
     set(clone, path, value);
   }
   return clone as T;
 }
 
-function saveChanges<T extends object>(ob: T & Changes<T>) {
+export function saveChanges<T extends object>(ob: Changeable<T>) {
   if (_.isEmpty(ob._unsaved)) return;
   const original = asOriginal(ob);
-  const saved = asOriginal(ob);
+  const saved = _.cloneDeep(ob);
+  delete saved._original, delete saved._unsaved;
   const savedLeaves = findDifference(original, saved);
   const unsavedLeaves = findDifference(original, ob._unsaved);
   const changeLeaves = {
@@ -41,7 +42,7 @@ function saveChanges<T extends object>(ob: T & Changes<T>) {
   ob._unsaved = {} as Fragment<T>;
   for (const [path, change] of walkLeaves(changeLeaves)) {
     set(ob, path, change);
-    set(ob._original!, path, get(original, path));
+    set(ob._original, path, get(original, path));
   }
   return changeLeaves;
 }
