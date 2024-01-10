@@ -5,13 +5,13 @@ import parsePath from './parsePath.js';
 /** Get the leaf value at the given path.
  * Throws an error if the value returned isn't a leaf or doesn't exist.
  */
-export function get(obj: any, path: string): Leaf {
+export function get(obj: object, path: string): Leaf {
   if (!has(obj, path)) throw new Error('No leaf value found at the given path');
   return _.get(obj, path);
 }
 
 /** Checks whether the path refers to a leaf value */
-export function has(obj: any, path: string) {
+export function has(obj: object, path: string) {
   const parent = _.get(obj, _.toPath(path).slice(0, -1));
   if (typeof parent === 'string') return false;
   const value = _.get(obj, path, new Error());
@@ -27,11 +27,11 @@ export function has(obj: any, path: string) {
 }
 
 /** in-place setter for a deeply nested value */
-export function set(obj: any, path: string, value: any) {
+export function set(obj: object, path: string, value: any) {
   const groups = parsePath(path);
   // [a]        => {a: {}}
   // [a, 1, 0]  => {a: [ ___, [ {} ] ]}
-  let ref = obj;
+  let ref: any = obj;
   for (const group of groups) {
     const isLastGroup = group === _.last(groups);
     if (group.length === 1) {

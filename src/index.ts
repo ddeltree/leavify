@@ -7,6 +7,7 @@ import type { Leaves, Leaf } from './Leaves.js';
 import type Fragment from './Fragment.js';
 import type Branch from './Branch.js';
 import fromBranch from './fromBranch.js';
+import walkLeaves from './walkLeaves.js';
 
 const leaves = {
   get,
@@ -16,6 +17,7 @@ const leaves = {
   toLeaves,
   findDifference,
   fromBranch,
+  walkLeaves,
 };
 
 export default leaves;

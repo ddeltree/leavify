@@ -1,11 +1,11 @@
 import _ from 'lodash';
 import { Leaf } from './Leaves.js';
 
-export function* walkLeaves(
+export default function* walkLeaves(
   ob: object,
 ): Generator<[string, Leaf, Property[]], undefined> {
   const paths: string[] = [];
-  const generators = [generate(ob)];
+  const generators = [makeGenerator(ob)];
   const properties: Property[] = [];
 
   while (generators.length > 0) {
@@ -20,7 +20,7 @@ export function* walkLeaves(
 
     const [path, value, prop] = entry.value;
     if (_.isObject(value)) {
-      generators.push(generate(value));
+      generators.push(makeGenerator(value));
       paths.push(path);
       properties.push(prop);
     } else {
@@ -29,7 +29,7 @@ export function* walkLeaves(
   }
 }
 
-function* generate(
+function* makeGenerator(
   ob: object,
 ): Generator<[string, object | Leaf, Property], undefined> {
   for (const [key, value] of Object.entries(ob)) {
