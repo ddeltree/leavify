@@ -5,9 +5,12 @@ import { Leaves } from './Leaves.js';
 /** from path-value pairs to object */
 
 export default function toTree(leaves: Leaves): object | undefined {
-  if (_.isEmpty(leaves)) return undefined;
-  const firstPath = _.first(_.keys(leaves))!;
+  const entries = [...leaves];
+  if (_.isEmpty(entries)) return undefined;
+  const [firstPath] = entries[0];
   const tree: any = firstPath.startsWith('[') ? [] : {};
-  _.forEach(leaves, (value, path) => set(tree, path, value));
+  for (const [path, value] of entries) {
+    set(tree, path, value);
+  }
   return tree;
 }

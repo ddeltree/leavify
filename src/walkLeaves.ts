@@ -1,9 +1,7 @@
 import _ from 'lodash';
-import { Leaf } from './Leaves.js';
+import { Leaf, Leaves, Property } from './Leaves.js';
 
-export default function* walkLeaves(
-  ob: object,
-): Generator<[string, Leaf, Property[]], undefined> {
+export default function* walkLeaves(ob: object): Leaves {
   const paths: string[] = [];
   const generators = [makeGenerator(ob)];
   const properties: Property[] = [];
@@ -39,8 +37,3 @@ function* makeGenerator(
     yield [path, value, { name: key, isArrayIndex: _.isArray(ob) }];
   }
 }
-
-type Property = {
-  name: string;
-  isArrayIndex: boolean;
-};

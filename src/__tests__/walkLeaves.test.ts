@@ -1,18 +1,18 @@
 import _ from 'lodash';
 import { test, expect } from 'vitest';
-import toLeaves from '../toLeaves';
+import walkLeaves from '../walkLeaves';
 import toTree from '../toTree';
 import { generateBranches } from './helpers';
 
-test('inverse of toLeaves for empty array argument', () => {
+test('reversing walkLeaves for empty array argument', () => {
   expect(treeFromLeavesOf([])).toBe(undefined);
 });
 
-test('inverse of toLeaves for empty object argument', () => {
+test('reversing walkLeaves for empty object argument', () => {
   expect(treeFromLeavesOf({})).toBe(undefined);
 });
 
-test('inverse of toLeaves for all nesting combinations up to level 5', () => {
+test('reversing walkLeaves for all nesting combinations up to level 5', () => {
   const branches = generateBranches();
   expect(treeFromLeavesOf(branches)).toEqual(branches);
   for (const branch of branches) {
@@ -20,18 +20,17 @@ test('inverse of toLeaves for all nesting combinations up to level 5', () => {
   }
 });
 
-test('toLeaves returns single value for proper branch inputs', () => {
+test('walkLeaves returns single value for proper branch inputs', () => {
   const branches = generateBranches();
-  for (const branch of branches)
-    expect(_.keys(toLeaves(branch)).length).toBe(1);
+  for (const branch of branches) expect([...walkLeaves(branch)].length).toBe(1);
 });
 
-test('toLeaves returns empty for branches with no leaf values', () => {
+test('walkLeaves returns empty for branches with no leaf values', () => {
   const branches = generateBranches({ withLeaf: false });
   for (const branch of branches)
-    expect(_.keys(toLeaves(branch)).length).toBe(0);
+    expect(walkLeaves(branch).next().done).toBe(true);
 });
 
 function treeFromLeavesOf(tree: object) {
-  return toTree(toLeaves(tree));
+  return toTree(walkLeaves(tree));
 }
