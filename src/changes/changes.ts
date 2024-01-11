@@ -25,12 +25,10 @@ export function save<T extends object>(ob: Changeable<T>) {
   const original = asOriginal(ob);
   const saved = _.cloneDeep(ob);
   delete saved._original, delete saved._unsaved;
-  const savedLeaves = findDifference(original, saved);
-  const unsavedLeaves = findDifference(original, ob._unsaved);
-  const changeLeaves = {
-    ...savedLeaves,
-    ...unsavedLeaves,
-  };
+  const changeLeaves = _.fromPairs([
+    ...findDifference(original, saved),
+    ...findDifference(original, ob._unsaved),
+  ]);
   // If change goes back to original value
   for (const [path, unsavedValue] of walkLeaves(ob._unsaved)) {
     // TODO customizable comparison

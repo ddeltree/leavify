@@ -12,11 +12,9 @@ test('flat value change', () => {
     ...original,
     changed: 'Y',
   };
-  const changes = findDifference(original, fragment);
-  expect(changes).toEqual({
-    changed: fragment.changed,
-  });
-  expect(changes.unchanged).toBe(undefined);
+  const diff = findDifference(original, fragment);
+  expect(diff.next().value).containSubset(['changed', fragment.changed]);
+  expect(diff.next().done).toBe(true);
 });
 
 test('nested value change', () => {
@@ -25,10 +23,10 @@ test('nested value change', () => {
     unchanged: { other: [0, 1] },
   };
   const fragment: typeof original = _.cloneDeep(original);
-  const changePath = 'changed[1].prop';
-  set(fragment, changePath, 'change value');
-  const changedLeaves = findDifference(original, fragment);
-  expect(changedLeaves).toEqual({
-    [changePath]: get(fragment, changePath),
-  });
+  const path = 'changed[1].prop';
+  set(fragment, path, 'change value');
+
+  const diff = findDifference(original, fragment);
+  expect(diff.next().value).containSubset([path, get(fragment, path)]);
+  expect(diff.next().done).toBe(true);
 });

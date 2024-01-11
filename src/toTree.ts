@@ -12,5 +12,6 @@ export default function toTree(leaves: Leaves): object | undefined {
   for (const [path, value] of entries) {
     set(tree, path, value);
   }
+
   return tree;
 }

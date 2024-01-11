@@ -19,7 +19,6 @@ const base: Changeable<A> = {
 test('undo proposes reverting back to original', () => {
   const kase = _.cloneDeep(base);
   undo(kase, { prop: '' });
-  console.log(kase);
   expect(kase).toEqual({
     ...kase,
     _unsaved: {
