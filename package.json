@@ -13,7 +13,7 @@
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
     },
-    "./*": "./dist/*.js",
+    "./changes": "./dist/changes/index.js",
     "./package.json": "./package.json"
   },
   "types": "./dist/index.d.ts",

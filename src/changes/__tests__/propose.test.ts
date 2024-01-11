@@ -1,5 +1,5 @@
 import { expect, test } from 'vitest';
-import { Changeable, propose } from '../experimenting';
+import { Changeable, propose } from '../changes';
 import _ from 'lodash';
 
 type A = { prop: string; leavemealone: boolean; other: number };
