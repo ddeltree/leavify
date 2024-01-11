@@ -70,18 +70,9 @@ export function propose<T extends object>(
   }
 }
 
-type A = { prop: string; leavemealone: boolean; other: number };
-const base: Changeable<A> = {
-  prop: 'saved',
-  other: 42,
-  leavemealone: true,
-  _original: {
-    prop: 'original',
-    other: 43,
-  },
-  _unsaved: {
-    prop: 'proposed',
-  },
-};
-
-undo(base, { prop: '' });
+export function discard<T extends object>(ob: Changeable<T>) {
+  ob._unsaved = {} as Fragment<T>;
+}
+export function isSaved<T extends object>(ob: Changeable<T>) {
+  return _.isEmpty(ob._unsaved);
+}
