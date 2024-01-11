@@ -5,8 +5,8 @@ import Tree from './Tree.js';
  * (recursive partial T).
  * @param TLeaf types a mapped leaf
  * */
-type Fragment<T, TLeaf = undefined> = T extends object
-  ? Tree<RecursivePartial<T>, TLeaf>
-  : never;
+type Fragment<T, TLeaf = undefined> =
+  | T
+  | (T extends object ? Tree<RecursivePartial<T>, TLeaf> : never);
 
 export default Fragment;
