@@ -8,6 +8,7 @@ import type Fragment from './Fragment.js';
 import type Branch from './Branch.js';
 import fromBranch from './fromBranch.js';
 import walkLeaves from './walkLeaves.js';
+import changes from './changes/index.js';
 
 const leaves = {
   get,
@@ -18,6 +19,7 @@ const leaves = {
   findDifference,
   fromBranch,
   walkLeaves,
+  changes,
 };
 
 export default leaves;
