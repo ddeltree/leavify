@@ -3,6 +3,7 @@ import { test, expect, describe } from 'vitest';
 import { set, get, has } from '../accessors';
 import { bitWordToBranch } from './helpers';
 
+// if this fails, get() will also
 describe('has()', () => {
   const ob = {
     leaf: 'value',
@@ -24,11 +25,14 @@ describe('has()', () => {
     expect(has(ob, 'arr[1]')).toBe(false);
     expect(has(ob, 'arr[2]')).toBe(false);
   });
+
+  test('nesting combinations up to level 5', () => {});
 });
 
-describe('get() and set() integration', () => {
+// has() is already used by get()'s implemetation
+describe('get(), has(), set() integration', () => {
   test('change leaf of branch', () => {
-    const branch = bitWordToBranch('1001', true);
+    const branch = bitWordToBranch('1001');
     const path = '[0].0.0[0]',
       value = 42;
     expect(get(branch, path)).not.toBe(value);
