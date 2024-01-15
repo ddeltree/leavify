@@ -1,48 +1,50 @@
-// TODO only works for the case `const my_variable = ... as const`, but I think I could also make it work for the case my_variable is defined without `as const`
-export type Leaves<T, Acc extends Leaf = undefined> = T extends readonly any[] // ARRAY
-  ? EntriesOfArray<T>[RangeTo<Length<T>>] extends infer Entry
+// TODO? type property
+
+/** The collection of path-value pairs of a tree.
+ * @param T the tree, either a user-defined array or object type or an inferred one.
+ * If `T` is inferred from a variable, prefer using `as const` for better accuracy.
+ */
+export type Leaves<T> = Leavify<T>;
+
+type Leavify<T, Acc extends Leaf = undefined> = T extends readonly any[] // ARRAY
+  ? EntriesOf<T>[keyof T] extends infer Entry
     ? Entry extends [Leaf, any]
       ? Acc extends undefined
-        ? Leaves<Entry[1], `[${Entry[0]}]`>
-        : Leaves<Entry[1], `${Acc}[${Entry[0]}]`>
+        ? Leavify<Entry[1], `[${Entry[0]}]`>
+        : Leavify<Entry[1], `${Acc}[${Entry[0]}]`>
       : never
     : never
   : T extends object | undefined // OBJECT
-  ? EntriesOfObject<T>[keyof T] extends infer Entry
+  ? EntriesOf<T>[keyof T] extends infer Entry
     ? Entry extends [Leaf, any]
       ? Acc extends undefined
-        ? Leaves<Entry[1], Entry[0]>
-        : Leaves<Entry[1], `${Acc}.${Entry[0]}`>
+        ? Leavify<Entry[1], Entry[0]>
+        : Leavify<Entry[1], `${Acc}.${Entry[0]}`>
       : never
     : never
-  : T extends Leaf // LEAF
-  ? `${Acc} = ${Leaf<T>}`
-  : never;
+  : [Acc, T];
 
-// HELPERS
+// EntriesOf<T> -> [K in keyof T]: [K, T[K]] loops through all possible ordered pairs
+// for the given set of K in T.
+// The relationship of K and T[K] persists outsite of EntriesOf<T>.
 
+// KeyOf<T> -> [K]: T[K] would only be a selection of T[K] alone given any K.
+// It is like a for-loop of entries: inside they are related, but outside not necessarily.
+
+// So, outside of KeyOf<T>, attempting to get an index/key and its corresponding value
+// by using K and KeyOf<T>[K] would generate two unrelated sets, even if they are side by side,
+// since typescript cannot logically determine their relationship outside of KeyOf<T>.
+// That would result in a cartesian product, instead of an injection
+// - each key combined to every value.
+
+type EntriesOf<T> = {
+  [K in keyof T]: [K, T[K]];
+};
+
+/** Asserts that T is a Leaf -
+ * a type that can be interpolated in template literals */
 type Leaf<T = undefined> = T extends undefined
   ? string | number | bigint | boolean | null | undefined
   : T extends Leaf
   ? T
   : never;
-
-type Length<T extends readonly any[]> = T['length'];
-
-type EntriesOfArray<T extends readonly any[]> = {
-  [K in RangeTo<Length<T>>]: [K, T[K]];
-};
-type EntriesOfObject<T extends object | undefined> = {
-  [K in keyof T]: [K, T[K]];
-};
-
-// RANGE GENERATOR
-
-type RangeTo<T extends number> = T extends 0 ? 0 : GenerateRange<T, []>;
-
-type GenerateRange<
-  T extends number,
-  Acc extends number[],
-> = Acc['length'] extends T
-  ? Acc[number]
-  : GenerateRange<T, [...Acc, Acc['length']]>;
