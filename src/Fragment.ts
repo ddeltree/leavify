@@ -1,3 +1,4 @@
+import { Leaf } from './Leaves.js';
 import RecursivePartial from './RecursivePartial/index.js';
 import Tree from './Tree.js';
 
@@ -5,8 +6,17 @@ import Tree from './Tree.js';
  * (recursive partial T).
  * @param TLeaf types a mapped leaf
  * */
-type Fragment<T, TLeaf = undefined> =
-  | T
-  | (T extends object ? Tree<RecursivePartial<T>, TLeaf> : never);
+// type Fragment<T extends object, TLeaf = undefined> = Fragment<
+//   T | Tree<RecursivePartial<T>, TLeaf>
+// >;
+
+type Fragment<
+  T extends object,
+  TLeaf extends Leaf = undefined,
+> = T extends object
+  ? T extends Function
+    ? never
+    : T | Tree<RecursivePartial<T>, TLeaf>
+  : never;
 
 export default Fragment;

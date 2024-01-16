@@ -4,7 +4,7 @@ export type Leaves<T extends Leaf = Leaf> = Generator<
 >;
 
 /** Asserts that T is a Leaf -
- * a type that can be interpolated in template literals */
+ * a (**primitive**) type that can be interpolated in template literals */
 export type Leaf<T = undefined> = T extends undefined
   ? string | number | bigint | boolean | null | undefined
   : T extends Leaf

@@ -3,10 +3,7 @@ type Tree<T, TLeaf = undefined> = {
     ? Tree<U, TLeaf>[]
     : T[K] extends object | undefined
     ? Tree<T[K], TLeaf>
-    : // : TLeaf extends undefined
-      // ? T[K]
-      // : TLeaf;
-      T[K];
+    : T[K];
 };
 
 export default Tree;

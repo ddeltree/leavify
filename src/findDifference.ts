@@ -12,7 +12,7 @@ import walkLeaves from './walkLeaves.js';
  */
 export default function* findDifference<T extends object>(
   original: T,
-  fragment: Fragment<T>,
+  fragment: T | Fragment<T>,
 ): Leaves {
   for (const [path, changeValue, props] of walkLeaves(fragment)) {
     const originalValue = get(original, path);

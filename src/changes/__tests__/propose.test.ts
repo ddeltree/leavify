@@ -1,6 +1,7 @@
 import { expect, test, describe, beforeEach } from 'vitest';
-import { Changeable, propose } from '../changes';
+import { propose } from '../changes';
 import _ from 'lodash';
+import { Changeable, CHANGES_SYMBOL } from '../Changeable';
 
 type A = { prop: string; leavemealone: boolean; other: number };
 let source: Changeable<A>;
@@ -11,9 +12,12 @@ beforeEach(() => {
     prop: 'saved',
     other: 42,
     leavemealone: true,
-    _original: {
-      prop: 'original',
-      other: 43,
+    [CHANGES_SYMBOL]: {
+      original: {
+        prop: 'original',
+        other: 43,
+      },
+      proposed: {},
     },
   };
   target = _.cloneDeep(source);
@@ -21,11 +25,11 @@ beforeEach(() => {
 
 describe('propose', () => {
   test('...', () => {
-    const proposition = { prop: 'proposed', other: 2 } as A;
-    propose(target, proposition);
+    const proposal = { prop: 'proposed', other: 2 } as A;
+    propose(target, proposal);
     expect(target).toEqual({
       ...target,
-      _unsaved: proposition,
+      _unsaved: proposal,
     });
   });
 });
