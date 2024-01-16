@@ -13,7 +13,7 @@ export function asOriginal<T extends object>(ob: Changeable<T>): T {
   for (const [path, value] of walkLeaves(changes.original)) {
     set(original, path, value);
   }
-  delete ob[CHANGES_SYMBOL];
+  delete original[CHANGES_SYMBOL];
   return original;
 }
 
@@ -41,13 +41,14 @@ export function save<T extends object>(ob: Changeable<T>) {
     set(ob, path, change);
     set(changes.original, path, get(original, path));
   }
+  changes.proposed = {} as Fragment<T>;
   return _.toPairs(changeLeaves);
 }
 
 /** Proposes reverting back to original value */
 export function undo<T extends object>(
   ob: Changeable<T>,
-  fragment: Fragment<T>,
+  fragment: Fragment<T>, // TODO use new Leaves type that autocompletes path, since there's no need for the leaf
 ) {
   const changes = ob[CHANGES_SYMBOL];
   if (changes === undefined) return;

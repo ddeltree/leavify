@@ -2,6 +2,7 @@ import { expect, test, describe, beforeEach } from 'vitest';
 import { propose } from '../changes';
 import _ from 'lodash';
 import { Changeable, CHANGES_SYMBOL } from '../Changeable';
+import Fragment from '../../Fragment';
 
 type A = { prop: string; leavemealone: boolean; other: number };
 let source: Changeable<A>;
@@ -24,12 +25,20 @@ beforeEach(() => {
 });
 
 describe('propose', () => {
-  test('...', () => {
-    const proposal = { prop: 'proposed', other: 2 } as A;
+  let proposal: Fragment<A>;
+  beforeEach(() => {
+    proposal = { prop: 'proposed', other: 2 };
+  });
+
+  test('new proposal exists', () => {
     propose(target, proposal);
-    expect(target).toEqual({
-      ...target,
-      _unsaved: proposal,
-    });
+    expect(target[CHANGES_SYMBOL]?.proposed).toEqual(proposal);
+  });
+
+  test('new proposal does not affect saved values', () => {
+    propose(target, proposal);
+    delete target[CHANGES_SYMBOL];
+    delete source[CHANGES_SYMBOL];
+    expect(target).toEqual(source);
   });
 });

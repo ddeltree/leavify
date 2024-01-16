@@ -1,37 +1,47 @@
 import { expect, test, describe, beforeEach } from 'vitest';
-import { Changeable, undo } from '../changes';
+import { undo } from '../changes';
 import _ from 'lodash';
+import { CHANGES_SYMBOL, Changeable } from '../Changeable';
+import Fragment from '../../Fragment';
 
 type A = { prop: string; leavemealone: boolean; other: number };
-let source: Changeable<A>;
-let target: Changeable<A>;
+type Changes = Pick<
+  Changeable<A>,
+  typeof CHANGES_SYMBOL
+>[typeof CHANGES_SYMBOL];
+type Defined<T> = T extends undefined ? never : T;
+let source: Changeable<A>, sourceChanges: Defined<Changes>;
+let target: Changeable<A>, targetChanges: Defined<Changes>;
 
 beforeEach(() => {
   source = {
-    prop: 'saved',
+    prop: 'prop',
     other: 42,
     leavemealone: true,
-    _original: {
-      prop: 'original',
-      other: 43,
-    },
-    _unsaved: {
-      prop: 'proposed',
+
+    [CHANGES_SYMBOL]: {
+      original: {},
+      proposed: {},
     },
   };
   target = _.cloneDeep(source);
+  sourceChanges = source[CHANGES_SYMBOL]!;
+  targetChanges = target[CHANGES_SYMBOL]!;
 });
 
-describe('undo', () => {
-  test('proposes reverting back to original', () => {
-    undo(target, { prop: '', other: 22 });
-    expect(target).toEqual({
-      ...target,
-      _unsaved: {
-        ...source._unsaved,
-        prop: source._original?.prop ?? source.prop,
-        other: source._original?.other ?? source.other,
-      },
+describe('undo()', () => {
+  let originals: Fragment<A>;
+  beforeEach(() => {
+    originals = { prop: '', other: 0 };
+    sourceChanges.original = { ...originals };
+    targetChanges.original = { ...originals };
+  });
+
+  test('proposes reverting back to original values', () => {
+    undo(target, originals);
+    expect(targetChanges.proposed).toEqual({
+      ...sourceChanges.proposed,
+      ...originals,
     });
   });
 });
