@@ -1,5 +1,7 @@
 // TODO? type property
 
+import { Leaf } from './Leaves.js';
+
 /** The collection of path-value pairs of a tree.
  * @param T the tree, either a user-defined array or object type or an inferred one.
  * If `T` is inferred from a variable, prefer using `as const` for better accuracy.
@@ -40,11 +42,3 @@ type Leavify<T, Acc extends Leaf = undefined> = T extends readonly any[] // ARRA
 type EntriesOf<T> = {
   [K in keyof T]: [K, T[K]];
 };
-
-/** Asserts that T is a Leaf -
- * a type that can be interpolated in template literals */
-type Leaf<T = undefined> = T extends undefined
-  ? string | number | bigint | boolean | null | undefined
-  : T extends Leaf
-  ? T
-  : never;

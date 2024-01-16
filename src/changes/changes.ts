@@ -40,7 +40,6 @@ export function save<T extends object>(ob: Changeable<T>) {
   ]);
   // If change goes back to original value
   for (const [path, unsavedValue] of walkLeaves(ob._unsaved)) {
-    // TODO customizable comparison?
     if (unsavedValue === get(original, path)) {
       set(ob, path, unsavedValue);
       delete changeLeaves[path];
@@ -57,14 +56,18 @@ export function save<T extends object>(ob: Changeable<T>) {
 }
 
 /** Proposes reverting back to original value */
-export function undo<T extends object>(ob: Changeable<T>, branch: Branch<T>) {
-  // TODO undo fragment instead of branch
-  const [path] = fromBranch(branch);
+export function undo<T extends object>(
+  ob: Changeable<T>,
+  fragment: Fragment<T>,
+) {
+  const [path] = walkLeaves(fragment).next().value ?? [''];
   if (ob._original === undefined || !has(ob._original, path))
     throw new Error(`Branch of path ${path} does not have a change to undo`);
-  const value = get(ob._original, path);
-  const changes = _.cloneDeep(branch);
-  set(changes, path, value);
+  const changes = _.cloneDeep(fragment);
+  for (const [path] of walkLeaves(fragment)) {
+    const og = get(ob._original, path);
+    set(changes, path, og);
+  }
   propose(ob, changes);
 }
 

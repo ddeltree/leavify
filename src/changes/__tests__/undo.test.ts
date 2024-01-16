@@ -3,10 +3,11 @@ import { Changeable, undo } from '../changes';
 import _ from 'lodash';
 
 type A = { prop: string; leavemealone: boolean; other: number };
-let base: Changeable<A>;
+let source: Changeable<A>;
+let target: Changeable<A>;
 
 beforeEach(() => {
-  base = {
+  source = {
     prop: 'saved',
     other: 42,
     leavemealone: true,
@@ -18,17 +19,18 @@ beforeEach(() => {
       prop: 'proposed',
     },
   };
+  target = _.cloneDeep(source);
 });
 
 describe('undo', () => {
   test('proposes reverting back to original', () => {
-    const kase = _.cloneDeep(base);
-    undo(kase, { prop: '' });
-    expect(kase).toEqual({
-      ...kase,
+    undo(target, { prop: '', other: 22 });
+    expect(target).toEqual({
+      ...target,
       _unsaved: {
-        ...base._unsaved,
-        prop: base._original?.prop ?? base.prop,
+        ...source._unsaved,
+        prop: source._original?.prop ?? source.prop,
+        other: source._original?.other ?? source.other,
       },
     });
   });
