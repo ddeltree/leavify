@@ -1,16 +1,9 @@
 import { Primitive } from './Leaves.js';
 
-/** The collection of path-value pairs of a tree.
- * @param T the tree, either a user-defined array or object type or an inferred one.
- * If `T` is inferred from a variable, prefer using `as const` for better accuracy.
- */
-export type Leaf<T> = Leavify<T>;
-export type Leaves<T> = [Leaf<T>['path'], Leaf<T>['value']][];
-
 type Leavify<
   value,
   pathAcc extends Primitive = undefined,
-  keysAcc extends Keys[] = [],
+  keysAcc extends Key[] = [],
 > = value extends readonly any[] // ARRAY
   ? EntriesOf<value>[keyof value] extends infer Entry
     ? Entry extends [Primitive, any]
@@ -45,24 +38,38 @@ type Leavify<
     : never
   : { path: `${pathAcc}`; value: value; keys: keysAcc };
 
-// EntriesOf<T> -> [K in keyof T]: [K, T[K]] loops through all possible ordered pairs
-// for the given set of K in T.
-// The relationship of K and T[K] persists outsite of EntriesOf<T>.
+/** Types an individual path-to-leaf within a given tree.
+ * @param T the tree, either a user-defined array or object type or an inferred one.
+ * If `T` is inferred from a variable, prefer using `as const` for better accuracy.
+ */
+export type LeafPath<T> = Leavify<T>['path'];
 
-// KeyOf<T> -> [K]: T[K] would only be a selection of T[K] alone given any K.
-// It is like a for-loop of entries: inside they are related, but outside not necessarily.
+/** A 2-tuple that types the possible path-leaf pairs, individually.
+ * @param T the tree, either a user-defined array or object type or an inferred one.
+ * If `T` is inferred from a variable, prefer using `as const` for better accuracy.
+ */
+export type PathLeafPair<T> = Pair<T>[keyof Pair<T>] extends infer P
+  ? P extends [Primitive, Primitive]
+    ? P
+    : never
+  : never;
 
-// So, outside of KeyOf<T>, attempting to get an index/key and its corresponding value
-// by using K and KeyOf<T>[K] would generate two unrelated sets, even if they are side by side,
-// since typescript cannot logically determine their relationship outside of KeyOf<T>.
-// That would result in a cartesian product, instead of an injection
-// - each key combined to every value.
+/** A 3-tuple that types an individual combination between a path, its value
+ * and an array containing the keys of that path.
+ * @param T the tree, either a user-defined array or object type or an inferred one.
+ * If `T` is inferred from a variable, prefer using `as const` for better accuracy.
+ */
+export type PathLeafKey<T> = Leavify<T>;
+
+type Pair<T, U extends Leavify<T> = Leavify<T>> = {
+  [K in keyof U]: [U['path'], U['value']];
+};
 
 type EntriesOf<T> = {
   [K in keyof T]: [K, T[K]];
 };
 
-type Keys = {
+type Key = {
   name: string;
   isArrayIndex: boolean;
 };

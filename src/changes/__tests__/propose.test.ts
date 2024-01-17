@@ -2,7 +2,7 @@ import { expect, test, describe, beforeEach } from 'vitest';
 import { propose } from '../changes';
 import _ from 'lodash';
 import { Changeable, CHANGES_SYMBOL } from '../Changeable';
-import Fragment from '../../Fragment';
+import { PathLeafKeys, PathLeafPair } from '../../NewLeaves';
 
 type A = { prop: string; leavemealone: boolean; other: number };
 let source: Changeable<A>;
@@ -25,9 +25,12 @@ beforeEach(() => {
 });
 
 describe('propose', () => {
-  let proposal: Fragment<A>;
+  let proposal: PathLeafPair<A>[];
   beforeEach(() => {
-    proposal = { prop: 'proposed', other: 2 };
+    proposal = [
+      ['prop', '2'],
+      ['other', 2],
+    ];
   });
 
   test('new proposal exists', () => {
