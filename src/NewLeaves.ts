@@ -8,23 +8,43 @@ import { Leaf } from './Leaves.js';
  */
 export type Leaves<T> = Leavify<T>;
 
-type Leavify<T, Acc extends Leaf = undefined> = T extends readonly any[] // ARRAY
+type Leavify<
+  T,
+  Acc extends Leaf = undefined,
+  props extends Property[] = [],
+> = T extends readonly any[] // ARRAY
   ? EntriesOf<T>[keyof T] extends infer Entry
     ? Entry extends [Leaf, any]
       ? Acc extends undefined
-        ? Leavify<Entry[1], `[${Entry[0]}]`>
-        : Leavify<Entry[1], `${Acc}[${Entry[0]}]`>
+        ? Leavify<
+            Entry[1],
+            `[${Entry[0]}]`,
+            [...props, { name: `${Entry[0]}`; isArrayIndex: true }]
+          >
+        : Leavify<
+            Entry[1],
+            `${Acc}[${Entry[0]}]`,
+            [...props, { name: `${Entry[0]}`; isArrayIndex: true }]
+          >
       : never
     : never
   : T extends object | undefined // OBJECT
   ? EntriesOf<T>[keyof T] extends infer Entry
     ? Entry extends [Leaf, any]
       ? Acc extends undefined
-        ? Leavify<Entry[1], Entry[0]>
-        : Leavify<Entry[1], `${Acc}.${Entry[0]}`>
+        ? Leavify<
+            Entry[1],
+            Entry[0],
+            [...props, { name: `${Entry[0]}`; isArrayIndex: false }]
+          >
+        : Leavify<
+            Entry[1],
+            `${Acc}.${Entry[0]}`,
+            [...props, { name: `${Entry[0]}`; isArrayIndex: false }]
+          >
       : never
     : never
-  : [Acc, T];
+  : [Acc, T, props];
 
 // EntriesOf<T> -> [K in keyof T]: [K, T[K]] loops through all possible ordered pairs
 // for the given set of K in T.
@@ -41,4 +61,9 @@ type Leavify<T, Acc extends Leaf = undefined> = T extends readonly any[] // ARRA
 
 type EntriesOf<T> = {
   [K in keyof T]: [K, T[K]];
+};
+
+type Property = {
+  name: string;
+  isArrayIndex: boolean;
 };
