@@ -1,50 +1,49 @@
-// TODO? type property
-
-import { Leaf } from './Leaves.js';
+import { Primitive } from './Leaves.js';
 
 /** The collection of path-value pairs of a tree.
  * @param T the tree, either a user-defined array or object type or an inferred one.
  * If `T` is inferred from a variable, prefer using `as const` for better accuracy.
  */
-export type Leaves<T> = Leavify<T>;
+export type Leaf<T> = Leavify<T>;
+export type Leaves<T> = [Leaf<T>['path'], Leaf<T>['value']][];
 
 type Leavify<
-  T,
-  Acc extends Leaf = undefined,
-  props extends Property[] = [],
-> = T extends readonly any[] // ARRAY
-  ? EntriesOf<T>[keyof T] extends infer Entry
-    ? Entry extends [Leaf, any]
-      ? Acc extends undefined
+  value,
+  pathAcc extends Primitive = undefined,
+  keysAcc extends Keys[] = [],
+> = value extends readonly any[] // ARRAY
+  ? EntriesOf<value>[keyof value] extends infer Entry
+    ? Entry extends [Primitive, any]
+      ? pathAcc extends undefined
         ? Leavify<
             Entry[1],
             `[${Entry[0]}]`,
-            [...props, { name: `${Entry[0]}`; isArrayIndex: true }]
+            [...keysAcc, { name: `${Entry[0]}`; isArrayIndex: true }]
           >
         : Leavify<
             Entry[1],
-            `${Acc}[${Entry[0]}]`,
-            [...props, { name: `${Entry[0]}`; isArrayIndex: true }]
+            `${pathAcc}[${Entry[0]}]`,
+            [...keysAcc, { name: `${Entry[0]}`; isArrayIndex: true }]
           >
       : never
     : never
-  : T extends object | undefined // OBJECT
-  ? EntriesOf<T>[keyof T] extends infer Entry
-    ? Entry extends [Leaf, any]
-      ? Acc extends undefined
+  : value extends object | undefined // OBJECT
+  ? EntriesOf<value>[keyof value] extends infer Entry
+    ? Entry extends [Primitive, any]
+      ? pathAcc extends undefined
         ? Leavify<
             Entry[1],
             Entry[0],
-            [...props, { name: `${Entry[0]}`; isArrayIndex: false }]
+            [...keysAcc, { name: `${Entry[0]}`; isArrayIndex: false }]
           >
         : Leavify<
             Entry[1],
-            `${Acc}.${Entry[0]}`,
-            [...props, { name: `${Entry[0]}`; isArrayIndex: false }]
+            `${pathAcc}.${Entry[0]}`,
+            [...keysAcc, { name: `${Entry[0]}`; isArrayIndex: false }]
           >
       : never
     : never
-  : [Acc, T, props];
+  : { path: `${pathAcc}`; value: value; keys: keysAcc };
 
 // EntriesOf<T> -> [K in keyof T]: [K, T[K]] loops through all possible ordered pairs
 // for the given set of K in T.
@@ -63,7 +62,7 @@ type EntriesOf<T> = {
   [K in keyof T]: [K, T[K]];
 };
 
-type Property = {
+type Keys = {
   name: string;
   isArrayIndex: boolean;
 };

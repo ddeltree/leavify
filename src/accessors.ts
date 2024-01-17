@@ -1,11 +1,11 @@
 import _ from 'lodash';
-import { Leaf } from './Leaves.js';
+import { Primitive } from './Leaves.js';
 import parsePath from './parsePath.js';
 
 /** Get the leaf value at the given path.
  * Throws an error if the value returned isn't a leaf or doesn't exist.
  */
-export function get(obj: object, path: string): Leaf {
+export function get(obj: object, path: string): Primitive {
   if (!has(obj, path)) throw new Error('No leaf value found at the given path');
   return _.get(obj, path);
 }

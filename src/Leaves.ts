@@ -1,13 +1,12 @@
-export type Leaves<T extends Leaf = Leaf> = Generator<
+export type Leaves<T extends Primitive = Primitive> = Generator<
   [string, T, Property[]],
   undefined
 >;
 
-/** Asserts that T is a Leaf -
- * a (**primitive**) type that can be interpolated in template literals */
-export type Leaf<T = undefined> = T extends undefined
+/** Asserts that T is a primitive or leaf - a type that can be interpolated in template literals */
+export type Primitive<T = undefined> = T extends undefined
   ? string | number | bigint | boolean | null | undefined
-  : T extends Leaf
+  : T extends Primitive
   ? T
   : never;
 

@@ -1,4 +1,4 @@
-import { Leaf } from './Leaves.js';
+import { Primitive } from './Leaves.js';
 import RecursivePartial from './RecursivePartial/index.js';
 import Tree from './Tree.js';
 
@@ -12,7 +12,7 @@ import Tree from './Tree.js';
 
 type Fragment<
   T extends object,
-  TLeaf extends Leaf = undefined,
+  TLeaf extends Primitive = undefined,
 > = T extends object
   ? T extends Function
     ? never

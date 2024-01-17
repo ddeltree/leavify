@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import { Leaf, Leaves, Property } from './Leaves.js';
+import { Primitive, Leaves, Property } from './Leaves.js';
 
 export default function* walkLeaves(ob: object): Leaves {
   const paths: string[] = [];
@@ -29,7 +29,7 @@ export default function* walkLeaves(ob: object): Leaves {
 
 function* makeGenerator(
   ob: object,
-): Generator<[string, object | Leaf, Property], undefined> {
+): Generator<[string, object | Primitive, Property], undefined> {
   for (const [key, value] of Object.entries(ob)) {
     let path = _.isArray(ob) ? `[${key}]` : key;
     // [num].prop || prop1.prop2 <=> child is object and not array

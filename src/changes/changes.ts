@@ -4,6 +4,8 @@ import walkLeaves from '../walkLeaves.js';
 import { set, get, has } from '../accessors.js';
 import findDifference from '../findDifference.js';
 import { Changeable, CHANGES_SYMBOL } from './Changeable.js';
+import { Leaf, Leaves } from '../NewLeaves.js';
+import { Primitive } from '../Leaves.js';
 
 /** Returns the initial object as it was before any proposed or saved changes */
 export function asOriginal<T extends object>(ob: Changeable<T>): T {
@@ -48,34 +50,33 @@ export function save<T extends object>(ob: Changeable<T>) {
 /** Proposes reverting back to original value */
 export function undo<T extends object>(
   ob: Changeable<T>,
-  fragment: Fragment<T>, // TODO use new Leaves type that autocompletes path, since there's no need for the leaf
+  leaves: Leaf<T>['path'][],
 ) {
   const changes = ob[CHANGES_SYMBOL];
-  if (changes === undefined) return;
-  const [path] = walkLeaves(fragment).next().value ?? [''];
+  if (changes === undefined || _.isEmpty(leaves)) return;
   const originals = changes.original;
-  if (originals === undefined || !has(originals, path))
-    throw new Error(`Branch of path ${path} does not have a change to undo`);
-  const proposal = _.cloneDeep(fragment);
-  for (const [path] of walkLeaves(fragment)) {
-    const og = get(originals, path);
-    set(proposal, path, og);
-  }
+  const proposal: [Leaf<T>['path'], Leaf<T>['value']][] = leaves.map((p) => [
+    p,
+    get(originals, p) as Leaf<T>['value'],
+  ]);
   propose(ob, proposal);
 }
 
 /** Propose a leaf value change, which can then be applied to the object by using `save()` or deleted by `discard()` */
 export function propose<T extends object>(
   ob: Changeable<T>,
-  change: Fragment<T>,
+  change: Leaves<T>,
 ) {
   ob[CHANGES_SYMBOL] ??= {
     original: {} as any,
     proposed: {} as any,
   };
-  for (const [path, value] of walkLeaves(change)) {
+  for (const [path, value] of change) {
     set(ob[CHANGES_SYMBOL].proposed, path, value);
   }
+  // for (const [path, value] of walkLeaves(change)) {
+  //   set(ob[CHANGES_SYMBOL].proposed, path, value);
+  // }
 }
 
 /** Deletes proposed changes */

@@ -3,7 +3,7 @@ import toTree from './toTree.js';
 import findDifference from './findDifference.js';
 import changes from './changes/index.js';
 
-import type { Leaves, Leaf } from './Leaves.js';
+import type { Leaves, Primitive } from './Leaves.js';
 import type Fragment from './Fragment.js';
 import type Branch from './Branch.js';
 import fromBranch from './fromBranch.js';
@@ -21,4 +21,4 @@ const leaves = {
 };
 
 export default leaves;
-export { Leaves, Leaf, Fragment, Branch };
+export { Leaves, Primitive as Leaf, Fragment, Branch };
