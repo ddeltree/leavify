@@ -4,7 +4,7 @@ import walkLeaves from '../walkLeaves.js';
 import { set, get, has } from '../accessors.js';
 import findDifference from '../findDifference.js';
 import { Changeable, CHANGES_SYMBOL } from './Changeable.js';
-import { PathLeafPair, PathLeafKeys } from '../NewLeaves.js';
+import { LeafPath, PathLeafPair } from '../NewLeaves.js';
 
 /** Returns the initial object as it was before any proposed or saved changes */
 export function asOriginal<T extends object>(ob: Changeable<T>): T {
@@ -49,20 +49,23 @@ export function save<T extends object>(ob: Changeable<T>) {
 /** Proposes reverting back to original value */
 export function undo<T extends object>(
   ob: Changeable<T>,
-  leaves: PathLeafPair<T>['path'][],
+  leaves: LeafPath<T>[],
 ) {
   const changes = ob[CHANGES_SYMBOL];
   if (changes === undefined || _.isEmpty(leaves)) return;
   const originals = changes.original;
-  const proposal: [PathLeafPair<T>['path'], PathLeafPair<T>['value']][] =
-    leaves.map((p) => [p, get(originals, p) as PathLeafPair<T>['value']]);
+  const proposal: PathLeafPair<T>[] = [];
+  for (const path of leaves) {
+    proposal.push([p, get(originals, p)]);
+  }
+  // leaves.map((p) => [p, get(originals, p)]);
   propose(ob, proposal);
 }
 
 /** Propose a leaf value change, which can then be applied to the object by using `save()` or deleted by `discard()` */
 export function propose<T extends object>(
   ob: Changeable<T>,
-  change: PathLeafKeys<T>,
+  change: PathLeafPair<T>[],
 ) {
   ob[CHANGES_SYMBOL] ??= {
     original: {} as any,

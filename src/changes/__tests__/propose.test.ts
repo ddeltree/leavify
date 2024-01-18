@@ -2,7 +2,7 @@ import { expect, test, describe, beforeEach } from 'vitest';
 import { propose } from '../changes';
 import _ from 'lodash';
 import { Changeable, CHANGES_SYMBOL } from '../Changeable';
-import { PathLeafKeys, PathLeafPair } from '../../NewLeaves';
+import { PathLeafPair } from '../../NewLeaves';
 
 type A = { prop: string; leavemealone: boolean; other: number };
 let source: Changeable<A>;
