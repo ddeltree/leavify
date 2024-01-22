@@ -2,7 +2,7 @@ import { expect, test, describe, beforeEach } from 'vitest';
 import { undo } from '../changes';
 import _ from 'lodash';
 import { CHANGES_SYMBOL, Changeable } from '../Changeable';
-import Fragment from '../../Fragment';
+import Fragment from '../../types/Fragment';
 
 type A = { prop: string; leavemealone: boolean; other: number };
 type Changes = Pick<
@@ -38,7 +38,7 @@ describe('undo()', () => {
   });
 
   test('proposes reverting back to original values', () => {
-    undo(target, originals);
+    undo(target, Object.keys(originals));
     expect(targetChanges.proposed).toEqual({
       ...sourceChanges.proposed,
       ...originals,

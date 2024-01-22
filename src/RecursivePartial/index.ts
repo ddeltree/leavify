@@ -1,3 +1,7 @@
+// CAUTION: do NOT expose this as a package import
+// LeafPath<RecursivePartial<T>> will run too many recursive calls
+// LeafPath<Fragment<T>> only works because T is explicitly extracted from it
+
 // FOREACH (key of Type):
 //  IF   (value is array of U)  make it array of partial U
 //  ELIF (value is object)      make its values partial

@@ -1,6 +1,5 @@
 import _ from 'lodash';
 import { Primitive } from './Leaves.js';
-import RecursivePartial from '../RecursivePartial/index.js';
 import Fragment from './Fragment.js';
 
 type FindLeaves<
@@ -34,5 +33,6 @@ type NoFragment<T> = T extends Fragment<infer V>
     ? V
     : never
   : T;
-type LeafPath<T extends object> = FindLeaves<NoFragment<T>>;
+// type LeafPath<T extends object> = (string & {}) | FindLeaves<NoFragment<T>>;
+type LeafPath<T extends object> = (string & {}) | FindLeaves<NoFragment<T>>;
 export default LeafPath;

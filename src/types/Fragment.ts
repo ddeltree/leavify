@@ -5,9 +5,6 @@ import RecursivePartial from '../RecursivePartial/index.js';
  * (recursive partial T).
  * @param TLeaf types a mapped leaf
  * */
-// type Fragment<T extends object, TLeaf = undefined> = Fragment<
-//   T | Tree<RecursivePartial<T>, TLeaf>
-// >;
 
 type Fragment<T extends object> = T extends object
   ? T extends Function

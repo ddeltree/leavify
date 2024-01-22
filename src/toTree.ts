@@ -8,10 +8,9 @@ export default function toTree(leaves: Leaves): object | undefined {
   const entries = [...leaves];
   if (_.isEmpty(entries)) return undefined;
   const [firstPath] = entries[0];
-  const tree: any = firstPath.startsWith('[') ? [] : {};
+  const tree: object = firstPath.startsWith('[') ? [] : {};
   for (const [path, value] of entries) {
     set(tree, path, value);
   }
-
   return tree;
 }

@@ -2,7 +2,9 @@ import { expect, test, describe, beforeEach } from 'vitest';
 import { propose } from '../changes';
 import _ from 'lodash';
 import { Changeable, CHANGES_SYMBOL } from '../Changeable';
-import { PathLeafPair } from '../../NewLeaves';
+import LeafPath from '../../types/LeafPath';
+import { Primitive } from '../../types/Leaves';
+import toTree from '../../toTree';
 
 type A = { prop: string; leavemealone: boolean; other: number };
 let source: Changeable<A>;
@@ -25,7 +27,7 @@ beforeEach(() => {
 });
 
 describe('propose', () => {
-  let proposal: PathLeafPair<A>[];
+  let proposal: [LeafPath<A>, Primitive][];
   beforeEach(() => {
     proposal = [
       ['prop', '2'],
@@ -35,7 +37,7 @@ describe('propose', () => {
 
   test('new proposal exists', () => {
     propose(target, proposal);
-    expect(target[CHANGES_SYMBOL]?.proposed).toEqual(proposal);
+    expect(target[CHANGES_SYMBOL]?.proposed).toEqual(toTree(proposal as any));
   });
 
   test('new proposal does not affect saved values', () => {

@@ -5,7 +5,7 @@ import { Fragment } from './index.js';
 
 export default function* walkLeaves<T extends object>(
   ob: T,
-): Generator<[(string & {}) | LeafPath<T>, Primitive, Property[]], undefined> {
+): Generator<[LeafPath<T>, Primitive, Property[]], undefined> {
   const paths: string[] = [];
   const generators = [makeGenerator(ob)];
   const properties: Property[] = [];

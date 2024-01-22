@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import Fragment from '../types/Fragment.js';
 import walkLeaves from '../walkLeaves.js';
-import { set, get, has } from '../accessors.js';
+import { set, get } from '../accessors.js';
 import findDifference from '../findDifference.js';
 import { Changeable, CHANGES_SYMBOL } from './Changeable.js';
 import { Primitive } from '../types/Leaves.js';
@@ -66,7 +66,7 @@ export function undo<T extends object>(target: Changeable<T>, paths: string[]) {
 /** Propose a leaf value change, which can then be applied to the object by using `save()` or deleted by `discard()` */
 export function propose<T extends object>(
   target: Changeable<T>,
-  change: PathLeafPair<T>[],
+  change: [LeafPath<T>, Primitive][],
 ) {
   target[CHANGES_SYMBOL] ??= {
     original: {} as any,
