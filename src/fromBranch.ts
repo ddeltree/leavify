@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import walkLeaves from './walkLeaves.js';
-import Branch from './Branch.js';
+import Branch from './types/Branch.js';
 
 /** Return the path this branch represents along with its leaf */
 

@@ -1,7 +1,11 @@
 import _ from 'lodash';
-import { Primitive, Leaves, Property } from './Leaves.js';
+import { Primitive, Property } from './types/Leaves.js';
+import LeafPath from './types/LeafPath.js';
+import { Fragment } from './index.js';
 
-export default function* walkLeaves(ob: object): Leaves {
+export default function* walkLeaves<T extends object>(
+  ob: T,
+): Generator<[(string & {}) | LeafPath<T>, Primitive, Property[]], undefined> {
   const paths: string[] = [];
   const generators = [makeGenerator(ob)];
   const properties: Property[] = [];
@@ -37,3 +41,21 @@ function* makeGenerator(
     yield [path, value, { name: key, isArrayIndex: _.isArray(ob) }];
   }
 }
+
+const b: Fragment<typeof a> = {
+  nome: 'as',
+};
+for (const [path] of walkLeaves(b)) {
+}
+const a = {
+  nome: 'davi',
+  nums: [1, 2, 3],
+  a: {
+    b: {
+      c: {
+        d: 42,
+        e: 2,
+      },
+    },
+  },
+};

@@ -3,9 +3,9 @@ import toTree from './toTree.js';
 import findDifference from './findDifference.js';
 import changes from './changes/index.js';
 
-import type { Leaves, Primitive } from './Leaves.js';
-import type Fragment from './Fragment.js';
-import type Branch from './Branch.js';
+import type { Leaves, Primitive } from './types/Leaves.js';
+import type Fragment from './types/Fragment.js';
+import type Branch from './types/Branch.js';
 import fromBranch from './fromBranch.js';
 import walkLeaves from './walkLeaves.js';
 

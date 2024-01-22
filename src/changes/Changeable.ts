@@ -1,4 +1,4 @@
-import Fragment from '../Fragment.js';
+import Fragment from '../types/Fragment.js';
 
 /** The symbol used to store original and proposed values */
 const leavify = Symbol("leavify's change tracking properties");

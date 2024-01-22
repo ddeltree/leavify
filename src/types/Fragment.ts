@@ -1,6 +1,5 @@
 import { Primitive } from './Leaves.js';
-import RecursivePartial from './RecursivePartial/index.js';
-import Tree from './Tree.js';
+import RecursivePartial from '../RecursivePartial/index.js';
 
 /** An object which is a subset of another of type T
  * (recursive partial T).
@@ -10,13 +9,10 @@ import Tree from './Tree.js';
 //   T | Tree<RecursivePartial<T>, TLeaf>
 // >;
 
-type Fragment<
-  T extends object,
-  TLeaf extends Primitive = undefined,
-> = T extends object
+type Fragment<T extends object> = T extends object
   ? T extends Function
     ? never
-    : T | Tree<RecursivePartial<T>, TLeaf>
+    : T | RecursivePartial<T>
   : never;
 
 export default Fragment;

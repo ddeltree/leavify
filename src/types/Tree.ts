@@ -6,4 +6,4 @@ type Tree<T, TLeaf = undefined> = {
     : T[K];
 };
 
-export default Tree;
+// export default Tree;

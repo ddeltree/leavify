@@ -1,7 +1,7 @@
 import _ from 'lodash';
-import { Leaves } from './Leaves.js';
+import { Leaves } from './types/Leaves.js';
 import { get } from './accessors.js';
-import Fragment from './Fragment.js';
+import Fragment from './types/Fragment.js';
 import walkLeaves from './walkLeaves.js';
 
 /** Find the differences between an object and it's modified clone (of same type)

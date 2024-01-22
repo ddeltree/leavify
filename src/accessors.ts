@@ -1,31 +1,18 @@
 import _ from 'lodash';
-import { Primitive } from './Leaves.js';
+import { Primitive } from './types/Leaves.js';
 import parsePath from './parsePath.js';
-import {
-  LeafPath,
-  LeafValue,
-  PathLeafKey,
-  PathLeafPair,
-  PathValuePair,
-} from './NewLeaves.js';
+import LeafPath from './types/LeafPath.js';
 
 /** Get the leaf value at the given path.
  * Throws an error if the value returned isn't a leaf or doesn't exist.
  */
-export function get<T extends object, P extends PathLeafPair<T>>(
-  obj: T,
-  path: P[0],
-) {
-  if (!has<T, P>(obj, path))
-    throw new Error('No leaf value found at the given path');
-  return _.get(obj, path);
+export function get<T extends object>(obj: T, path: LeafPath<T>) {
+  if (!has(obj, path)) throw new Error('No leaf value found at the given path');
+  return _.get<T, string>(obj, path) as Primitive;
 }
 
 /** Checks whether the path refers to a leaf value */
-export function has<T extends object, P extends PathLeafPair<T>>(
-  obj: T,
-  path: P[0],
-) {
+export function has<T extends object>(obj: T, path: LeafPath<T>) {
   const parent = _.get(obj, _.toPath(path).slice(0, -1));
   if (typeof parent === 'string') return false;
   const value = _.get(obj, path, new Error());
