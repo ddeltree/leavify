@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/ban-types */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import _ from 'lodash';
 
 export function generateBranches(params?: { withLeaf: boolean }): object[] {

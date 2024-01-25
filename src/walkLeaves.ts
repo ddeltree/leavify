@@ -1,7 +1,6 @@
 import _ from 'lodash';
 import { Primitive, Property } from './types/Leaves.js';
 import LeafPath from './types/LeafPath.js';
-import { Fragment } from './index.js';
 
 export default function* walkLeaves<T extends object>(
   ob: T,
@@ -26,7 +25,11 @@ export default function* walkLeaves<T extends object>(
       paths.push(path);
       properties.push(prop);
     } else {
-      yield [[...paths, path].join(''), value, [...properties, prop]];
+      yield [
+        [...paths, path].join('') as LeafPath<T>,
+        value,
+        [...properties, prop],
+      ];
     }
   }
 }
@@ -41,21 +44,3 @@ function* makeGenerator(
     yield [path, value, { name: key, isArrayIndex: _.isArray(ob) }];
   }
 }
-
-const b: Fragment<typeof a> = {
-  nome: 'as',
-};
-for (const [path] of walkLeaves(b)) {
-}
-const a = {
-  nome: 'davi',
-  nums: [1, 2, 3],
-  a: {
-    b: {
-      c: {
-        d: 42,
-        e: 2,
-      },
-    },
-  },
-};

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { Primitive } from './Leaves.js';
 import { NoFragment } from './Fragment.js';
 
@@ -31,16 +32,15 @@ type ToString<
 // BUG IntelliSense freezes when passing `any` to LeafPath
 type LeafPath<T extends object> =
   // eslint-disable-next-line @typescript-eslint/ban-types
-  (string & {}) | FindLeaves<NoFragment<T>>;
+  FindLeaves<NoFragment<T>>;
 export default LeafPath;
 
 // TESTING TYPES
 
 () => {
-  // @ts-check object not marked `as const` can interpolate indices
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const _: FindLeaves<typeof ob> = 'objects[0].id',
-    ob = {
+  const // @ts-check object not marked `as const` can interpolate indices
+    _1: FindLeaves<typeof ob1> = 'objects[0].id',
+    ob1 = {
       objects: [
         {
           id: 2,

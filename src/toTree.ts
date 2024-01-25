@@ -1,15 +1,16 @@
 import _ from 'lodash';
 import { set } from './accessors.js';
-import { Leaves } from './types/Leaves.js';
+import { Primitive } from './types/Leaves.js';
 
 /** from path-value pairs to object */
 
-export default function toTree(leaves: Leaves): object | undefined {
-  const entries = [...leaves];
-  if (_.isEmpty(entries)) return undefined;
-  const [firstPath] = entries[0];
+export default function toTree(
+  leaves: [string, Primitive][],
+): object | undefined {
+  if (_.isEmpty(leaves)) return undefined;
+  const [firstPath] = leaves[0];
   const tree: object = firstPath.startsWith('[') ? [] : {};
-  for (const [path, value] of entries) {
+  for (const [path, value] of leaves) {
     set(tree, path, value);
   }
   return tree;

@@ -1,4 +1,3 @@
-import _ from 'lodash';
 import { Leaves } from './types/Leaves.js';
 import { get } from './accessors.js';
 import Fragment from './types/Fragment.js';

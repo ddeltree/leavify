@@ -1,6 +1,7 @@
 import _ from 'lodash';
 import { test, expect, describe, beforeEach } from 'vitest';
 import findDifference from '../findDifference';
+import LeafPath from '../types/LeafPath';
 
 interface Example {
   nested: (
@@ -35,7 +36,7 @@ describe('findDifference()', () => {
   });
 
   test('nested value change', () => {
-    const path = 'nested[1].prop';
+    const path: LeafPath<Example> = 'nested[1].prop';
     _.set(fragment, path, 'change value');
     const diff = findDifference(original, fragment);
     expect(diff.next().value).containSubset([path, _.get(fragment, path)]);

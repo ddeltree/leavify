@@ -30,12 +30,14 @@ export function has<T extends object>(obj: T, path: LeafPath<T>) {
 /** in-place setter for a deeply nested value */
 export function set<T extends object>(
   obj: T,
-  path: LeafPath<T>,
+  // eslint-disable-next-line @typescript-eslint/ban-types
+  path: (string & {}) | LeafPath<T>,
   value: Primitive,
 ) {
   const groups = parsePath(path);
   // [a]        => {a: {}}
   // [a, 1, 0]  => {a: [ ___, [ {} ] ]}
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let ref: any = obj;
   for (const group of groups) {
     const isLastGroup = group === _.last(groups);

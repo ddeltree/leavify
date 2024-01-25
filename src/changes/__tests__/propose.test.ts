@@ -37,7 +37,7 @@ describe('propose', () => {
 
   test('new proposal exists', () => {
     propose(target, proposal);
-    expect(target[CHANGES_SYMBOL]?.proposed).toEqual(toTree(proposal as any));
+    expect(target[CHANGES_SYMBOL]?.proposed).toEqual(toTree(proposal));
   });
 
   test('new proposal does not affect saved values', () => {

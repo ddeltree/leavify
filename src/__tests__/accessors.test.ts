@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 import _ from 'lodash';
 import { test, expect, describe } from 'vitest';
 import { set, get, has } from '../accessors';
@@ -7,8 +8,12 @@ import { bitWordToBranch } from './helpers';
 describe('has()', () => {
   const ob = {
     leaf: 'value',
-    obj: { leaf: 'value', obj: {}, arr: [] },
-    arr: ['value', {}, []],
+    obj: {
+      leaf: 'value',
+      obj: {} as Record<string, unknown>,
+      arr: [] as unknown[],
+    },
+    arr: ['value', {} as Record<string, unknown>, [] as unknown[]],
   };
 
   test('leaf values return true', () => {
@@ -18,9 +23,13 @@ describe('has()', () => {
   });
 
   test('non leaf value returns false', () => {
+    // @ts-expect-error
     expect(has(ob, 'obj')).toBe(false);
+    // @ts-expect-error
     expect(has(ob, 'obj.obj')).toBe(false);
+    // @ts-expect-error
     expect(has(ob, 'obj.arr')).toBe(false);
+    // @ts-expect-error
     expect(has(ob, 'arr')).toBe(false);
     expect(has(ob, 'arr[1]')).toBe(false);
     expect(has(ob, 'arr[2]')).toBe(false);
@@ -35,8 +44,10 @@ describe('get(), has(), set() integration', () => {
     const branch = bitWordToBranch('1001');
     const path = '[0].0.0[0]',
       value = 42;
+    // @ts-expect-error
     expect(get(branch, path)).not.toBe(value);
     set(branch, path, value);
+    // @ts-expect-error
     expect(get(branch, path)).toBe(value);
   });
 
@@ -65,8 +76,10 @@ describe('get(), has(), set() integration', () => {
     const branch = bitWordToBranch('1001');
     const path = 'some.inexistent[2].path',
       value = 42;
+    // @ts-expect-error
     expect(() => get(branch, path)).toThrow();
     set(branch, path, value);
+    // @ts-expect-error
     expect(get(branch, path)).toBe(value);
   });
 });

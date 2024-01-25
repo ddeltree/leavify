@@ -1,4 +1,3 @@
-import _ from 'lodash';
 import { test, expect, describe } from 'vitest';
 import walkLeaves from '../walkLeaves';
 import toTree from '../toTree';
