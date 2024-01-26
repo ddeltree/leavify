@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import _ from 'lodash';
 import Fragment from '../types/Fragment.js';
 import walkLeaves from '../walkLeaves.js';
@@ -48,25 +49,25 @@ export function save<T extends object>(target: Changeable<T>) {
 }
 
 /** Proposes reverting back to original value */
-export function undo<T extends object>(target: Changeable<T>, paths: string[]) {
+export function undo<T extends object>(
+  target: Changeable<T>,
+  paths: readonly LeafPath<T>[],
+) {
   const changes = target[CHANGES_SYMBOL];
   if (changes === undefined || _.isEmpty(paths)) return;
+  // collect original values assuming the paths refer to existing original values
   const originals = changes.original;
-  const proposal: [string, Primitive][] = paths.map((p) => [
-    p,
-    get(originals, p),
-  ]);
+  const proposal = paths.map((p) => [p, get(originals, p)] as const);
   for (const path of paths) {
     proposal.push([path, get(originals, path)]);
   }
-  // leaves.map((p) => [p, get(originals, p)]);
   propose(target, proposal);
 }
 
 /** Propose a leaf value change, which can then be applied to the object by using `save()` or deleted by `discard()` */
 export function propose<T extends object>(
   target: Changeable<T>,
-  change: [LeafPath<T>, Primitive][],
+  change: readonly (readonly [LeafPath<T>, Primitive])[],
 ) {
   target[CHANGES_SYMBOL] ??= {
     original: {} as any,
@@ -75,9 +76,6 @@ export function propose<T extends object>(
   for (const [path, value] of change) {
     set(target[CHANGES_SYMBOL].proposed, path, value);
   }
-  // for (const [path, value] of walkLeaves(change)) {
-  //   set(ob[CHANGES_SYMBOL].proposed, path, value);
-  // }
 }
 
 /** Deletes proposed changes */

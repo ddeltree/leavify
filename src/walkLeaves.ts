@@ -4,7 +4,10 @@ import LeafPath from './types/LeafPath.js';
 
 export default function* walkLeaves<T extends object>(
   ob: T,
-): Generator<[LeafPath<T>, Primitive, Property[]], undefined> {
+): Generator<
+  readonly [LeafPath<T>, Primitive, readonly Property[]],
+  undefined
+> {
   const paths: string[] = [];
   const generators = [makeGenerator(ob)];
   const properties: Property[] = [];
@@ -36,7 +39,7 @@ export default function* walkLeaves<T extends object>(
 
 function* makeGenerator(
   ob: object,
-): Generator<[string, object | Primitive, Property], undefined> {
+): Generator<readonly [string, object | Primitive, Property], undefined> {
   for (const [key, value] of Object.entries(ob)) {
     let path = _.isArray(ob) ? `[${key}]` : key;
     // [num].prop || prop1.prop2 <=> child is object and not array

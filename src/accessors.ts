@@ -2,13 +2,17 @@ import _ from 'lodash';
 import { Primitive } from './types/Leaves.js';
 import parsePath from './parsePath.js';
 import LeafPath from './types/LeafPath.js';
+import { Fragment } from './index.js';
 
 /** Get the leaf value at the given path.
  * Throws an error if the value returned isn't a leaf or doesn't exist.
  */
-export function get<T extends object>(obj: T, path: LeafPath<T>) {
+export function get<
+  T extends Readonly<object>,
+  U extends Readonly<Fragment<T>> = Readonly<Fragment<T>>,
+>(obj: U | T, path: LeafPath<T>) {
   if (!has(obj, path)) throw new Error('No leaf value found at the given path');
-  return _.get<T, string>(obj, path) as Primitive;
+  return _.get<U | T, string>(obj, path) as Primitive;
 }
 
 /** Checks whether the path refers to a leaf value */

@@ -1,5 +1,5 @@
 export type Leaves<T extends Primitive = Primitive> = Generator<
-  [string, T, Property[]],
+  readonly [string, T, readonly Property[]],
   undefined
 >;
 

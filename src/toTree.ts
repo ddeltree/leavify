@@ -5,7 +5,7 @@ import { Primitive } from './types/Leaves.js';
 /** from path-value pairs to object */
 
 export default function toTree(
-  leaves: [string, Primitive][],
+  leaves: readonly (readonly [string, Primitive])[],
 ): object | undefined {
   if (_.isEmpty(leaves)) return undefined;
   const [firstPath] = leaves[0];

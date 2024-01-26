@@ -3,6 +3,7 @@ import { undo } from '../changes';
 import _ from 'lodash';
 import { CHANGES_SYMBOL, Changeable } from '../Changeable';
 import Fragment from '../../types/Fragment';
+import LeafPath from '../../types/LeafPath';
 
 type A = { prop: string; leavemealone: boolean; other: number };
 type Changes = Pick<
@@ -38,7 +39,7 @@ describe('undo()', () => {
   });
 
   test('proposes reverting back to original values', () => {
-    undo(target, Object.keys(originals));
+    undo(target, Object.keys(originals) as LeafPath<typeof target>[]);
     expect(targetChanges.proposed).toEqual({
       ...sourceChanges.proposed,
       ...originals,

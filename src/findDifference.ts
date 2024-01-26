@@ -1,4 +1,4 @@
-import { Leaves } from './types/Leaves.js';
+// import { Leaves } from './types/Leaves.js';
 import { get } from './accessors.js';
 import Fragment from './types/Fragment.js';
 import walkLeaves from './walkLeaves.js';
@@ -12,9 +12,9 @@ import walkLeaves from './walkLeaves.js';
 export default function* findDifference<T extends object>(
   original: T,
   fragment: T | Fragment<T>,
-): Leaves {
+) {
   for (const [path, changeValue, props] of walkLeaves(fragment)) {
-    const originalValue = get(original, path);
+    const originalValue = get<T>(original, path);
     if (originalValue !== changeValue) {
       yield [path, changeValue, props];
     }

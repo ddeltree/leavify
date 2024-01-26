@@ -5,8 +5,6 @@ import changes from './changes/index.js';
 
 import type { Leaves, Primitive } from './types/Leaves.js';
 import type Fragment from './types/Fragment.js';
-import type Branch from './types/Branch.js';
-import fromBranch from './fromBranch.js';
 import walkLeaves from './walkLeaves.js';
 
 const leaves = {
@@ -15,10 +13,9 @@ const leaves = {
   has,
   toTree,
   findDifference,
-  fromBranch,
   walkLeaves,
   changes,
 };
 
 export default leaves;
-export { Leaves, Primitive as Leaf, Fragment, Branch };
+export { Leaves, Primitive as Leaf, Fragment };

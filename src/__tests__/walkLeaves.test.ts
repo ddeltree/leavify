@@ -35,6 +35,7 @@ describe('walkLeaves', () => {
   });
 });
 
-function treeFromLeavesOf(tree: object) {
-  return toTree(walkLeaves(tree));
+function treeFromLeavesOf<T extends object>(tree: T) {
+  const elems = [...walkLeaves(tree)].map(([p, v]) => [p, v] as const);
+  return toTree(elems);
 }
