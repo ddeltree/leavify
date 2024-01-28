@@ -5,10 +5,13 @@ const leavify = Symbol("leavify's change tracking properties");
 
 export type Changeable<T extends object> = T & {
   [leavify]?: {
-    original: Readonly<Fragment<T>>;
-    proposed: Fragment<T>;
+    original: OriginalEntries<T>;
+    proposed: ProposedEntries<T>;
   };
 };
+
+export type OriginalEntries<T extends object> = Readonly<Fragment<T>>;
+export type ProposedEntries<T extends object> = Fragment<T>;
 
 export { leavify as CHANGES_SYMBOL };
 

@@ -1,11 +1,14 @@
+/* eslint-disable @typescript-eslint/ban-types */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { Primitive } from './Leaves.js';
-import { NoFragment } from './Fragment.js';
+import Fragment, { NoFragment } from './Fragment.js';
 
 type FindLeaves<
   value extends object | Primitive,
   pathAcc extends string | undefined = undefined,
-> = value extends object
+> = value extends Function
+  ? never
+  : value extends object
   ? EntriesOf<value>[keyof value] extends infer Entry
     ? Entry extends [string | number, object | Primitive]
       ? FindLeaves<Entry[1], ToString<value, pathAcc, Entry[0]>>
@@ -48,4 +51,15 @@ export default LeafPath;
       ],
       numbers: [1, 2, 3],
     };
+
+  const _t1: LeafPath<Test> = 'other[1]',
+    // @ts-expect-error property does
+    _t2: LeafPath<Test> = '';
+  class Test {
+    name!: string;
+    other!: [string, number];
+    get prop() {
+      return true;
+    }
+  }
 };

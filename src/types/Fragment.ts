@@ -1,4 +1,4 @@
-import RecursivePartial from '../RecursivePartial/index.js';
+import RecursivePartial from './RecursivePartial.js';
 
 /** An object which is a subset of another of type T
  * (recursive partial T).
