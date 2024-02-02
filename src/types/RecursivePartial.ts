@@ -1,5 +1,7 @@
 /* eslint-disable @typescript-eslint/ban-types */
 
+import { ChangeableEntries } from '../changes/Changeable.js';
+
 // CAUTION: do NOT expose this as a package import
 // LeafPath<RecursivePartial<T>> will run too many recursive calls
 // LeafPath<Fragment<T>> only works because T is explicitly extracted from it
@@ -19,6 +21,8 @@ type NoFunctionKeys<T> = Entries<T>[keyof T] extends infer Entry
 
 // Based on https://stackoverflow.com/a/51365037
 type RecursivePartial<T> = T extends Function
+  ? never
+  : T[keyof T] extends ChangeableEntries
   ? never
   : {
       [K in NoFunctionKeys<T>]?: T[K] extends (infer U)[]

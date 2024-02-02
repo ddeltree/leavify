@@ -2,11 +2,14 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { Primitive } from './Leaves.js';
 import Fragment, { NoFragment } from './Fragment.js';
+import { ChangeableEntries } from '../changes/Changeable.js';
 
 type FindLeaves<
   value extends object | Primitive,
   pathAcc extends string | undefined = undefined,
-> = value extends Function
+> = value[keyof value] extends ChangeableEntries
+  ? never
+  : value extends Function
   ? never
   : value extends object
   ? EntriesOf<value>[keyof value] extends infer Entry
