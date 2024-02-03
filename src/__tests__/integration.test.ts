@@ -1,20 +1,29 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { get } from '../accessors';
-import { CHANGES_SYMBOL, Changeable } from '../changes/Changeable';
+import {
+  CHANGES_SYMBOL,
+  Changeable,
+  ChangeableEntries,
+} from '../changes/Changeable';
 import { propose } from '../changes/changes';
+
+function getOriginals<T extends object, K extends string>() {
+  return (this as Changeable<Omit<T, K>>)[CHANGES_SYMBOL]?.original;
+}
+function getProposed<T extends object, K extends string>() {
+  return (this as Changeable<Omit<T, K>>)[CHANGES_SYMBOL]?.proposed;
+}
 
 class Example {
   prop: string = 'vvv';
   numbers: number[];
 
   get original() {
-    return (this as Changeable<Omit<Example, 'original' | 'proposed'>>)[
-      CHANGES_SYMBOL
-    ]?.original;
+    // trying to infer 'original' results in a circular reference
+    return getOriginals<Example, 'original' | 'proposed'>();
   }
   get proposed() {
-    return (this as Changeable<Omit<Example, 'original' | 'proposed'>>)[
-      CHANGES_SYMBOL
-    ]?.proposed;
+    return getProposed<Example, 'original' | 'proposed'>();
   }
 }
 
@@ -23,4 +32,4 @@ const value = get(ob, 'prop');
 console.log(value);
 propose(ob, [['prop', 'value']]);
 
-console.log(ob.proposed?.prop);
+console.log(ob.original?.prop);
