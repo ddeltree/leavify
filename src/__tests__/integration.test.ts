@@ -1,35 +1,60 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import { get } from '../accessors';
-import {
-  CHANGES_SYMBOL,
-  Changeable,
-  ChangeableEntries,
-} from '../changes/Changeable';
+import { CHANGES_SYMBOL, Changeable } from '../changes/Changeable';
 import { propose } from '../changes/changes';
 
-function getOriginals<T extends object, K extends string>() {
-  return (this as Changeable<Omit<T, K>>)[CHANGES_SYMBOL]?.original;
-}
-function getProposed<T extends object, K extends string>() {
-  return (this as Changeable<Omit<T, K>>)[CHANGES_SYMBOL]?.proposed;
+/** Boilerplate for a class getter of the stored fragment of original values.
+ * @param thisRef a reference to the `this` class instance.
+ * @param getterNames the names of the getters within the class, for both `proposed` and `original` fragments, in order to prevent circular reference.
+ */
+function getOriginals<T extends object, K extends keyof T>(
+  thisRef: T,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  ...getterNames: K[]
+) {
+  return (thisRef as Changeable<Omit<T, K>>)[CHANGES_SYMBOL]?.original;
 }
 
-class Example {
-  prop: string = 'vvv';
-  numbers: number[];
+/** Boilerplate for a class getter of the stored fragment of proposed values.
+ * @param thisRef a reference to the `this` class instance.
+ * @param getterNames the names of the getters within the class, for both `proposed` and `original` fragments, in order to prevent circular reference.
+ */
+function getProposed<T extends object, K extends keyof T>(
+  thisRef: T,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  ...getterNames: K[]
+) {
+  return (thisRef as Changeable<Omit<T, K>>)[CHANGES_SYMBOL]?.proposed;
+}
+
+class Book {
+  readonly id: string;
+  constructor(
+    public title: string,
+    public year: number,
+    public chapters: Chapter[],
+  ) {
+    this.id = '42';
+  }
 
   get original() {
-    // trying to infer 'original' results in a circular reference
-    return getOriginals<Example, 'original' | 'proposed'>();
+    return getOriginals(this, 'original', 'proposed');
   }
   get proposed() {
-    return getProposed<Example, 'original' | 'proposed'>();
+    return getProposed(this, 'original', 'proposed');
   }
 }
 
-const ob = new Example();
-const value = get(ob, 'prop');
-console.log(value);
-propose(ob, [['prop', 'value']]);
+class Chapter {
+  readonly id: string;
+  constructor(public title: string, public order: number) {
+    this.id = '24';
+  }
+}
 
-console.log(ob.original?.prop);
+const ob = new Book('Book Title', 2020, [new Chapter('Introduction', 1)]);
+
+const value = get(ob, 'title');
+console.log(value);
+
+propose(ob, [['title', 'Modified Book Title']]);
+console.log(ob.proposed?.title);
