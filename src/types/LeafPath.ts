@@ -1,11 +1,12 @@
 /* eslint-disable @typescript-eslint/ban-types */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { Primitive } from './Leaves.js';
-import Fragment, { NoFragment } from './Fragment.js';
+import { NoFragment } from './Fragment.js';
 import { ChangeableEntries } from '../changes/Changeable.js';
 
 type FindLeaves<
   value extends object | Primitive,
+  parent = never,
   pathAcc extends string | undefined = undefined,
 > = value[keyof value] extends ChangeableEntries
   ? never
@@ -14,7 +15,11 @@ type FindLeaves<
   : value extends object
   ? EntriesOf<value>[keyof value] extends infer Entry
     ? Entry extends [string | number, object | Primitive]
-      ? FindLeaves<Entry[1], ToString<value, pathAcc, Entry[0]>>
+      ? Entry[1] extends parent | readonly parent[]
+        ? // interpolate circular references to `any`
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          ToString<value, pathAcc, `${Entry[0]}${any}`>
+        : FindLeaves<Entry[1], value, ToString<value, pathAcc, Entry[0]>>
       : never
     : never
   : `${pathAcc}`;
