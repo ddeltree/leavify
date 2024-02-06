@@ -10,7 +10,7 @@ import { Fragment } from './index.js';
 export function get<
   T extends Readonly<object>,
   U extends Readonly<Fragment<T>> = Readonly<Fragment<T>>,
->(obj: U | T, path: LeafPath<T>) {
+>(obj: U | T, path: LeafPath<U | T>) {
   if (!has(obj, path)) throw new Error('No leaf value found at the given path');
   return _.get<U | T, string>(obj, path) as Primitive;
 }
