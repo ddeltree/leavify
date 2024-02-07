@@ -5,24 +5,24 @@ import { NoFragment } from './Fragment.js';
 import { ChangeableEntries } from '../changes/Changeable.js';
 
 type FindLeaves<
-  value extends object | Primitive,
-  parent = never,
-  pathAcc extends string | undefined = undefined,
-> = value[keyof value] extends ChangeableEntries
+  REF extends object | Primitive,
+  PARENTS = never,
+  PATH_ACC extends string | undefined = undefined,
+> = REF[keyof REF] extends ChangeableEntries
   ? never
-  : value extends Function
+  : REF extends Function
   ? never
-  : value extends object
-  ? EntriesOf<value>[keyof value] extends infer Entry
-    ? Entry extends [string | number, object | Primitive]
-      ? Entry[1] extends parent | readonly parent[]
+  : REF extends object
+  ? EntriesOf<REF>[keyof REF] extends infer ENTRY
+    ? ENTRY extends [string | number, object | Primitive]
+      ? ENTRY[1] extends PARENTS
         ? // interpolate circular references to `any`
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          ToString<value, pathAcc, `${Entry[0]}${any}`>
-        : FindLeaves<Entry[1], value, ToString<value, pathAcc, Entry[0]>>
+          ToString<REF, PATH_ACC, `${ENTRY[0]}`, any>
+        : FindLeaves<ENTRY[1], PARENTS | REF, ToString<REF, PATH_ACC, ENTRY[0]>>
       : never
     : never
-  : `${pathAcc}`;
+  : `${PATH_ACC}`;
 
 type EntriesOf<T> = {
   [K in keyof T]: [K, T[K]];
@@ -32,13 +32,14 @@ type ToString<
   value extends object | Primitive,
   pathAcc extends string | undefined,
   key extends string | number,
+  tail extends string = '',
 > = value extends readonly unknown[]
   ? pathAcc extends undefined
-    ? `[${key}]`
-    : `${pathAcc}[${key}]`
+    ? `[${key}]${tail}`
+    : `${pathAcc}[${key}]${tail}`
   : pathAcc extends undefined
-  ? `${key}`
-  : `${pathAcc}.${key}`;
+  ? `${key}${tail}`
+  : `${pathAcc}.${key}${tail}`;
 
 // BUG IntelliSense freezes when passing `any` to LeafPath
 type LeafPath<T extends object> =
