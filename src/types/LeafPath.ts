@@ -2,15 +2,13 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { Primitive } from './Leaves.js';
 import { NoFragment } from './Fragment.js';
-import { ChangeableEntries } from '../changes/Changeable.js';
+import { ChangeableEntries, OriginalEntries } from '../changes/Changeable.js';
 
 type FindLeaves<
   REF extends object | Primitive,
   PARENTS = never,
   PATH_ACC extends string | undefined = undefined,
-> = REF[keyof REF] extends ChangeableEntries
-  ? never
-  : REF extends Function
+> = REF extends Function
   ? never
   : REF extends object
   ? EntriesOf<REF>[keyof REF] extends infer ENTRY
@@ -19,6 +17,8 @@ type FindLeaves<
         ? // interpolate circular references to `any`
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           ToString<REF, PATH_ACC, `${ENTRY[0]}`, any>
+        : ENTRY[1] extends ChangeableEntries
+        ? never
         : FindLeaves<ENTRY[1], PARENTS | REF, ToString<REF, PATH_ACC, ENTRY[0]>>
       : never
     : never
@@ -71,4 +71,12 @@ export default LeafPath;
       return true;
     }
   }
+
+  interface A {
+    original: OriginalEntries<{
+      b: 2;
+    }>;
+  }
+  // @ts-expect-error refuse to provide intellisense for ChangeableEntries
+  const b: FindLeaves<A> = 'original.b';
 };
