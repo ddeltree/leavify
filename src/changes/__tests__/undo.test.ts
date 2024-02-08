@@ -1,9 +1,9 @@
 import { expect, test, describe, beforeEach } from 'vitest';
-import { undo } from '../changes';
+import { undo } from '../changes.js';
 import _ from 'lodash';
-import { CHANGES_SYMBOL, Changeable } from '../Changeable';
-import Fragment from '../../types/Fragment';
-import LeafPath from '../../types/LeafPath';
+import { CHANGES_SYMBOL, Changeable } from '../Changeable.js';
+import Fragment from '../../types/Fragment.js';
+import LeafPath from '../../types/LeafPath.js';
 
 type A = { prop: string; leavemealone: boolean; other: number };
 type Changes = Pick<

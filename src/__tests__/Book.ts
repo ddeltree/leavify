@@ -1,4 +1,4 @@
-import { getOriginals, getProposed } from '../changes/getStore';
+import { getOriginals, getProposed } from '../changes/getStore.js';
 
 export class Book {
   id: string;
@@ -22,12 +22,12 @@ export class Book {
 export class Chapter {
   id: string;
   author: Author;
-  // parent: Book;    // circular reference
+  parent: Book;
   constructor(public title: string, public order: number) {
     this.id = '24';
   }
 }
 
 class Author {
-  name: string;
+  name!: string;
 }

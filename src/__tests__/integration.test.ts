@@ -1,6 +1,6 @@
-import { get } from '../accessors';
-import { propose } from '../changes/changes';
-import { Book, Chapter } from './Book';
+import { get } from '../accessors.js';
+import { propose } from '../changes/changes.js';
+import { Book, Chapter } from './Book.js';
 
 const ob: Book = new Book('Book Title', 2020, [new Chapter('Introduction', 1)]);
 

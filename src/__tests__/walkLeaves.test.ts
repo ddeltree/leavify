@@ -1,7 +1,7 @@
 import { test, expect, describe } from 'vitest';
-import walkLeaves from '../walkLeaves';
-import toTree from '../toTree';
-import { generateBranches } from './helpers';
+import walkLeaves from '../walkLeaves.js';
+import toTree from '../toTree.js';
+import { generateBranches } from './helpers.js';
 
 describe('reversing walkLeaves', () => {
   test('empty array argument', () => {
