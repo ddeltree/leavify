@@ -31,8 +31,8 @@ declare function p<
     RETURNED,
     string
   >,
-  const LEAF_PAIRS extends { [P in LEAF_PATHS]: [P, null] }[LEAF_PATHS] = {
-    [P in LEAF_PATHS]: [P, null];
+  const LEAF_PAIRS extends { [P in LEAF_PATHS]: [P, false] }[LEAF_PATHS] = {
+    [P in LEAF_PATHS]: [P, false];
   }[LEAF_PATHS],
   const ALL_PATHS extends CIRCULAR_PATHS | LEAF_PATHS =
     | CIRCULAR_PATHS
@@ -51,10 +51,12 @@ declare function p<
   // const REF extends PATH_REF_PAIR[1] = PATH_REF_PAIR[1],
   //
 >(
-  path: pares[ALL_PATHS] extends infer P extends Cycle | readonly [string, null]
-    ? P[1] extends null
-      ? P
-      : P
+  path: ALL_PATHS extends infer P
+    ? pares[ALL_PATHS] extends infer Q extends Cycle | readonly [string, false]
+      ? Q[1] extends false
+        ? Q[0]
+        : RemoveInterpolatorAny<Q[0]>
+      : never
     : never,
 ): RETURNED;
 type IsInterp<T extends string> = `${T}-` extends T ? true : false;
