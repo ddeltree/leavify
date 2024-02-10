@@ -13,10 +13,15 @@ type FindLeaves<
   : REF extends object
   ? EntriesOf<REF>[keyof REF] extends infer ENTRY
     ? ENTRY extends [string | number, object | Primitive]
-      ? ENTRY[1] extends PARENTS
-        ? // interpolate circular references to `any`
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          [ToString<REF, PATH_ACC, `${ENTRY[0]}`, any>, ENTRY[1]]
+      ? REF extends PARENTS
+        ? ToString<
+            REF,
+            PATH_ACC,
+            `${ENTRY[0]}`,
+            // interpolate circular reference as `${any}`
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            ENTRY[1] extends PARENTS ? any : ''
+          >
         : ENTRY[1] extends ChangeableEntries
         ? never
         : FindLeaves<ENTRY[1], PARENTS | REF, ToString<REF, PATH_ACC, ENTRY[0]>>
