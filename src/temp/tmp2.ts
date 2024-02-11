@@ -1,6 +1,32 @@
 /* eslint-disable */
 
 import LeafPath from '../types/LeafPath.js';
+import { Primitive } from '../types/Leaves.js';
+
+type Arr = [string | number, object | Primitive] | '...';
+
+type Refs<T, ACC extends Arr[] = []> = {
+  [K in keyof T]-?: [K, T] extends infer P extends Arr
+    ? P extends ACC[number]
+      ? [...ACC, P, '...']
+      : T[K] extends Primitive
+      ? [...ACC, P]
+      : Refs<T[K], [...ACC, P]>
+    : never;
+}[keyof T];
+
+// type Steps<T> = Refs<T> extends [infer FIRST, ...infer REST extends Arr[]]
+//   ? [FIRST, Steps<REST>]
+//   : never;
+
+type Zip<T> = T extends [infer FIRST, ...infer REST]
+  ? REST extends []
+    ? [FIRST]
+    : [FIRST, ...Zip<REST>]
+  : never;
+
+type g = Refs<A>;
+type test = Refs<A>;
 
 interface A {
   b: B;
@@ -9,71 +35,20 @@ interface B {
   c: C;
 }
 interface C {
+  d: D;
   a: A;
-  VALOR: 2;
+  VALOR_1: 2;
+}
+interface D {
+  VALOR_2: 42;
 }
 
-// [path, circular reference]
-type Cycle = readonly [string, object];
-type LeafPair = readonly [string, null];
-
-declare function p<
-  const RETURNED extends Cycle | string,
-  // Extract information
-  const CIRCULAR_PAIRS extends Extract<RETURNED, Cycle> = Extract<
-    RETURNED,
-    Cycle
-  >,
-  const CIRCULAR_PATHS extends CIRCULAR_PAIRS extends infer P extends Cycle
-    ? P[0]
-    : never = CIRCULAR_PAIRS extends infer P extends Cycle ? P[0] : never,
-  const LEAF_PATHS extends Extract<RETURNED, string> = Extract<
-    RETURNED,
-    string
-  >,
-  const LEAF_PAIRS extends { [P in LEAF_PATHS]: [P, false] }[LEAF_PATHS] = {
-    [P in LEAF_PATHS]: [P, false];
-  }[LEAF_PATHS],
-  const ALL_PATHS extends CIRCULAR_PATHS | LEAF_PATHS =
-    | CIRCULAR_PATHS
-    | LEAF_PATHS,
-  // Map leaf-paths to tuple with null circular ref ( [path, null] )
-  const ALL_PAIRS extends CIRCULAR_PAIRS | LEAF_PAIRS =
-    | CIRCULAR_PAIRS
-    | LEAF_PAIRS,
-  const pares extends {
-    [P in ALL_PAIRS as P[0]]: P;
-  } = {
-    [P in ALL_PAIRS as P[0]]: P;
-  },
-  // Create path
-  // const PATH extends PATH_REF_PAIR[0] = PATH_REF_PAIR[0],
-  // const REF extends PATH_REF_PAIR[1] = PATH_REF_PAIR[1],
-  //
->(
-  path: ALL_PATHS extends infer P
-    ? pares[ALL_PATHS] extends infer Q extends Cycle | readonly [string, false]
-      ? Q[1] extends false
-        ? Q[0]
-        : RemoveInterpolatorAny<Q[0]>
-      : never
-    : never,
-): RETURNED;
-type IsInterp<T extends string> = `${T}-` extends T ? true : false;
-
-// type keys = 'a' | 'b';
-// type k = keys extends infer U extends string ? `${U}.` : never;
-
-type a = null extends null ? 'sim' : 'nao';
-
-type RemoveInterpolatorAny<
-  T extends string,
-  ACC extends string = '',
-> = T extends `${infer CHAR}${infer REST}`
-  ? REST extends ''
-    ? ACC
-    : RemoveInterpolatorAny<REST, `${ACC}${CHAR}`>
-  : never;
-
-const a: LeafPath<A> = p('');
-const b: LeafPath<A> = 'b.c.VALOR';
+interface X {
+  y: Y;
+}
+interface Y {
+  z: Z;
+}
+interface Z {
+  data: 2;
+}
