@@ -13,7 +13,7 @@ type Refs<T, ACC extends readonly Ref[] = []> = {
       ? readonly [...ACC, readonly [P[0], P[1], true]]
       : Refs<T[K], readonly [...ACC, P]>
     : never;
-}[Exclude<keyof T, keyof []>];
+}[Exclude<Exclude<keyof T, keyof []>, ChangeableKeys<T>>];
 
 type ToString<
   REFS extends readonly Ref[],
@@ -34,6 +34,10 @@ type ToString<
   : '';
 
 export type NewLeafPath<T extends object> = ToString<Refs<NoFragment<T>>>;
+
+type ChangeableKeys<T> = {
+  [K in keyof T]: T[K] extends ChangeableEntries ? K : never;
+}[keyof T];
 
 // TESTING TYPES
 
