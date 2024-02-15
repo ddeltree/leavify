@@ -2,7 +2,7 @@ import { expect, test, describe, beforeEach } from 'vitest';
 import { propose } from '../changes.js';
 import _ from 'lodash';
 import { Changeable, CHANGES_SYMBOL } from '../Changeable.js';
-import LeafPath from '../../types/NewLeafPath.js';
+import LeafPath from '../../types/LeafPath.js';
 import { Primitive } from '../../types/Leaves.js';
 import toTree from '../../toTree.js';
 

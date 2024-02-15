@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import { Primitive } from './types/Leaves.js';
 import parsePath from './parsePath.js';
-import LeafPath from './types/NewLeafPath.js';
+import LeafPath from './types/LeafPath.js';
 import { Fragment } from './index.js';
 
 /** Get the leaf value at the given path.
