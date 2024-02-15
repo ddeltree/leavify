@@ -3,7 +3,7 @@ import { undo } from '../changes.js';
 import _ from 'lodash';
 import { CHANGES_SYMBOL, Changeable } from '../Changeable.js';
 import Fragment from '../../types/Fragment.js';
-import LeafPath from '../../types/LeafPath.js';
+import LeafPath from '../../types/NewLeafPath.js';
 
 type A = { prop: string; leavemealone: boolean; other: number };
 type Changes = Pick<

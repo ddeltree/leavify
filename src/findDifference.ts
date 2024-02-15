@@ -1,7 +1,5 @@
-// import { Leaves } from './types/Leaves.js';
 import { get } from './accessors.js';
 import Fragment from './types/Fragment.js';
-import LeafPath from './types/LeafPath.js';
 import walkLeaves from './walkLeaves.js';
 
 /** Find the differences between an object and it's modified clone (of same type)
@@ -15,7 +13,7 @@ export default function* findDifference<T extends object>(
   fragment: T | Fragment<T>,
 ) {
   for (const [path, changeValue, props] of walkLeaves(fragment)) {
-    const originalValue = get(original, path as LeafPath<T>);
+    const originalValue = get(original, path);
     if (originalValue !== changeValue) {
       yield [path, changeValue, props];
     }

@@ -6,7 +6,7 @@ import { set, get } from '../accessors.js';
 import findDifference from '../findDifference.js';
 import { Changeable, CHANGES_SYMBOL } from './Changeable.js';
 import { Primitive } from '../types/Leaves.js';
-import LeafPath from '../types/LeafPath.js';
+import LeafPath from '../types/NewLeafPath.js';
 
 /** Returns the initial object as it was before any proposed or saved changes */
 export function asOriginal<T extends object>(target: Changeable<T>): T {
