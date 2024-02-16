@@ -42,7 +42,7 @@ export function save<T extends object>(target: Changeable<T>) {
   // Set values in-place
   for (const [path, change] of walkLeaves(changeLeaves as T)) {
     set(target, path, change);
-    set(changes.original as T, path, get(original, path));
+    set(changes.original, path, get(original, path));
   }
   changes.proposed = {} as Fragment<T>;
   return _.toPairs(changeLeaves);

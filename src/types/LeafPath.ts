@@ -7,7 +7,7 @@ import { Primitive } from './Leaves.js';
 /** [`key`, `value | ref`, `isLeaf | circular_ref`] */
 type Ref = readonly [string | number, object | Primitive, boolean | '...'];
 
-type Refs<T, ACC extends readonly Ref[] = []> = T extends infer X
+export type Refs<T, ACC extends readonly Ref[] = []> = T extends infer X
   ? {
       [K in keyof X]-?: [K, X, false] extends infer P extends Ref
         ? P extends ACC[number]
@@ -43,49 +43,3 @@ export default LeafPath;
 type ChangeableKeys<T> = {
   [K in keyof T]: T[K] extends ChangeableEntries ? K : never;
 }[keyof T];
-
-// TESTING TYPES
-declare function check<T extends object, U extends LeafPath<T> = LeafPath<T>>(
-  path: U,
-): U;
-
-() => {
-  type DistributivePathUnion<
-    T extends object,
-    U extends Fragment<T> = Fragment<T>,
-    // @ts-check
-    _UNION extends Refs<T | U> = Refs<T>,
-  > = T;
-
-  // @ts-check object not marked `as const` can interpolate indices
-  check<typeof ob1>('objects[30].id');
-  const ob1 = {
-    objects: [
-      {
-        id: 2,
-      },
-    ],
-    numbers: [1, 2, 3],
-  };
-
-  class Test {
-    name!: string;
-    other!: [string, number];
-    get prop() {
-      return true;
-    }
-  }
-  check<Test>('other[1]');
-  // @ts-expect-error property does
-  check<Test>('');
-
-  interface A {
-    leaf: 42;
-    original: OriginalEntries<{
-      b: 2;
-    }>;
-  }
-  check<A>('leaf');
-  // @ts-expect-error refuse to provide intellisense for ChangeableEntries
-  check<A>('original.b');
-};
