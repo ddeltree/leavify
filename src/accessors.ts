@@ -12,7 +12,8 @@ export function get<
   U extends Readonly<Fragment<T>> = Readonly<Fragment<T>>,
 >(obj: U | T, path: LeafPath<U | T>) {
   if (!has(obj, path)) throw new Error('No leaf value found at the given path');
-  return _.get(obj, path);
+  // return _.get<U | T, string>(obj, path);
+  return _.get<object, string>(obj, path);
 }
 
 /** Checks whether the path refers to a leaf value */
