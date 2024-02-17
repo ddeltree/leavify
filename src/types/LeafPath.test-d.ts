@@ -1,6 +1,7 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/ban-types */
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { expectError, expectNotType } from 'tsd';
+import { expectError, expectNotType, expectType } from 'tsd';
 import LeafPath, { Refs } from './LeafPath.js';
 import { OriginalEntries } from '../changes/Changeable.js';
 import Fragment from './Fragment.js';
@@ -71,3 +72,20 @@ const a: A = {
 };
 get(a.original, 'leaf');
 get(a.original, 'leaf' as LeafPath<A>);
+
+// Non-as-const array
+const obInArr = [1, 2, { id: '123' }],
+  arrInOb = {
+    leaf: 'value',
+    obj: {
+      leaf: 'value',
+      obj: {} as Record<string, unknown>,
+      arr: [] as unknown[],
+    },
+    arr: ['value', {} as Record<string, unknown>, [] as unknown[]],
+  };
+expectNotType<`${any}` | `[${number}].id`>(check<typeof obInArr>('[0].id'));
+expectError(check<typeof arrInOb>('obj'));
+expectError(check<typeof arrInOb>('obj.obj'));
+expectError(check<typeof arrInOb>('obj.arr'));
+expectError(check<typeof arrInOb>('arr'));

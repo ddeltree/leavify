@@ -15,7 +15,6 @@ describe('has()', () => {
     },
     arr: ['value', {} as Record<string, unknown>, [] as unknown[]],
   };
-
   test('leaf values return true', () => {
     expect(has(ob, 'leaf')).toBe(true);
     expect(has(ob, 'obj.leaf')).toBe(true);

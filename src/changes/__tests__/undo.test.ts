@@ -1,6 +1,6 @@
+import _ from 'lodash';
 import { expect, test, describe, beforeEach } from 'vitest';
 import { undo } from '../changes.js';
-import _ from 'lodash';
 import { CHANGES_SYMBOL, Changeable } from '../Changeable.js';
 import Fragment from '../../types/Fragment.js';
 import LeafPath from '../../types/LeafPath.js';
