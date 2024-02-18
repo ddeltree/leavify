@@ -46,7 +46,7 @@
     "test-types": "tsd --files src/**/*.test-d.ts",
     "coverage": "vitest --coverage",
     "release": "standard-version",
-    "build": "tsc",
+    "build": "tsc --project tsconfig.build.json",
     "prepublishOnly": "npm run test && npm run build"
   },
   "author": "Davi Alexandre",
