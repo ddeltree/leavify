@@ -16,11 +16,11 @@ export type Refs<T extends object, ACC extends Ref[] = []> =
             Primitive // leaf value
           ) ?
             [...ACC, [REF[0], REF[1], true]]
-          : V extends object ? Refs<V, [...ACC, REF]>
           : REF extends (
             ACC[number] // circular reference
           ) ?
             [...ACC, [REF[0], REF[1], "..."]]
+          : V extends object ? Refs<V, [...ACC, REF]>
           : never
         : never
       : never;

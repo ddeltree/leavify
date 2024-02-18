@@ -1,30 +1,33 @@
-import { getOriginals, getProposed } from '../changes/getStore.js';
+import { getOriginals, getProposed } from "../changes/getStore.js";
 
 export class Book {
   id: string;
-  author: Author;
+  author!: Author;
   constructor(
     public title: string,
     public year: number,
     public chapters: Chapter[],
   ) {
-    this.id = '42';
+    this.id = "42";
   }
 
   get original() {
-    return getOriginals(this, 'original', 'proposed');
+    return getOriginals(this, "original", "proposed");
   }
   get proposed() {
-    return getProposed(this, 'original', 'proposed');
+    return getProposed(this, "original", "proposed");
   }
 }
 
 export class Chapter {
   id: string;
-  author: Author;
-  parent: Book;
-  constructor(public title: string, public order: number) {
-    this.id = '24';
+  author!: Author;
+  parent!: Book;
+  constructor(
+    public title: string,
+    public order: number,
+  ) {
+    this.id = "24";
   }
 }
 
