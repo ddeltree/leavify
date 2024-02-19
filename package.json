@@ -43,7 +43,7 @@
   "scripts": {
     "dev": "npx tsx src/index.ts",
     "test": "vitest",
-    "test-types": "tsd --files src/**/*.test-d.ts",
+    "test-types": "npm run build && tsd --files src/**/*.test-d.ts",
     "coverage": "vitest --coverage",
     "release": "standard-version",
     "build": "tsc --project tsconfig.build.json",
