@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { ChangeableEntries, OriginalEntries } from "../changes/Changeable.js";
 import type Fragment from "./Fragment.js";
-import { type NoFragment } from "./Fragment.js";
 import { Primitive } from "./Leaves.js";
 
 /** [`key`, `value | ref`, `isLeaf | circular_ref`] */
@@ -45,7 +44,7 @@ type ToString<REFS extends Ref[], PREVIOUS extends Ref | null = null> =
     never // TODO
   : never;
 
-type LeafPath<T extends object> = ToString<Refs<NoFragment<T>>>;
+type LeafPath<T extends object> = ToString<Refs<T>>;
 export default LeafPath;
 
 type ChangeableKeys<T> = {
