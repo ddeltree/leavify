@@ -1,4 +1,4 @@
-import Fragment from '../types/Fragment.js';
+import Fragment from "../types/Fragment.js";
 
 /** The symbol used to store original and proposed values */
 const CHANGES_SYMBOL = Symbol("leavify's change tracking properties");
@@ -11,7 +11,7 @@ export type Changeable<T extends object> = T & {
 };
 
 const ENTRIES_SYMBOL = Symbol(
-  'Symbol to identify the type of original entries',
+  "Symbol to identify the type of original entries",
 );
 /** Marks stored fragments' types and excludes them from autocompletion.
  *
@@ -19,7 +19,7 @@ const ENTRIES_SYMBOL = Symbol(
  * of a getter which returns [CHANGES_SYMBOL].original or [CHANGES_SYMBOL].proposed,
  * since that would just duplicate the classes' fields under a new parent subpath */
 export type ChangeableEntries = {
-  [ENTRIES_SYMBOL]?: undefined;
+  [ENTRIES_SYMBOL]: never;
 };
 
 export type OriginalEntries<T extends object> = Readonly<Fragment<T>> &

@@ -113,3 +113,13 @@ expectType<"leaf">(check<N>("leaf"));
 // arrays inside objects
 type Bug = { values: number[] };
 expectType<`values[${number}]`>(check<Bug>("values[0]"));
+
+// Record type inside object
+// this can be messed up by ChangeableEntries' definition
+type Records = {
+  strings: Record<string, string>;
+  numbers: Record<number, number>;
+};
+expectType<`strings${string}` | `numbers.${number}`>(
+  check<Records>("strings.other"),
+);
