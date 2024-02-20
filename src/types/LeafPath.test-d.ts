@@ -53,24 +53,24 @@ class Test {
 expectNotType<any>(check<Test>("other[1]"));
 expectError(check<Test>("myFunction"));
 
-// ChangeableEntries' paths are not valid
-type Props = { leaf: number };
-interface A extends Props {
+// LeafPath<Fragment> <=> LeafPath<ChangeableFragment> <=> LeafPath<ChangeableEntry>
+// No intellisense for OriginalEntries' fields
+type Fragm = {
   leaf: number;
-  original: OriginalEntries<Props>;
-}
-expectNotType<any>(check<A>("leaf"));
-expectError(check<A>("original.leaf"));
-
-// ChangeableEntries' refs paths are valid
-const a: A = {
-  leaf: 42,
-  original: {
-    leaf: 2,
-  },
+  arr: number[];
+  ob1: Record<string, string>;
+  ob2: Record<number, string>;
 };
-get(a.original, "leaf");
-get(a.original, "leaf" as LeafPath<A>);
+interface Changeable extends Fragm {
+  original: OriginalEntries<Fragm>;
+}
+expectType<LeafPath<Fragm>>(
+  check<Fragm & OriginalEntries<Fragm> & Changeable>("leaf"),
+);
+expectType<LeafPath<Fragm>>(check<Changeable>("leaf"));
+expectType<LeafPath<Fragm>>(
+  check<Changeable["original"]>("leaf" as LeafPath<Changeable>),
+);
 
 // Non-as-const array
 const obInArr = [1, "2", { id: "123" }],
