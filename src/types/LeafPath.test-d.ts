@@ -60,7 +60,7 @@ interface A extends Props {
   original: OriginalEntries<Props>;
 }
 expectNotType<never>(check<A>("leaf"));
-expectError(check<A>("original.b"));
+expectError(check<A>("original.leaf"));
 
 // ChangeableEntries' refs paths are valid
 const a: A = {
@@ -82,6 +82,7 @@ const obInArr = [1, "2", { id: "123" }],
       arr: [] as unknown[],
     },
     arr: ["value", {} as Record<string, unknown>, [] as unknown[]],
+    arr2: [1, 2, 3],
   };
 expectNotType<`${any}` | `[${number}].id`>(check<typeof obInArr>("[0].id"));
 expectError(check<typeof arrInOb>("obj"));
