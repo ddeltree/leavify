@@ -1,9 +1,9 @@
-/* eslint-disable  */
+/* eslint-disable */
 import { expectError, expectNotType, expectType } from "tsd";
-import LeafPath, { Refs } from "./LeafPath.js";
-import { OriginalEntries } from "../changes/Changeable.js";
-import Fragment from "./Fragment.js";
-import { Primitive } from "./Leaves.js";
+import LeafPath, { Refs } from "../LeafPath.js";
+import { OriginalEntries } from "../../changes/Changeable.js";
+import Fragment from "../Fragment.js";
+import { Primitive } from "../Leaves.js";
 
 declare function check<T extends object, U extends LeafPath<T> = LeafPath<T>>(
   path: U,
@@ -119,6 +119,6 @@ type Records = {
   strings: Record<string, string>;
   numbers: Record<number, number>;
 };
-expectType<`strings${string}` | `numbers.${number}`>(
+expectType<`strings.${string}` | `numbers.${number}`>(
   check<Records>("strings.other"),
 );
