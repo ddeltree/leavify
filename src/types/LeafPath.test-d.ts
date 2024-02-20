@@ -20,8 +20,8 @@ interface Y {
 class Z extends X implements Y {
   id!: number;
 }
-expectNotType<never>(check<Z>("id"));
-expectNotType<never>(check<Z>("name"));
+expectNotType<any>(check<Z>("id"));
+expectNotType<any>(check<Z>("name"));
 
 // The paths of the union is the union of the paths of each union element
 type DistributivePathUnion<
@@ -31,7 +31,7 @@ type DistributivePathUnion<
 > = T;
 
 // object not marked `as const` can interpolate indices
-expectNotType<never>(check<typeof ob1>("objects[30].id"));
+expectNotType<any>(check<typeof ob1>("objects[30].id"));
 const ob1 = {
   objects: [
     {
@@ -50,7 +50,7 @@ class Test {
   }
   myFunction() {}
 }
-expectNotType<never>(check<Test>("other[1]"));
+expectNotType<any>(check<Test>("other[1]"));
 expectError(check<Test>("myFunction"));
 
 // ChangeableEntries' paths are not valid
@@ -59,7 +59,7 @@ interface A extends Props {
   leaf: number;
   original: OriginalEntries<Props>;
 }
-expectNotType<never>(check<A>("leaf"));
+expectNotType<any>(check<A>("leaf"));
 expectError(check<A>("original.leaf"));
 
 // ChangeableEntries' refs paths are valid
