@@ -24,7 +24,10 @@ export type Refs<T extends object, ACC extends Ref[] = []> =
           : never
         : never
       : never;
-    }[Exclude<Exclude<keyof U, keyof []>, ChangeableKeys<U>>]
+    }[Exclude<
+      U extends readonly unknown[] ? Exclude<keyof U, keyof []> : keyof U,
+      ChangeableKeys<U>
+    >]
   : never;
 
 type ToString<REFS extends Ref[], PREVIOUS extends Ref | null = null> =

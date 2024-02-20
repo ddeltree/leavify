@@ -109,3 +109,7 @@ type M = ["value", {}, []];
 expectType<"[0]">(check<M>("[0]"));
 type N = { leaf: "value"; list: []; ob: {} };
 expectType<"leaf">(check<N>("leaf"));
+
+// arrays inside objects
+type Bug = { values: number[] };
+expectType<`values[${number}]`>(check<Bug>("values[0]"));
