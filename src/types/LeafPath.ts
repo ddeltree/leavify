@@ -9,7 +9,7 @@ type Ref = [string | number, object | Primitive, boolean | "..."];
 export type Refs<T extends object, ACC extends Ref[] = []> =
   T extends infer U ?
     {
-      [K in keyof U]-?: U[K] extends infer V ?
+      [K in keyof U]-?: Exclude<U[K], undefined> extends infer V ?
         [K, U, false] extends infer REF extends Ref ?
           V extends (
             Primitive // leaf value
