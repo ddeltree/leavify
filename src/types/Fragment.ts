@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/ban-types */
 import RecursivePartial from './RecursivePartial.js';
 
 /** An object which is a subset of another of type T
@@ -6,11 +7,6 @@ import RecursivePartial from './RecursivePartial.js';
  * */
 
 type Fragment<T extends object> =
-  T extends object ?
-    // eslint-disable-next-line @typescript-eslint/ban-types
-    T extends Function ?
-      never
-    : T | RecursivePartial<T>
-  : never;
+  T extends Function ? never : T | RecursivePartial<T>;
 
 export default Fragment;

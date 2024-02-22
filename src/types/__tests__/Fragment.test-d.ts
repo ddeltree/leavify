@@ -14,5 +14,4 @@ type F = {
     z: undefined;
   };
 };
-
 expectType<'a.b.c'>(check<F>('a.b.c'));

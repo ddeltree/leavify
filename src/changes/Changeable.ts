@@ -1,45 +1,78 @@
+import _ from 'lodash';
 import Fragment from '../types/Fragment.js';
 
 /** The symbol used to store original and proposed values */
-const CHANGES_SYMBOL = Symbol("leavify's change tracking properties");
+const CHANGES_SYMBOL = Symbol('leavify change tracking');
 
-export type Changeable<T extends object> = T & {
-  [CHANGES_SYMBOL]?: {
+export type Changeable<T extends object> = T & Chest<T>;
+
+type Chest<T extends object> = {
+  [CHANGES_SYMBOL]: {
     original: OriginalEntries<T>;
     proposed: ProposedEntries<T>;
   };
 };
 
+export class Changes<T extends object> {
+  private readonly target: Changeable<T>;
+  private readonly chest: Chest<T>[typeof CHANGES_SYMBOL];
+
+  constructor(target: T) {
+    this.target = target as Changeable<T>;
+    if (this.existsChanges(target)) {
+      this.chest = target[CHANGES_SYMBOL];
+    } else {
+      this.target[CHANGES_SYMBOL] = this.chest = this.getEmptyChest();
+    }
+  }
+  private getEmptyChest() {
+    return {
+      original: {} as OriginalEntries<T>,
+      proposed: {} as ProposedEntries<T>,
+    };
+  }
+  get proposed() {
+    return this.chest.proposed;
+  }
+  get original() {
+    return this.chest.original;
+  }
+  setEmptyProposed() {
+    this.chest.proposed = this.getEmptyChest().proposed;
+  }
+  setEmptyOriginal() {
+    this.chest.original = this.getEmptyChest().original;
+  }
+  isEmptyProposed() {
+    return _.isEmpty(this.chest.proposed);
+  }
+  isEmptyOriginal() {
+    return _.isEmpty(this.chest.original);
+  }
+  isTouched() {
+    return this.existsChanges(this.target);
+  }
+  removeChest() {
+    delete (this.target as Partial<Changeable<T>>)[CHANGES_SYMBOL];
+  }
+  private existsChanges(target: T): target is Changeable<T> {
+    return Object.hasOwn(target, CHANGES_SYMBOL);
+  }
+}
+
+export type OriginalEntries<T extends object> = ChangeableEntry &
+  Readonly<Fragment<T>>;
+export type ProposedEntries<T extends object> = ChangeableEntry & Fragment<T>;
+
 /** Marks stored fragments' types and excludes them from autocompletion.
  *
  * Marks OriginalEntries and ProposedEntries as to avoid path autocompletion
  * of a getter which returns [CHANGES_SYMBOL].original or [CHANGES_SYMBOL].proposed,
- * since that would just duplicate the classes' fields under a new parent subpath */
-export type ChangeableEntry = { [ENTRIES_SYMBOL]: 'original' | 'proposed' };
+ * since that would just duplicate the classes' fields under a new parent subpath
+ *
+ * This symbol only exists as a type, it is not actually in the object itself
+ * */
+export type ChangeableEntry = { [ENTRIES_SYMBOL]: never };
 const ENTRIES_SYMBOL = Symbol('Symbol to identify the type of changed entries');
-
-export class ChangeableEntryFactory {
-  static createOriginals<T extends object>(target: T) {
-    return this.create(target as Readonly<Fragment<T>>, 'original');
-  }
-  static createProposed<T extends object>(target: T) {
-    return this.create(target as Fragment<T>, 'proposed');
-  }
-  private static create<T extends object>(
-    target: T,
-    type: 'original' | 'proposed',
-  ): T & ChangeableEntry {
-    const res = target as T & ChangeableEntry;
-    res[ENTRIES_SYMBOL] = type;
-    return res;
-  }
-}
-
-export type OriginalEntries<T extends object> = ReturnType<
-  typeof ChangeableEntryFactory.createOriginals<T>
->;
-export type ProposedEntries<T extends object> = ReturnType<
-  typeof ChangeableEntryFactory.createProposed<T>
->;
 
 export { CHANGES_SYMBOL };
