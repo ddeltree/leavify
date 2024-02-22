@@ -70,8 +70,8 @@ export function propose<T extends object>(
   change: readonly (readonly [LeafPath<T>, Primitive])[],
 ) {
   target[CHANGES_SYMBOL] ??= {
-    original: {} as any,
-    proposed: {} as any,
+    original: {},
+    proposed: {},
   };
   for (const [path, value] of change) {
     set(target[CHANGES_SYMBOL].proposed, path, value);
@@ -81,10 +81,10 @@ export function propose<T extends object>(
 /** Deletes proposed changes */
 export function discard<T extends object>(ob: Changeable<T>) {
   ob[CHANGES_SYMBOL] ??= {
-    original: {} as any,
-    proposed: {} as any,
+    original: {},
+    proposed: {},
   };
-  ob[CHANGES_SYMBOL].proposed = {} as any;
+  ob[CHANGES_SYMBOL].proposed = {};
 }
 
 /** Checks whether there are any proposed changes */

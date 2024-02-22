@@ -1,4 +1,4 @@
-import { getOriginals, getProposed } from "../changes/getStore.js";
+import { getOriginals, getProposed } from '../changes/getStore.js';
 
 export class Book {
   id: string;
@@ -8,14 +8,14 @@ export class Book {
     public year: number,
     public chapters: Chapter[],
   ) {
-    this.id = "42";
+    this.id = '42';
   }
 
   get original() {
-    return getOriginals(this, "original", "proposed");
+    return getOriginals(this, 'original', 'proposed');
   }
   get proposed() {
-    return getProposed(this, "original", "proposed");
+    return getProposed(this, 'original', 'proposed');
   }
 }
 
@@ -27,7 +27,7 @@ export class Chapter {
     public title: string,
     public order: number,
   ) {
-    this.id = "24";
+    this.id = '24';
   }
 }
 

@@ -1,10 +1,9 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { ChangeableEntries, OriginalEntries } from "../changes/Changeable.js";
-import type Fragment from "./Fragment.js";
-import { Primitive } from "./Leaves.js";
+import { ChangeableEntry } from '../changes/Changeable.js';
+import { Primitive } from './Leaves.js';
 
 /** [`key`, `value | ref`, `isLeaf | circular_ref`] */
-type Ref = [string | number, object | Primitive, boolean | "..."];
+type Ref = [string | number, object | Primitive, boolean | '...'];
 
 export type Refs<T extends object, ACC extends Ref[] = []> =
   T extends infer U ?
@@ -18,7 +17,7 @@ export type Refs<T extends object, ACC extends Ref[] = []> =
           : REF extends (
             ACC[number] // circular reference
           ) ?
-            [...ACC, [REF[0], REF[1], "..."]]
+            [...ACC, [REF[0], REF[1], '...']]
           : V extends object ? Refs<V, [...ACC, REF]>
           : never
         : never
@@ -32,12 +31,12 @@ export type Refs<T extends object, ACC extends Ref[] = []> =
 type ToString<REFS extends Ref[], PREVIOUS extends Ref | null = null> =
   REFS extends [infer FIRST extends Ref, ...infer REST extends Ref[]] ?
     `${FIRST[1] extends unknown[] ? `[${FIRST[0]}]`
-    : `${PREVIOUS extends null ? "" : "."}${FIRST[0]}`}${ToString<REST, FIRST>}`
+    : `${PREVIOUS extends null ? '' : '.'}${FIRST[0]}`}${ToString<REST, FIRST>}`
   : PREVIOUS extends Ref ?
-    PREVIOUS[2] extends "..." ?
+    PREVIOUS[2] extends '...' ?
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       `${any}`
-    : ""
+    : ''
   : PREVIOUS extends (
     null // TODO vazio
   ) ?
@@ -48,5 +47,5 @@ type LeafPath<T extends object> = ToString<Refs<T>>;
 export default LeafPath;
 
 type ChangeableKeys<T> = {
-  [K in keyof T]: T[K] extends ChangeableEntries ? K : never;
+  [K in keyof T]: T[K] extends ChangeableEntry ? K : never;
 }[keyof T];

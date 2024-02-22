@@ -1,9 +1,9 @@
 /* eslint-disable */
-import { expectError, expectNotType, expectType } from "tsd";
-import LeafPath, { Refs } from "../LeafPath.js";
-import { OriginalEntries } from "../../changes/Changeable.js";
-import Fragment from "../Fragment.js";
-import { Primitive } from "../Leaves.js";
+import { expectError, expectNotType, expectType } from 'tsd';
+import LeafPath, { Refs } from '../LeafPath.js';
+import { OriginalEntries } from '../../changes/Changeable.js';
+import Fragment from '../Fragment.js';
+import { Primitive } from '../Leaves.js';
 
 declare function check<T extends object, U extends LeafPath<T> = LeafPath<T>>(
   path: U,
@@ -19,8 +19,8 @@ interface Y {
 class Z extends X implements Y {
   id!: number;
 }
-expectNotType<any>(check<Z>("id"));
-expectNotType<any>(check<Z>("name"));
+expectNotType<any>(check<Z>('id'));
+expectNotType<any>(check<Z>('name'));
 
 // The paths of the union is the union of the paths of each union element
 type DistributivePathUnion<
@@ -30,7 +30,7 @@ type DistributivePathUnion<
 > = T;
 
 // object not marked `as const` can interpolate indices
-expectNotType<any>(check<typeof ob1>("objects[30].id"));
+expectNotType<any>(check<typeof ob1>('objects[30].id'));
 const ob1 = {
   objects: [
     {
@@ -49,8 +49,8 @@ class Test {
   }
   myFunction() {}
 }
-expectNotType<any>(check<Test>("other[1]"));
-expectError(check<Test>("myFunction"));
+expectNotType<any>(check<Test>('other[1]'));
+expectError(check<Test>('myFunction'));
 
 // LeafPath<Fragment> <=> LeafPath<ChangeableFragment> <=> LeafPath<ChangeableEntry>
 // No intellisense for OriginalEntries' fields
@@ -64,30 +64,30 @@ interface Changeable extends Fragm {
   original: OriginalEntries<Fragm>;
 }
 expectType<LeafPath<Fragm>>(
-  check<Fragm & OriginalEntries<Fragm> & Changeable>("leaf"),
+  check<Fragm & OriginalEntries<Fragm> & Changeable>('leaf'),
 );
-expectType<LeafPath<Fragm>>(check<Changeable>("leaf"));
+expectType<LeafPath<Fragm>>(check<Changeable>('leaf'));
 expectType<LeafPath<Fragm>>(
-  check<Changeable["original"]>("leaf" as LeafPath<Changeable>),
+  check<Changeable['original']>('leaf' as LeafPath<Changeable>),
 );
 
 // Non-as-const array
-const obInArr = [1, "2", { id: "123" }],
+const obInArr = [1, '2', { id: '123' }],
   arrInOb = {
-    leaf: "value",
+    leaf: 'value',
     obj: {
-      leaf: "value",
+      leaf: 'value',
       obj: {} as Record<string, unknown>,
       arr: [] as unknown[],
     },
-    arr: ["value", {} as Record<string, unknown>, [] as unknown[]],
+    arr: ['value', {} as Record<string, unknown>, [] as unknown[]],
     arr2: [1, 2, 3],
   };
-expectNotType<`${any}` | `[${number}].id`>(check<typeof obInArr>("[0].id"));
-expectError(check<typeof arrInOb>("obj"));
-expectError(check<typeof arrInOb>("obj.obj"));
-expectError(check<typeof arrInOb>("obj.arr"));
-expectError(check<typeof arrInOb>("arr"));
+expectNotType<`${any}` | `[${number}].id`>(check<typeof obInArr>('[0].id'));
+expectError(check<typeof arrInOb>('obj'));
+expectError(check<typeof arrInOb>('obj.obj'));
+expectError(check<typeof arrInOb>('obj.arr'));
+expectError(check<typeof arrInOb>('arr'));
 
 // Mix of leaves and trees inside array
 type LeafTreeArray = (
@@ -101,17 +101,17 @@ type expected =
   | `[${number}].${string}`
   | `[${number}].${number}`
   | `[${number}][${number}]`;
-expectType<expected>(check<LeafTreeArray>("[1]"));
+expectType<expected>(check<LeafTreeArray>('[1]'));
 
 // empty array or object
-type M = ["value", {}, []];
-expectType<"[0]">(check<M>("[0]"));
-type N = { leaf: "value"; list: []; ob: {} };
-expectType<"leaf">(check<N>("leaf"));
+type M = ['value', {}, []];
+expectType<'[0]'>(check<M>('[0]'));
+type N = { leaf: 'value'; list: []; ob: {} };
+expectType<'leaf'>(check<N>('leaf'));
 
 // arrays inside objects
 type Bug = { values: number[] };
-expectType<`values[${number}]`>(check<Bug>("values[0]"));
+expectType<`values[${number}]`>(check<Bug>('values[0]'));
 
 // Record type inside object
 // this can be messed up by ChangeableEntries' definition
@@ -120,5 +120,5 @@ type Records = {
   numbers: Record<number, number>;
 };
 expectType<`strings.${string}` | `numbers.${number}`>(
-  check<Records>("strings.other"),
+  check<Records>('strings.other'),
 );

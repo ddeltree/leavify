@@ -1,4 +1,4 @@
-import Fragment from "../types/Fragment.js";
+import Fragment from '../types/Fragment.js';
 
 /** The symbol used to store original and proposed values */
 const CHANGES_SYMBOL = Symbol("leavify's change tracking properties");
@@ -10,24 +10,36 @@ export type Changeable<T extends object> = T & {
   };
 };
 
-const ENTRIES_SYMBOL = Symbol(
-  "Symbol to identify the type of original entries",
-);
 /** Marks stored fragments' types and excludes them from autocompletion.
  *
  * Marks OriginalEntries and ProposedEntries as to avoid path autocompletion
  * of a getter which returns [CHANGES_SYMBOL].original or [CHANGES_SYMBOL].proposed,
  * since that would just duplicate the classes' fields under a new parent subpath */
-export type ChangeableEntries = {
-  [ENTRIES_SYMBOL]: never;
-};
+export type ChangeableEntry = { [ENTRIES_SYMBOL]: 'original' | 'proposed' };
+const ENTRIES_SYMBOL = Symbol('Symbol to identify the type of changed entries');
 
-export type OriginalEntries<T extends object> = Readonly<Fragment<T>> &
-  ChangeableEntries;
-export type ProposedEntries<T extends object> = Fragment<T> & ChangeableEntries;
+export class ChangeableEntryFactory {
+  static createOriginals<T extends object>(target: T) {
+    return this.create(target as Readonly<Fragment<T>>, 'original');
+  }
+  static createProposed<T extends object>(target: T) {
+    return this.create(target as Fragment<T>, 'proposed');
+  }
+  private static create<T extends object>(
+    target: T,
+    type: 'original' | 'proposed',
+  ): T & ChangeableEntry {
+    const res = target as T & ChangeableEntry;
+    res[ENTRIES_SYMBOL] = type;
+    return res;
+  }
+}
+
+export type OriginalEntries<T extends object> = ReturnType<
+  typeof ChangeableEntryFactory.createOriginals<T>
+>;
+export type ProposedEntries<T extends object> = ReturnType<
+  typeof ChangeableEntryFactory.createProposed<T>
+>;
 
 export { CHANGES_SYMBOL };
-
-// TODO? Changeable's fields could be made customizable by providing a ['originals' | 'proposed', path][] argument.
-// I could even allow the changes to be stored on an entirely different object, but I don't see the purpose of that at the moment.
-// _leavify {original, proposed} could be used as default. These keys should be made into accessor properties in the target object for easy access.
