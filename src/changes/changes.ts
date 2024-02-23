@@ -2,12 +2,12 @@ import _ from 'lodash';
 import walkLeaves from '../walkLeaves.js';
 import { set, get } from '../accessors.js';
 import findDifference from '../findDifference.js';
-import { Changeable, Changes } from './Changeable.js';
+import { Changes } from './Changeable.js';
 import { Primitive } from '../types/Leaves.js';
 import LeafPath from '../types/LeafPath.js';
 
 /** Returns the initial object as it was before any proposed or saved changes */
-export function asOriginal<T extends object>(target: T): T {
+export function asOriginal<T extends object>(target: T) {
   const changes = new Changes(target);
   if (!changes.isTouched()) return target;
   const original = _.cloneDeep(target);
@@ -48,10 +48,10 @@ export function save<T extends object>(target: T) {
 
 /** Proposes reverting back to original value */
 export function undo<T extends object>(
-  target: Changeable<T>,
+  target: T,
   paths: readonly LeafPath<T>[],
 ) {
-  const changes = new Changes(target as T);
+  const changes = new Changes(target);
   if (!changes.isTouched() || _.isEmpty(paths)) return;
   // collect original values assuming the paths refer to existing original values
   const originals = changes.original;
@@ -64,7 +64,7 @@ export function undo<T extends object>(
 
 /** Propose a leaf value change, which can then be applied to the object by using `save()` or deleted by `discard()` */
 export function propose<T extends object>(
-  target: Changeable<T>,
+  target: T,
   change: readonly (readonly [LeafPath<T>, Primitive])[],
 ) {
   const changes = new Changes(target);
@@ -74,13 +74,13 @@ export function propose<T extends object>(
 }
 
 /** Deletes proposed changes */
-export function discard<T extends object>(ob: Changeable<T>) {
-  const changes = new Changes(ob as T);
+export function discard<T extends object>(target: T) {
+  const changes = new Changes(target);
   changes.setEmptyProposed();
 }
 
 /** Checks whether there are any proposed changes */
-export function isSaved<T extends object>(ob: Changeable<T>) {
-  const changes = new Changes(ob as T);
+export function isSaved<T extends object>(target: T) {
+  const changes = new Changes(target);
   return changes.isEmptyProposed();
 }
