@@ -1,19 +1,22 @@
 import { expect, test, describe, beforeEach } from 'vitest';
 import { undo } from '../changes.js';
 import LeafPath from '../../types/LeafPath.js';
-import { initialValues } from './helpers.js';
+import { VAL, mockOriginals, resetInitialValues } from './mocking.js';
 
 describe('undo()', () => {
-  using values = initialValues();
-  const { sourceChanges, target, targetChanges, originals, mockOriginals } =
-    values;
-  beforeEach(mockOriginals);
+  beforeEach(() => {
+    resetInitialValues();
+    mockOriginals();
+  });
 
   test('proposes reverting back to original values', () => {
-    undo(target, Object.keys(originals) as LeafPath<typeof target>[]);
-    expect(targetChanges.proposed).toEqual({
-      ...sourceChanges.proposed,
-      ...originals,
+    undo(
+      VAL.target,
+      Object.keys(VAL.sourceChanges.original) as LeafPath<typeof VAL.target>[],
+    );
+    expect(VAL.targetChanges.proposed).toEqual({
+      ...VAL.sourceChanges.proposed,
+      ...VAL.sourceChanges.original,
     });
   });
 });

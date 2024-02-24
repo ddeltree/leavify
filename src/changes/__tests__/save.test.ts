@@ -1,60 +1,59 @@
 import { expect, test, beforeEach, describe } from 'vitest';
 import { asOriginal, save } from '../changes.js';
-import { initialValues } from './helpers.js';
+import {
+  VAL,
+  initialProposal,
+  resetInitialValues,
+  mockOriginals,
+  mockProposal,
+} from './mocking.js';
 
 describe('asOriginal()', () => {
-  using values = initialValues();
-  const { source, sourceChanges, target, mockOriginals } = values;
-  beforeEach(mockOriginals);
+  beforeEach(() => {
+    resetInitialValues();
+    mockOriginals();
+  });
 
   test("applies the existent symbol's entries", () => {
-    sourceChanges.removeChest();
-    expect(asOriginal(target)).toEqual({
-      ...source,
-      ...sourceChanges.original,
+    VAL.sourceChanges.removeChest();
+    expect(asOriginal(VAL.target)).toEqual({
+      ...VAL.source,
+      ...VAL.sourceChanges.original,
     });
   });
 });
 
-// describe('save()', () => {
-//   let proposal: {
-//     prop: string;
-//   };
-//   beforeEach(() => {
-//     proposal = {
-//       prop: 'new',
-//     };
-//     const originals = {
-//       prop: 'original',
-//       other: 43,
-//     };
-//     sourceChanges.proposed = { ...proposal };
-//     targetChanges.proposed = { ...proposal };
-//     sourceChanges.original = { ...originals };
-//     targetChanges.original = { ...originals };
-//   });
+describe('save()', () => {
+  beforeEach(() => {
+    resetInitialValues();
+    mockOriginals();
+    mockProposal();
+  });
 
-//   test('empties the proposals list', () => {
-//     save(target);
-//     expect(targetChanges.proposed).toEqual({});
-//   });
+  test('empties the proposals list', () => {
+    save(VAL.target);
+    expect(VAL.targetChanges.proposed).toEqual({});
+  });
 
-//   test('non-original value proposal does not affect the stored original values', () => {
-//     save(target);
-//     expect(targetChanges.original).toEqual(sourceChanges.original);
-//   });
+  test('non-original value proposal does not affect the stored original values', () => {
+    save(VAL.target);
+    expect(VAL.targetChanges.original).toEqual(VAL.sourceChanges.original);
+  });
 
-//   test('original value proposal empties the stored original field', () => {
-//     const proposal = sourceChanges.original;
-//     sourceChanges.proposed = { ...proposal };
-//     targetChanges.proposed = { ...proposal };
-//     save(target);
-//     expect(targetChanges.proposed).toEqual({});
-//   });
+  test('original value proposal empties the stored original field', () => {
+    const proposal = VAL.sourceChanges.original;
+    VAL.sourceChanges.proposed = { ...proposal };
+    VAL.targetChanges.proposed = { ...proposal };
+    save(VAL.target);
+    expect(VAL.targetChanges.proposed).toEqual({});
+  });
 
-//   test('affects none but the proposed fields', () => {
-//     save(target);
-//     delete target[CHANGES_SYMBOL], delete source[CHANGES_SYMBOL];
-//     expect({ ...target }).toEqual({ ...source, ...proposal });
-//   });
-// });
+  test('affects none but the proposed fields', () => {
+    save(VAL.target);
+    VAL.targetChanges.removeChest(), VAL.sourceChanges.removeChest();
+    expect({ ...VAL.target }).toEqual({
+      ...VAL.source,
+      ...VAL.sourceChanges.proposed,
+    });
+  });
+});

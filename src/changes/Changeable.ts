@@ -31,6 +31,11 @@ export class Changes<T extends object> {
       proposed: {} as ProposedEntries<T>,
     };
   }
+  setEmptyChest() {
+    const emptyChest = this.getEmptyChest();
+    this.chest.original = emptyChest.original;
+    this.chest.proposed = emptyChest.proposed;
+  }
   get proposed() {
     return this.chest.proposed;
   }
