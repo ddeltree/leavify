@@ -35,13 +35,13 @@ export function resetInitialValues() {
 }
 resetInitialValues();
 
-export function mockOriginals() {
-  VAL.sourceChanges.original = { ...initialOriginals };
-  VAL.targetChanges.original = { ...initialOriginals };
+export function mockOriginals(value?: Fragment<TestCase>) {
+  VAL.sourceChanges.original = { ...(value ?? initialOriginals) };
+  VAL.targetChanges.original = { ...(value ?? initialOriginals) };
 }
-export function mockProposal() {
-  VAL.sourceChanges.proposed = { ...initialProposal };
-  VAL.targetChanges.proposed = { ...initialProposal };
+export function mockProposal(value?: Fragment<TestCase>) {
+  VAL.sourceChanges.proposed = { ...(value ?? initialProposal) };
+  VAL.targetChanges.proposed = { ...(value ?? initialProposal) };
 }
 
 export type TestCase = { prop: string; leavemealone: boolean; other: number };

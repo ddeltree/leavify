@@ -2,7 +2,6 @@ import { expect, test, beforeEach, describe } from 'vitest';
 import { asOriginal, save } from '../changes.js';
 import {
   VAL,
-  initialProposal,
   resetInitialValues,
   mockOriginals,
   mockProposal,

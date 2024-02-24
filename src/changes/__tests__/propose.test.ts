@@ -1,33 +1,17 @@
 import { expect, test, describe, beforeEach } from 'vitest';
 import { propose } from '../changes.js';
-import _ from 'lodash';
-import { Changeable, CHANGES_SYMBOL } from '../Changeable.js';
 import LeafPath from '../../types/LeafPath.js';
 import { Primitive } from '../../types/Leaves.js';
 import toTree from '../../toTree.js';
-
-type A = { prop: string; leavemealone: boolean; other: number };
-let source: Changeable<A>;
-let target: Changeable<A>;
+import { TestCase, VAL, mockOriginals, resetInitialValues } from './mocking.js';
 
 beforeEach(() => {
-  source = {
-    prop: 'saved',
-    other: 42,
-    leavemealone: true,
-    [CHANGES_SYMBOL]: {
-      original: {
-        prop: 'original',
-        other: 43,
-      },
-      proposed: {},
-    },
-  };
-  target = _.cloneDeep(source);
+  resetInitialValues();
+  mockOriginals();
 });
 
 describe('propose', () => {
-  let proposal: [LeafPath<A>, Primitive][];
+  let proposal: [LeafPath<TestCase>, Primitive][];
   beforeEach(() => {
     proposal = [
       ['prop', '2'],
@@ -36,14 +20,14 @@ describe('propose', () => {
   });
 
   test('new proposal exists', () => {
-    propose(target, proposal);
-    expect(target[CHANGES_SYMBOL]?.proposed).toEqual(toTree(proposal));
+    propose(VAL.target, proposal);
+    expect(VAL.targetChanges.proposed).toEqual(toTree(proposal));
   });
 
   test('new proposal does not affect saved values', () => {
-    propose(target, proposal);
-    delete target[CHANGES_SYMBOL];
-    delete source[CHANGES_SYMBOL];
-    expect(target).toEqual(source);
+    propose(VAL.target, proposal);
+    VAL.targetChanges.removeChest();
+    VAL.sourceChanges.removeChest();
+    expect(VAL.target).toEqual(VAL.source);
   });
 });
