@@ -6,7 +6,7 @@ const CHANGES_SYMBOL = Symbol('leavify change tracking');
 
 export type Changeable<T extends object> = T & Chest<T>;
 
-type Chest<T extends object> = {
+export type Chest<T extends object> = {
   [CHANGES_SYMBOL]: {
     original: OriginalEntries<T>;
     proposed: ProposedEntries<T>;
@@ -15,7 +15,7 @@ type Chest<T extends object> = {
 
 export class Changes<T extends object> {
   private readonly target: Changeable<T>;
-  private readonly chest: Chest<T>[typeof CHANGES_SYMBOL];
+  readonly chest: Chest<T>[typeof CHANGES_SYMBOL];
 
   constructor(target: T) {
     this.target = target as Changeable<T>;
@@ -34,8 +34,14 @@ export class Changes<T extends object> {
   get proposed() {
     return this.chest.proposed;
   }
+  set proposed(value: Fragment<T>) {
+    this.chest.proposed = value as ProposedEntries<T>;
+  }
   get original() {
     return this.chest.original;
+  }
+  set original(value: Fragment<T>) {
+    this.chest.original = value as OriginalEntries<T>;
   }
   setEmptyProposed() {
     this.chest.proposed = this.getEmptyChest().proposed;
@@ -60,8 +66,7 @@ export class Changes<T extends object> {
   }
 }
 
-export type OriginalEntries<T extends object> = ChangeableEntry &
-  Readonly<Fragment<T>>;
+export type OriginalEntries<T extends object> = ChangeableEntry & Fragment<T>;
 export type ProposedEntries<T extends object> = ChangeableEntry & Fragment<T>;
 
 /** Marks stored fragments' types and excludes them from autocompletion.

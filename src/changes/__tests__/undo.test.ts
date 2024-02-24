@@ -1,47 +1,37 @@
 import _ from 'lodash';
 import { expect, test, describe, beforeEach } from 'vitest';
 import { undo } from '../changes.js';
-import { CHANGES_SYMBOL, Changeable } from '../Changeable.js';
+import { Changes } from '../Changeable.js';
 import Fragment from '../../types/Fragment.js';
 import LeafPath from '../../types/LeafPath.js';
 
 type A = { prop: string; leavemealone: boolean; other: number };
-type Changes = Pick<
-  Changeable<A>,
-  typeof CHANGES_SYMBOL
->[typeof CHANGES_SYMBOL];
-type Defined<T> = T extends undefined ? never : T;
-let source: Changeable<A>, sourceChanges: Defined<Changes>;
-let target: Changeable<A>, targetChanges: Defined<Changes>;
+let source: A, sourceChest: Changes<A>;
+let target: A, targetChest: Changes<A>;
 
 beforeEach(() => {
   source = {
     prop: 'prop',
     other: 42,
     leavemealone: true,
-
-    [CHANGES_SYMBOL]: {
-      original: {},
-      proposed: {},
-    },
   };
   target = _.cloneDeep(source);
-  sourceChanges = source[CHANGES_SYMBOL]!;
-  targetChanges = target[CHANGES_SYMBOL]!;
+  sourceChest = new Changes(source);
+  targetChest = new Changes(target);
 });
 
 describe('undo()', () => {
   let originals: Fragment<A>;
   beforeEach(() => {
     originals = { prop: '', other: 0 };
-    sourceChanges.original = { ...originals };
-    targetChanges.original = { ...originals };
+    sourceChest.original = { ...originals };
+    targetChest.original = { ...originals };
   });
 
   test('proposes reverting back to original values', () => {
     undo(target, Object.keys(originals) as LeafPath<typeof target>[]);
-    expect(targetChanges.proposed).toEqual({
-      ...sourceChanges.proposed,
+    expect(targetChest.proposed).toEqual({
+      ...sourceChest.proposed,
       ...originals,
     });
   });

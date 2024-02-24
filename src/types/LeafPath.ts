@@ -37,10 +37,6 @@ type ToString<REFS extends Ref[], PREVIOUS extends Ref | null = null> =
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       `${any}`
     : ''
-  : PREVIOUS extends (
-    null // TODO vazio
-  ) ?
-    never // TODO
   : never;
 
 type LeafPath<T extends object> = ToString<Refs<T>>;
