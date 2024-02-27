@@ -30,8 +30,8 @@ export type Refs<T extends object, ACC extends Ref[] = []> =
 
 type ToString<REFS extends Ref[], PREVIOUS extends Ref | null = null> =
   REFS extends [infer FIRST extends Ref, ...infer REST extends Ref[]] ?
-    `${FIRST[1] extends unknown[] ? `[${FIRST[0]}]`
-    : `${PREVIOUS extends null ? '' : '.'}${FIRST[0]}`}${ToString<REST, FIRST>}`
+    `${FIRST[1] extends unknown[] ? Arr<FIRST[0]>
+    : `${DotNotation<PREVIOUS, FIRST[0]>}`}${ToString<REST, FIRST>}`
   : PREVIOUS extends Ref ?
     PREVIOUS[2] extends '...' ?
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -39,9 +39,42 @@ type ToString<REFS extends Ref[], PREVIOUS extends Ref | null = null> =
     : ''
   : never;
 
-type LeafPath<T extends object> = ToString<Refs<T>>;
-export default LeafPath;
-
 type ChangeableKeys<T> = {
   [K in keyof T]: T[K] extends ChangeableEntry ? K : never;
 }[keyof T];
+
+// Notation string types
+
+type Arr<T extends string | number> = `[${T | ''}]`;
+
+type DotNotation<
+  PREV,
+  FIRST extends Ref[0],
+> = `${Dot<PREV, FIRST>}${Prefix<FIRST>}`;
+
+type Dot<T, U> =
+  T extends null ? ''
+  : IsIndetermined<U> extends true ? ''
+  : '.';
+
+type Prefix<T> =
+  IsIndetermined<T> extends true ?
+    T extends string | number ?
+      Prefixes[T]
+    : T
+  : T;
+
+type IsIndetermined<T> =
+  string extends T ? true
+  : number extends T ? true
+  : false;
+
+type Prefixes = {
+  [K in string | number]: K extends string ?
+    // `string` should not intersect with `$`
+    '$' | `.${string}`
+  : '#' | `.${number}`;
+};
+
+type LeafPath<T extends object> = ToString<Refs<T>>;
+export default LeafPath;

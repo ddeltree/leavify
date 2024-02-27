@@ -83,7 +83,9 @@ const obInArr = [1, '2', { id: '123' }],
     arr: ['value', {} as Record<string, unknown>, [] as unknown[]],
     arr2: [1, 2, 3],
   };
-expectNotType<`${any}` | `[${number}].id`>(check<typeof obInArr>('[0].id'));
+expectNotType<`${any}` | `[${number | ''}].id`>(
+  check<typeof obInArr>('[0].id'),
+);
 expectError(check<typeof arrInOb>('obj'));
 expectError(check<typeof arrInOb>('obj.obj'));
 expectError(check<typeof arrInOb>('obj.arr'));
@@ -97,21 +99,21 @@ type LeafTreeArray = (
   | Primitive[]
 )[];
 type expected =
-  | `[${number}]`
-  | `[${number}].${string}`
-  | `[${number}].${number}`
-  | `[${number}][${number}]`;
-expectType<expected>(check<LeafTreeArray>('[1]'));
+  | `[${number | ''}]`
+  | `[${number | ''}][${number | ''}]`
+  | `[${number | ''}].${string | number}`
+  | `[${number | ''}]${'$' | '#'}`;
+expectType<expected>(check<LeafTreeArray>('[1].'));
 
 // empty array or object
 type M = ['value', {}, []];
-expectType<'[0]'>(check<M>('[0]'));
+expectType<`[${0 | ''}]`>(check<M>('[0]'));
 type N = { leaf: 'value'; list: []; ob: {} };
 expectType<'leaf'>(check<N>('leaf'));
 
 // arrays inside objects
 type Bug = { values: number[] };
-expectType<`values[${number}]`>(check<Bug>('values[0]'));
+expectType<`values[${number | ''}]`>(check<Bug>('values[0]'));
 
 // Record type inside object
 // this can be messed up by ChangeableEntries' definition
@@ -119,6 +121,6 @@ type Records = {
   strings: Record<string, string>;
   numbers: Record<number, number>;
 };
-expectType<`strings.${string}` | `numbers.${number}`>(
+expectType<`strings.${string}` | 'strings$' | 'numbers#' | `numbers.${number}`>(
   check<Records>('strings.other'),
 );

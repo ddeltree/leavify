@@ -11,6 +11,8 @@ export function get<
   T extends Readonly<object>,
   U extends Readonly<Fragment<T>> = Readonly<Fragment<T>>,
 >(obj: U | T, path: LeafPath<U | T>) {
+  // TODO assume the path `arr[]` means getting the first element
+  // TODO handle `$` and `#` paths
   if (!has(obj, path)) throw new Error('No leaf value found at the given path');
   // return _.get<U | T, string>(obj, path);
   return _.get<object, string>(obj, path);
