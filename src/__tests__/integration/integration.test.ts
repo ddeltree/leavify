@@ -1,5 +1,4 @@
 import { get } from '../../accessors.js';
-import { propose } from '../../changes/changes.js';
 import { Author, Book, Chapter } from './Book.js';
 import { test, expect } from 'vitest';
 import data from './book.json' assert { type: 'json' };
@@ -17,6 +16,5 @@ const hdm: Book = new Book(data.title)
 
 const value = get(hdm, 'chapters[0].title');
 console.log(value);
-
-propose(hdm, [['title', 'Modified Book Title']]);
+hdm.propose([['title', 'Modified Book Title']]);
 console.log(hdm.proposed.title);

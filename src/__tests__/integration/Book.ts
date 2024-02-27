@@ -1,38 +1,50 @@
 import { getOriginals, getProposed } from '../../changes/getStore.js';
+import * as func from '../../changes/changes.js';
+import LeafPath from '../../types/LeafPath.js';
+import { Primitive } from '../../types/Leaves.js';
 
 class Book {
   readonly id = crypto.randomUUID();
-  chapters: Chapter[] = [];
+  chapters: ChainableChapter[] = [];
   year?: number;
-  author?: Author;
+  author?: ChainableAuthor;
   constructor(public title: string) {}
+}
 
+class ChangeableBook extends Book {
   get original() {
     return getOriginals(this, 'original', 'proposed');
   }
   get proposed() {
     return getProposed(this, 'original', 'proposed');
   }
+  discard = () => func.discard(this);
+  isSaved = () => func.isSaved(this);
+  asOriginal = () => func.asOriginal(this);
+  save = () => func.save(this);
+  propose = (change: readonly [LeafPath<this>, Primitive][]) =>
+    func.propose(this, change);
+  undo = (paths: readonly LeafPath<this>[]) => func.undo(this, paths);
 }
 
 class Chapter {
   readonly id = crypto.randomUUID();
-  author?: Author;
+  author?: ChainableAuthor;
   title?: string;
-  constructor(public readonly book: Book) {
+  constructor(public readonly book: ChainableBook) {
     this.author = book.author;
   }
 }
 
 class Author {
   readonly id = crypto.randomUUID();
-  books: Book[] = [];
+  books: ChainableBook[] = [];
   constructor(public name: string) {}
 }
 
 // Setting up chainable methods
 
-class ChainableBook extends Book {
+class ChainableBook extends ChangeableBook {
   setAuthor = setChainableField(this, 'author');
   setTitle = setChainableField(this, 'title');
   setYear = setChainableField(this, 'year');
