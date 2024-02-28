@@ -9,13 +9,23 @@ import LeafPath from '../types/LeafPath.js';
 /** Returns the initial object as it was before any proposed or saved changes */
 export function asOriginal<T extends object>(target: T) {
   const changes = new Changes(target);
-  if (!changes.isTouched()) return target;
+  if (!changes.isTouched() || changes.isEmptyOriginal()) return target;
   const original = _.cloneDeep(target);
   for (const [path, value] of walkLeaves(changes.original)) {
     set(original, path, value);
   }
   new Changes(original).removeChest();
   return original;
+}
+
+export function getSaved<T extends object>(target: T) {
+  const nodes: [LeafPath<T>, Primitive][] = [];
+  const changes = new Changes(target);
+  if (!changes.isTouched() || changes.isEmptyOriginal()) return nodes;
+  for (const [path] of walkLeaves(changes.original)) {
+    nodes.push([path, get<T>(target, path)]);
+  }
+  return nodes;
 }
 
 /** Sets proposed leaf changes in-place
@@ -38,8 +48,8 @@ export function save<T extends object>(target: T) {
     }
   }
   // Set values in-place
-  for (const [path, change] of walkLeaves(changeLeaves as T)) {
-    set(target, path, change);
+  for (const [path, changeValue] of walkLeaves(changeLeaves as T)) {
+    set(target, path, changeValue);
     set(changes.original, path, get(original, path));
   }
   changes.setEmptyProposed();
