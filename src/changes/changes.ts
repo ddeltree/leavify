@@ -1,7 +1,6 @@
 import _ from 'lodash';
 import walkLeaves from '../walkLeaves.js';
 import { set, get } from '../accessors.js';
-import findDifference from '../findDifference.js';
 import { Changes } from './Changeable.js';
 import { Primitive } from '../types/Leaves.js';
 import LeafPath from '../types/LeafPath.js';
@@ -18,7 +17,7 @@ export function asOriginal<T extends object>(target: T) {
   return original;
 }
 
-export function getSaved<T extends object>(target: T) {
+export function getSavedEntries<T extends object>(target: T) {
   const nodes: [LeafPath<T>, Primitive][] = [];
   const changes = new Changes(target);
   if (!changes.isTouched() || changes.isEmptyOriginal()) return nodes;
@@ -34,26 +33,32 @@ export function getSaved<T extends object>(target: T) {
 export function save<T extends object>(target: T) {
   const changes = new Changes(target);
   if (!changes.isTouched() || changes.isEmptyProposed()) return;
-  const original = asOriginal(target);
-  const saved = _.cloneDeep(target);
-  const changeLeaves = _.fromPairs([
-    ...findDifference(original, saved),
-    ...findDifference(original, changes.proposed),
-  ]);
-  // If change goes back to original value
-  for (const [path, unsavedValue] of walkLeaves(changes.proposed)) {
-    if (unsavedValue === get<T>(original, path)) {
-      set(target, path, unsavedValue);
-      delete changeLeaves[path];
-    }
-  }
+  const changeLeaves = getChangedEntries(target);
   // Set values in-place
-  for (const [path, changeValue] of walkLeaves(changeLeaves as T)) {
+  for (const [path, changeValue] of walkLeaves(changeLeaves)) {
     set(target, path, changeValue);
-    set(changes.original, path, get(original, path));
+    set(changes.original, path, changes.getOriginalValue(path));
   }
   changes.setEmptyProposed();
   return _.toPairs(changeLeaves);
+}
+
+/** Union of saved and proposed */
+function getChangedEntries<T extends object>(target: T) {
+  const changes = new Changes(target);
+  const changeLeaves = _.fromPairs(getSavedEntries(target)) as Partial<
+    Record<LeafPath<T>, Primitive>
+  >;
+  // If the proposed change goes back to original value, ignore it
+  for (const [path, proposedValue] of walkLeaves(changes.proposed)) {
+    if (proposedValue === changes.getOriginalValue(path)) {
+      set(target, path, proposedValue);
+      delete changeLeaves[path];
+    } else {
+      changeLeaves[path] = proposedValue;
+    }
+  }
+  return changeLeaves;
 }
 
 /** Proposes reverting back to original value */

@@ -1,5 +1,7 @@
 import _ from 'lodash';
 import Fragment from '../types/Fragment.js';
+import { get, has } from '../accessors.js';
+import LeafPath from '../types/LeafPath.js';
 
 /** The symbol used to store original and proposed values */
 const CHANGES_SYMBOL = Symbol('leavify change tracking');
@@ -47,6 +49,11 @@ export class Changes<T extends object> {
   }
   set original(value: Fragment<T>) {
     this.chest.original = value as OriginalEntries<T>;
+  }
+  getOriginalValue(path: LeafPath<T>) {
+    return has(this.original, path) ?
+        get(this.original, path)
+      : get(this.target, path);
   }
   setEmptyProposed() {
     this.chest.proposed = this.getEmptyChest().proposed;

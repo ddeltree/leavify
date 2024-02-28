@@ -38,7 +38,7 @@ export function has<T extends object>(obj: T, path: LeafPath<T>) {
 export function set<T extends object>(
   obj: T,
   // eslint-disable-next-line @typescript-eslint/ban-types
-  path: (string & {}) | LeafPath<T>,
+  path: (string & {}) | LeafPath<T>, // TODO get path and value as a tuple
   value: Primitive,
 ) {
   const groups = parsePath(path);
