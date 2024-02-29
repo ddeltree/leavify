@@ -1,33 +1,34 @@
 // TODO rewrite
 export default function parsePath(path: string) {
-  // split by dots or bracket pairs, except when preceded by backslash
-  const points = /(?<!\\)\./;
-  const brackets = /(?<!\\)\[(.*?)(?<!\\)\]/;
-  // a[1][2].b ==> [['a', '1', '2'], ['b']]
-  // group keys by whether they refer to directly nested array or object keys
-  // --> object key   ==> single-element array, with the key
-  // --> arr[][][]... ==> > 2 elements; the last one is an object key
-  const groups: string[][] = [];
-  for (const sub of path.split(points)) {
-    const match = sub.split(brackets);
-    // .any.
-    if (match.length === 1) {
-      groups.push([match[0]]);
-      continue;
-    }
-    // .any[number].
-    const keys = match.filter((x) => x); // ignore empty ones (from the brackets)
-    if (keys.length === 1 && isNaN(parseInt(keys[0])))
-      throw new Error(
-        `The notation '.[string].' is not supported
-          Use '.string.' instead`,
-      );
-    else if (keys.slice(1).some((x) => isNaN(parseInt(x))))
-      throw new Error(
-        `The notation 'array[string]' is not supported, only for numbers.
-          Use 'any.string' instead.`,
-      );
-    groups.push(keys);
+  return split(path).map((x) =>
+    [x.rootKey, ...(x.indices?.map((i) => i.toString()) ?? [])].filter(
+      (x) => x,
+    ),
+  );
+}
+
+const pointsReg = /(?<!\\)\./,
+  keyIndicesReg = /^(?<rootKey>.*?)(?<indices>(?:(?<!\\)\[\d*(?<!\\)\])+)?$/,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  _bracketsReg = /(?<!\\)\[(\d*)(?<!\\)\]/g;
+
+/** Split path by dots and then bracket pairs, except when preceded by backslash
+ * @returns each dotted subpath: the root key and its indices.
+ * Both the root key and the indices can be `undefined`, but not both at the same time.
+ */
+export function split(path: string) {
+  const result: { rootKey?: string; indices?: number[] }[] = [];
+  for (const keyIndices of path.split(pointsReg)) {
+    const match = keyIndicesReg.exec(keyIndices)!;
+    const groups = match.groups as Partial<
+      Record<'rootKey' | 'indices', string>
+    >;
+    const rootKey = groups.rootKey === '' ? undefined : groups.rootKey;
+    const indices = groups.indices
+      ?.replace('[]', '[0]')
+      .match(/\d+/g)
+      ?.map((i) => parseInt(i));
+    result.push({ rootKey, indices });
   }
-  return groups;
+  return result;
 }
