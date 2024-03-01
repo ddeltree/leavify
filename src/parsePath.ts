@@ -1,9 +1,9 @@
-// TODO rewrite
 export default function parsePath(path: string) {
-  return split(path).map((x) =>
-    [x.rootKey, ...(x.indices?.map((i) => i.toString()) ?? [])].filter(
-      (x) => x,
-    ),
+  return split(path).map(
+    (x) =>
+      [x.rootKey, ...(x.indices?.map((i) => i.toString()) ?? [])].filter(
+        (x) => x !== undefined,
+      ) as string[],
   );
 }
 
@@ -25,9 +25,10 @@ export function split(path: string) {
     >;
     const rootKey = groups.rootKey === '' ? undefined : groups.rootKey;
     const indices = groups.indices
-      ?.replace('[]', '[0]')
+      ?.replaceAll('[]', '[0]')
       .match(/\d+/g)
       ?.map((i) => parseInt(i));
+    console.log(match);
     result.push({ rootKey, indices });
   }
   return result;
