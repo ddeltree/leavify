@@ -28,7 +28,6 @@ export function split(path: string) {
       ?.replaceAll('[]', '[0]')
       .match(/\d+/g)
       ?.map((i) => parseInt(i));
-    console.log(match);
     result.push({ rootKey, indices });
   }
   return result;

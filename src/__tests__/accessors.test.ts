@@ -45,7 +45,7 @@ describe('get(), has(), set() integration', () => {
       value = 42;
     // @ts-expect-error
     expect(get(branch, path)).not.toBe(value);
-    set(branch, path, value);
+    set(branch, [path, value]);
     // @ts-expect-error
     expect(get(branch, path)).toBe(value);
   });
@@ -61,7 +61,7 @@ describe('get(), has(), set() integration', () => {
     const path = 'change[2].target',
       value = 13;
     // set new value
-    set(tree, path, value);
+    set(tree, [path, value]);
     expect(get(tree, path)).toBe(value);
     // check that the previous values remain
     for (const key of Object.keys(tree)) {
@@ -77,7 +77,7 @@ describe('get(), has(), set() integration', () => {
       value = 42;
     // @ts-expect-error
     expect(() => get(branch, path)).toThrow();
-    set(branch, path, value);
+    set(branch, [path, value]);
     // @ts-expect-error
     expect(get(branch, path)).toBe(value);
   });

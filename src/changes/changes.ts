@@ -11,7 +11,7 @@ export function asOriginal<T extends object>(target: T) {
   if (!changes.isTouched() || changes.isEmptyOriginal()) return target;
   const original = _.cloneDeep(target);
   for (const [path, value] of walkLeaves(changes.original)) {
-    set(original, path, value);
+    set(original, [path, value]);
   }
   new Changes(original).removeChest();
   return original;
@@ -36,8 +36,8 @@ export function save<T extends object>(target: T) {
   const changeLeaves = getChangedEntries(target);
   // Set values in-place
   for (const [path, changeValue] of walkLeaves(changeLeaves)) {
-    set(target, path, changeValue);
-    set(changes.original, path, changes.getOriginalValue(path));
+    set(target, [path, changeValue]);
+    set(changes.original, [path, changes.getOriginalValue(path)]);
   }
   changes.setEmptyProposed();
   return _.toPairs(changeLeaves);
@@ -52,7 +52,7 @@ function getChangedEntries<T extends object>(target: T) {
   // If the proposed change goes back to original value, ignore it
   for (const [path, proposedValue] of walkLeaves(changes.proposed)) {
     if (proposedValue === changes.getOriginalValue(path)) {
-      set(target, path, proposedValue);
+      set(target, [path, proposedValue]);
       delete changeLeaves[path];
     } else {
       changeLeaves[path] = proposedValue;
@@ -80,11 +80,11 @@ export function undo<T extends object>(
 /** Propose a leaf value change, which can then be applied to the object by using `save()` or deleted by `discard()` */
 export function propose<T extends object>(
   target: T,
-  change: readonly (readonly [LeafPath<T>, Primitive])[],
+  proposal: readonly (readonly [LeafPath<T>, Primitive])[],
 ) {
   const changes = new Changes(target);
-  for (const [path, value] of change) {
-    set(changes.proposed, path, value);
+  for (const entry of proposal) {
+    set(changes.proposed, entry);
   }
 }
 

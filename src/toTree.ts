@@ -11,7 +11,7 @@ export default function toTree(
   const [firstPath] = leaves[0];
   const tree: object = firstPath.startsWith('[') ? [] : {};
   for (const [path, value] of leaves) {
-    set(tree, path, value);
+    set(tree, [path, value]);
   }
   return tree;
 }
