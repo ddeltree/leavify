@@ -35,8 +35,6 @@ export function set<T extends object>(
   obj: T,
   // eslint-disable-next-line @typescript-eslint/ban-types
   entry: readonly [(string & {}) | LeafPath<T>, Primitive],
-  // path: (string & {}) | LeafPath<T>, // TODO get path and value as a tuple
-  // value: Primitive,
 ) {
   const [path, value] = entry;
   const groups = parsePath(path);
