@@ -1,5 +1,6 @@
 import _ from 'lodash';
 import { DottedPath, split } from './parsePath.js';
+import { Primitive } from './types/Leaves.js';
 
 export function reconstruct(root: Ref, dotPath: DottedPath) {
   const refs = buildRefs(root, dotPath)
@@ -32,21 +33,6 @@ export function buildRefs(root: Ref, dotPath: DottedPath) {
   return refs;
 }
 
-export function hasTypeCollision(
-  refs: ReturnType<typeof getBindingRefMap>,
-  dotPath: DottedPath,
-) {
-  let valid = true;
-  if (dotPath.key !== undefined)
-    valid &&= _.isObject(refs[0]) && !_.isArray(refs[0]);
-  else valid &&= _.isArray(refs[0]);
-  if (dotPath.indices !== undefined) {
-    valid &&= refs.slice(2, -1).every((x) => _.isArray(x) || x === null);
-    valid &&= !_.isArray(refs.slice(-1)[0]);
-  }
-  return valid;
-}
-
 export function getBindingRefMap(rootRef: Ref, dotPath: DottedPath) {
   const key = dotPath.key,
     indices = dotPath.indices;
@@ -63,6 +49,29 @@ export function getBindingRefMap(rootRef: Ref, dotPath: DottedPath) {
     indexRefs,
     keyRef: key !== undefined ? [key, keyRef] : undefined,
   };
+}
+
+type Refs = ReturnType<typeof getBindingRefMap>;
+
+export function hasTypeCollision(refs: ReturnType<typeof getBindingRefMap>) {
+  const dottedRefs = new DottedRefs(refs);
+  let isValid = true;
+  isValid &&= dottedRefs.arrays.every((x) => _.isArray(x) || x === undefined);
+  isValid &&= !_.isArray(dottedRefs.lastRef);
+  return !isValid;
+}
+
+class DottedRefs {
+  readonly arrays: UnknownArray[];
+  readonly lastRef: UnknownRecord | Primitive;
+  constructor(public readonly refs: Refs) {
+    let innerRefs = [];
+    if (refs.keyRef !== undefined) innerRefs.push(refs.keyRef[1]);
+    if (refs.indexRefs !== undefined)
+      innerRefs = innerRefs.concat(refs.indexRefs.map((x) => x[1]));
+    this.arrays = innerRefs.slice(0, -1) as UnknownArray[];
+    this.lastRef = innerRefs.slice(-1)[0] as UnknownRecord | Primitive;
+  }
 }
 
 type Ref = UnknownArray | UnknownRecord;

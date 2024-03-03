@@ -12,15 +12,14 @@ test('only root key', () => {
   // const dotPath = split('a')[0];
   // const ref = {};
 
-  const ref1: any[] = [2];
-  const dotPath1 = split('a[][][][42]')[0];
-
-  console.log(getBindingRefMap(ref1, dotPath1));
+  const ref1: any = { a: [2] };
+  const dotPath1 = split('a[]')[0];
+  const bindingRefMap = getBindingRefMap(ref1, dotPath1);
+  const isValidPath = !hasTypeCollision(bindingRefMap);
+  console.log(bindingRefMap);
+  expect(isValidPath).toBe(true);
   // console.log(buildRefs(ref1, dotPath1));
   // console.log(reconstruct(ref1, dotPath1));
-  // expect(hasTypeCollision(getBindingRefMap(ref1, dotPath1), dotPath1)).toBe(
-  //   true,
-  // );
 
   // expect(dottedPathToTree(ref, dotPath)).toEqual({
   //   a: {},
