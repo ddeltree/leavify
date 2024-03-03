@@ -1,14 +1,14 @@
 export default function parsePath(path: string) {
   return split(path).map(
     (x) =>
-      [x.rootKey, ...(x.indices?.map((i) => i.toString()) ?? [])].filter(
+      [x.key, ...(x.indices?.map((i) => i.toString()) ?? [])].filter(
         (x) => x !== undefined,
       ) as string[],
   );
 }
 
 const pointsReg = /(?<!\\)\./,
-  keyIndicesReg = /^(?<rootKey>.*?)(?<indices>(?:(?<!\\)\[\d*(?<!\\)\])+)?$/,
+  keyIndicesReg = /^(?<key>.*?)(?<indices>(?:(?<!\\)\[\d*(?<!\\)\])+)?$/,
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   _bracketsReg = /(?<!\\)\[(\d*)(?<!\\)\]/g;
 
@@ -21,19 +21,17 @@ export function split(path: string) {
   const result: DottedPath[] = [];
   for (const keyIndices of path.split(pointsReg)) {
     const match = keyIndicesReg.exec(keyIndices)!;
-    const groups = match.groups as Partial<
-      Record<'rootKey' | 'indices', string>
-    >;
-    const rootKey = groups.rootKey === '' ? undefined : groups.rootKey;
+    const groups = match.groups!;
+    const rootKey = groups.key === '' ? undefined : groups.key;
     const indices = groups.indices
       ?.replaceAll('[]', '[0]')
       .match(/\d+/g)
       ?.map((i) => parseInt(i));
-    result.push({ rootKey, indices } as DottedPath);
+    result.push({ key: rootKey, indices } as DottedPath);
   }
   return result;
 }
 
 export type DottedPath =
-  | { rootKey?: string; indices: number[] }
-  | { rootKey: string; indices?: number[] };
+  | { key?: string; indices: number[] }
+  | { key: string; indices?: number[] };

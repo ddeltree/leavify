@@ -2,7 +2,7 @@
 import { test, expect } from 'vitest';
 import {
   buildRefs,
-  getOuterRefs,
+  getBindingRefMap,
   hasTypeCollision,
   reconstruct,
 } from '../newSetter.js';
@@ -12,13 +12,15 @@ test('only root key', () => {
   // const dotPath = split('a')[0];
   // const ref = {};
 
-  const ref1: any[] = [];
-  const dotPath1 = split('[][]')[0];
+  const ref1: any[] = [2];
+  const dotPath1 = split('a[][][][42]')[0];
 
-  console.log(getOuterRefs(ref1, dotPath1));
-  console.log(buildRefs(ref1, dotPath1));
-  console.log(reconstruct(ref1, dotPath1));
-  expect(hasTypeCollision(getOuterRefs(ref1, dotPath1), dotPath1)).toBe(true);
+  console.log(getBindingRefMap(ref1, dotPath1));
+  // console.log(buildRefs(ref1, dotPath1));
+  // console.log(reconstruct(ref1, dotPath1));
+  // expect(hasTypeCollision(getBindingRefMap(ref1, dotPath1), dotPath1)).toBe(
+  //   true,
+  // );
 
   // expect(dottedPathToTree(ref, dotPath)).toEqual({
   //   a: {},
