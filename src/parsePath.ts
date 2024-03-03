@@ -18,7 +18,7 @@ const pointsReg = /(?<!\\)\./,
  */
 export function split(path: string) {
   if (path === '') throw new Error('empty path keys are not supported!');
-  const result: DottedPath[] = [];
+  const result: SubPath[] = [];
   for (const keyIndices of path.split(pointsReg)) {
     const match = keyIndicesReg.exec(keyIndices)!;
     const groups = match.groups!;
@@ -27,11 +27,11 @@ export function split(path: string) {
       ?.replaceAll('[]', '[0]')
       .match(/\d+/g)
       ?.map((i) => parseInt(i));
-    result.push({ key: rootKey, indices } as DottedPath);
+    result.push({ key: rootKey, indices } as SubPath);
   }
   return result;
 }
 
-export type DottedPath =
+export type SubPath =
   | { key?: string; indices: number[] }
   | { key: string; indices?: number[] };
