@@ -30,7 +30,7 @@ export type Refs<T extends object, ACC extends Ref[] = []> =
 
 type ToString<REFS extends Ref[], PREVIOUS extends Ref | null = null> =
   REFS extends [infer FIRST extends Ref, ...infer REST extends Ref[]] ?
-    `${FIRST[1] extends unknown[] ? Arr<FIRST[0]>
+    `${FIRST[1] extends readonly unknown[] ? Arr<FIRST[0]>
     : `${DotNotation<PREVIOUS, FIRST[0]>}`}${ToString<REST, FIRST>}`
   : PREVIOUS extends Ref ?
     PREVIOUS[2] extends '...' ?
