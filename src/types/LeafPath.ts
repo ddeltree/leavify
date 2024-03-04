@@ -30,7 +30,7 @@ export type Refs<T extends object, ACC extends Ref[] = []> =
 
 type ToString<REFS extends Ref[], PREVIOUS extends Ref | null = null> =
   REFS extends [infer FIRST extends Ref, ...infer REST extends Ref[]] ?
-    `${FIRST[1] extends readonly unknown[] ? Arr<FIRST[0]>
+    `${FIRST[1] extends readonly unknown[] ? Arr<FIRST>
     : `${DotNotation<PREVIOUS, FIRST[0]>}`}${ToString<REST, FIRST>}`
   : PREVIOUS extends Ref ?
     PREVIOUS[2] extends '...' ?
@@ -45,7 +45,9 @@ type ChangeableKeys<T> = {
 
 // Notation string types
 
-type Arr<T extends string | number> = `[${T | ''}]`;
+type Arr<T extends Ref> =
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  Readonly<T[1]> extends T[1] ? `[${T[0]}]` : `[${T[0] | ''}]`;
 
 type DotNotation<
   PREV,
