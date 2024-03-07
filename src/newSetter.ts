@@ -4,17 +4,13 @@ import { SubPath as SubPath, split } from './parsePath.js';
 import { Primitive } from './types/Leaves.js';
 
 export function safeReconstruct(root: Root, subPath: SubPath) {
-  const bindings = getBindings(root as any, subPath);
+  let bindings = getBindings(root as any, subPath);
   if (hasTypeCollision(root, bindings)) throw new Error();
-  const refs = createMissingRefs(bindings).filter((x) => x !== undefined);
-  const keys = [subPath.key, ...(subPath.indices ?? [])].filter(
-    (x) => x !== undefined,
-  );
-  if (keys.length !== refs.length) throw new Error();
+  bindings = createMissingRefs(bindings).filter((x) => x !== undefined);
   let ref = root;
-  for (let i = 0; i < keys.length; i++) {
-    ref[keys[i]] = refs[i];
-    ref = refs[i];
+  for (const binding of bindings) {
+    ref[binding[0]] = binding[1];
+    ref = binding[1];
   }
   return root;
 }
@@ -39,8 +35,6 @@ export function createMissingRefs(bindings: BindingRefs) {
   if (typeof _.first(bindings) === 'string') bindings[0][1] ??= {};
   for (let i = 0; i < bindings.length - 1; i++) {
     bindings[i][1] ??= [];
-    // override leaf values along the way:
-    // TODO validate for type collision
     if (!_.isObject(bindings[i][1])) bindings[i][1] = [];
   }
   bindings[bindings.length - 1][1] ??= {};
@@ -49,7 +43,7 @@ export function createMissingRefs(bindings: BindingRefs) {
 
 export function hasTypeCollision(root: Root, bindings: BindingRefs) {
   const refs = bindings.map(([_, ref]) => ref);
-  const firstKey = bindings[0][0];
+  const [firstKey, firstRef] = bindings[0];
   let isValid = true;
 
   // ROOT
@@ -66,7 +60,7 @@ export function hasTypeCollision(root: Root, bindings: BindingRefs) {
 
   // LEAF
   isValid &&= !_.isArray(_.last(bindings)![1]);
-  return isValid;
+  return !isValid;
 }
 
 type Root = Extract<Ref, object>;
