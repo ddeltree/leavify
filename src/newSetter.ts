@@ -3,10 +3,20 @@ import _ from 'lodash';
 import { SubPath as SubPath, split } from './parsePath.js';
 import { Primitive } from './types/Leaves.js';
 
-export function safeReconstruct(root: Root, subPath: SubPath) {
+export function strictReconstruct(root: Root, subPath: SubPath) {
   let bindings = getBindings(root as any, subPath);
   if (hasTypeCollision(root, bindings)) throw new Error();
-  bindings = createMissingRefs(bindings).filter((x) => x !== undefined);
+  return reconstruct(root, subPath);
+}
+export function looseReconstruct(root: Root, subPath: SubPath) {
+  return reconstruct(root, subPath);
+}
+
+function reconstruct(root: Root, subPath: SubPath) {
+  let bindings = getBindings(root as any, subPath);
+  if (!isValidRootKey(root, bindings)) throw new Error();
+  createMissingRefs(bindings);
+  bindings = bindings.filter((x) => x !== undefined);
   let ref = root;
   for (const binding of bindings) {
     ref[binding[0]] = binding[1];
@@ -22,7 +32,7 @@ export function getBindings(rootRef: Root, subPath: SubPath) {
   const refs = keys
     .reduce((refs, key) => [...refs, getIndex(_.last(refs), key)], [rootRef])
     .slice(1);
-  return refs.map((ref, i) => [keys[i], ref]);
+  return refs.map((ref, i) => [keys[i], ref] as [string | number, Ref]);
 }
 
 function getIndex(ob: Ref, key: string | number) {
@@ -38,29 +48,33 @@ export function createMissingRefs(bindings: BindingRefs) {
     if (!_.isObject(bindings[i][1])) bindings[i][1] = [];
   }
   bindings[bindings.length - 1][1] ??= {};
-  return bindings;
 }
 
 export function hasTypeCollision(root: Root, bindings: BindingRefs) {
-  const refs = bindings.map(([_, ref]) => ref);
-  const [firstKey, firstRef] = bindings[0];
   let isValid = true;
-
-  // ROOT
-  if (typeof firstKey === 'string') {
-    isValid &&= _.isObject(root) && !_.isArray(root);
-  } else if (typeof firstKey === 'number') {
-    isValid &&= _.isArray(root);
-  }
-
-  // TRUNK
-  isValid &&= refs
-    .slice(1, -1)
-    .every((ref) => ref === undefined || _.isArray(ref));
-
-  // LEAF
-  isValid &&= !_.isArray(_.last(bindings)![1]);
+  isValid &&= isValidRootKey(root, bindings);
+  isValid &&= isNewBranch(bindings) || isExistingBranch(bindings);
   return !isValid;
+}
+
+function isNewBranch(bindings: BindingRefs) {
+  return bindings.slice(1, -1).some(([, ref]) => ref === undefined);
+}
+
+function isExistingBranch(bindings: BindingRefs) {
+  return (
+    bindings.slice(1, -1).every(([, ref]) => _.isArray(ref)) &&
+    !_.isArray(_.last(bindings)![1])
+  );
+}
+
+/** This MUST match. Further keys will definitely be arrays */
+function isValidRootKey(root: Ref, bindings: BindingRefs) {
+  const key = bindings[0][0];
+  let isValid = true;
+  if (typeof key === 'string') isValid &&= _.isObject(root) && !_.isArray(root);
+  else if (typeof key === 'number') isValid &&= _.isArray(root);
+  return isValid;
 }
 
 type Root = Extract<Ref, object>;
