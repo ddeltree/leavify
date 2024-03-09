@@ -2,12 +2,23 @@
 import _ from 'lodash';
 import { SubPath as SubPath, split } from './parsePath.js';
 import { Primitive } from './types/Leaves.js';
+import LeafPath from './types/LeafPath.js';
+
+export function setSafely<T extends object>(
+  ob: T,
+  [path, value]: [LeafPath<T>, Primitive],
+) {
+  for (const subPath of split(path)) {
+    console.log(subPath);
+  }
+}
 
 export function strictReconstruct(root: Root, subPath: SubPath) {
   let bindings = getBindings(root as any, subPath);
   if (hasTypeCollision(root, bindings)) throw new Error();
   return reconstruct(root, subPath);
 }
+
 export function looseReconstruct(root: Root, subPath: SubPath) {
   return reconstruct(root, subPath);
 }
@@ -68,7 +79,6 @@ function isExistingBranch(bindings: BindingRefs) {
   );
 }
 
-/** This MUST match. Further keys will definitely be arrays */
 function isValidRootKey(root: Ref, bindings: BindingRefs) {
   const key = bindings[0][0];
   let isValid = true;

@@ -1,5 +1,10 @@
 /* eslint-disable */
-import { expectError, expectNotType, expectType } from 'tsd';
+import {
+  expectError,
+  expectNotAssignable,
+  expectNotType,
+  expectType,
+} from 'tsd';
 import LeafPath, { Refs } from '../LeafPath.js';
 import { OriginalEntries } from '../../changes/Changeable.js';
 import Fragment from '../Fragment.js';
@@ -124,3 +129,18 @@ type Records = {
 expectType<`strings.${string}` | 'strings$' | 'numbers#' | `numbers.${number}`>(
   check<Records>('strings.other'),
 );
+
+type FalseCircularReference = (number | (number | number[])[])[];
+expectNotType<
+  | '[]'
+  | `[${number}]`
+  | `[${number}][${number}]`
+  | `[${number}][]`
+  | `[][${number}]`
+  | `[][]${any}`
+  | `[][${number}]${any}`
+  | `[${number}][]${any}`
+  | `[${number}][${number}]${any}`
+>(check<FalseCircularReference>('[][][]'));
+
+type ll = Refs<FalseCircularReference>;
