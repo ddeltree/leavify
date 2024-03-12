@@ -17,7 +17,9 @@ export type Refs<T extends object, ACC extends Ref[] = []> =
           : REF extends (
             ACC[number] // circular reference
           ) ?
-            [...ACC, [REF[0], REF[1], '...']]
+            V extends readonly unknown[] ?
+              Refs<V, [...ACC, REF]>
+            : [...ACC, [REF[0], REF[1], '...']]
           : V extends object ? Refs<V, [...ACC, REF]>
           : never
         : never
