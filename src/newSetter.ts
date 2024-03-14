@@ -4,12 +4,13 @@ import { SubPath as SubPath, split } from './parsePath.js';
 import { Primitive } from './types/Leaves.js';
 import LeafPath from './types/LeafPath.js';
 
-export function setSafely<T extends object>(
+export function setOutline<T extends object>(
   ob: T,
   [path, value]: [LeafPath<T>, Primitive],
 ) {
+  let ref: any = ob;
   for (const subPath of split(path)) {
-    console.log(subPath);
+    ref = strictReconstruct(ref, subPath);
   }
 }
 
@@ -27,13 +28,12 @@ function reconstruct(root: Root, subPath: SubPath) {
   let bindings = getBindings(root as any, subPath);
   if (!isValidRootKey(root, bindings)) throw new Error();
   createMissingRefs(bindings);
-  bindings = bindings.filter((x) => x !== undefined);
   let ref = root;
   for (const binding of bindings) {
     ref[binding[0]] = binding[1];
     ref = binding[1];
   }
-  return root;
+  return ref;
 }
 
 export function getBindings(rootRef: Root, subPath: SubPath) {
@@ -52,7 +52,7 @@ function getIndex(ob: Ref, key: string | number) {
     : (ob[key as any] as any);
 }
 
-export function createMissingRefs(bindings: BindingRefs) {
+export function createMissingRefs(bindings: Bindings) {
   if (typeof _.first(bindings) === 'string') bindings[0][1] ??= {};
   for (let i = 0; i < bindings.length - 1; i++) {
     bindings[i][1] ??= [];
@@ -61,25 +61,15 @@ export function createMissingRefs(bindings: BindingRefs) {
   bindings[bindings.length - 1][1] ??= {};
 }
 
-export function hasTypeCollision(root: Root, bindings: BindingRefs) {
+export function hasTypeCollision(root: Root, bindings: Bindings) {
   let isValid = true;
   isValid &&= isValidRootKey(root, bindings);
-  isValid &&= isNewBranch(bindings) || isExistingBranch(bindings);
+  isValid &&= !isBindingsNewBranch(bindings);
+  isValid &&= isBindingsValidExistingBranch(bindings);
   return !isValid;
 }
 
-function isNewBranch(bindings: BindingRefs) {
-  return bindings.slice(1, -1).some(([, ref]) => ref === undefined);
-}
-
-function isExistingBranch(bindings: BindingRefs) {
-  return (
-    bindings.slice(1, -1).every(([, ref]) => _.isArray(ref)) &&
-    !_.isArray(_.last(bindings)![1])
-  );
-}
-
-function isValidRootKey(root: Ref, bindings: BindingRefs) {
+function isValidRootKey(root: Ref, bindings: Bindings) {
   const key = bindings[0][0];
   let isValid = true;
   if (typeof key === 'string') isValid &&= _.isObject(root) && !_.isArray(root);
@@ -87,8 +77,19 @@ function isValidRootKey(root: Ref, bindings: BindingRefs) {
   return isValid;
 }
 
+function isBindingsNewBranch(bindings: Bindings) {
+  return bindings.slice(1, -1).some(([, ref]) => ref === undefined);
+}
+
+function isBindingsValidExistingBranch(bindings: Bindings) {
+  return (
+    bindings.slice(1, -1).every(([, ref]) => _.isArray(ref)) &&
+    !_.isArray(_.last(bindings)![1])
+  );
+}
+
 type Root = Extract<Ref, object>;
-type BindingRefs = ReturnType<typeof getBindings>;
+type Bindings = ReturnType<typeof getBindings>;
 type Ref = UnknownArray | UnknownRecord | Primitive;
 type UnknownArray = Array<Ref>;
 type UnknownRecord = Record<string | number | symbol, UnknownArray | Primitive>;

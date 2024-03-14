@@ -6,7 +6,7 @@ import {
   hasTypeCollision,
   strictReconstruct,
   looseReconstruct,
-  setSafely,
+  setOutline,
 } from '../newSetter.js';
 import { split } from '../parsePath.js';
 import LeafPath from '../types/LeafPath.js';
@@ -43,7 +43,9 @@ test('set', () => {
     person: { nome: 'me', arr: [2, [33, [3]]] },
     numbers: [0, 1, 'str'],
   };
-  setSafely(ob, ['person.arr[]', 42]);
+  expect(() => setOutline(ob, ['person.arr[0][]', 42])).toThrowError();
+  expect(() => setOutline(ob, ['person.arr[100]', 42])).not.toThrowError();
+  expect(() => setOutline(ob, ['person.arr[100][]', 42])).toThrowError();
 });
 
 // test('only array index', () => {
