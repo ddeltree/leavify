@@ -1,22 +1,30 @@
-import { get } from '../../accessors.js';
+/* eslint-disable */
+import { get, has, set } from '../../accessors.js';
 import { Author, Book, Chapter } from './Book.js';
-import { test, expect, describe } from 'vitest';
+import { test, expect, beforeEach } from 'vitest';
 import data from './book.json' assert { type: 'json' };
+import LeafPath from '../../types/LeafPath.js';
 
-describe('accessors', () => {
-  test('', () => {
-    expect(1).toBe(1);
-  });
+let book: Book;
+const p = <const T extends LeafPath<Book>>(x: T) => x;
+
+beforeEach(() => {
+  book = new Book(data.title)
+    .setYear(data.year)
+    .setAuthor((book) => new Author(data.author).setBooks([book]))
+    .setChapters((book) =>
+      data.chapters.map((title) => new Chapter(book).setTitle(title)),
+    );
 });
 
-const book = new Book(data.title)
-  .setYear(data.year)
-  .setAuthor((book) => new Author(data.author).setBooks([book]))
-  .setChapters((book) =>
-    data.chapters.map((title) => new Chapter(book).setTitle(title)),
-  );
-
-const value = get(book, 'chapters[0].book.author.books[0].year');
-console.log(value);
-book.propose([['title', 'Modified Book Title']]);
-console.log(book.proposed.title);
+test('accessors', () => {
+  const path = p('author.books[].chapters[].author.id');
+  console.log(book.author?.books[0].chapters[0].author?.id);
+  let prevValue;
+  const newValue = 2;
+  if (has(book, path)) prevValue = get(book, path);
+  expect(prevValue).not.toBeUndefined();
+  set(book, [path, newValue]);
+  expect(has(book, path)).toBe(true);
+  expect(get(book, path)).toBe(newValue);
+});
