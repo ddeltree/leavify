@@ -82,3 +82,15 @@ describe('get(), has(), set() integration', () => {
     expect(get(branch, path)).toBe(value);
   });
 });
+
+describe('empty brackets index notation', () => {
+  const leaf = 2,
+    newLeaf = 42;
+  const branch = {
+    a: [{ b: [leaf] }],
+  };
+  expect(has(branch, 'a[].b[]')).toBe(true);
+  expect(get(branch, 'a[].b[]')).toBe(leaf);
+  expect(() => set(branch, ['a[].b[]', newLeaf])).not.toThrowError();
+  expect(get(branch, 'a[].b[]')).toBe(newLeaf);
+});
