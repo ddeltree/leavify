@@ -1,3 +1,5 @@
+import LeafPath from './types/LeafPath.js';
+
 export default function parsePath(path: string) {
   return split(path).map(
     (x) =>
@@ -30,6 +32,14 @@ export function split(path: string) {
     result.push({ key: rootKey, indices } as SubPath);
   }
   return result;
+}
+
+export function interpretPathHints<T extends object>(path: LeafPath<T>) {
+  return split(path)
+    .map(
+      (x) => (x.key ?? '') + (x.indices?.map((i) => `[${i}]`).join('') ?? ''),
+    )
+    .join('.') as LeafPath<T>;
 }
 
 export type SubPath =

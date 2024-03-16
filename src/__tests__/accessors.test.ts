@@ -83,7 +83,7 @@ describe('get(), has(), set() integration', () => {
   });
 });
 
-describe('empty brackets index notation', () => {
+test('empty brackets index notation', () => {
   const leaf = 2,
     newLeaf = 42;
   const branch = {

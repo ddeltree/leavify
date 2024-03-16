@@ -1,21 +1,21 @@
 import _ from 'lodash';
 import { Primitive } from './types/Leaves.js';
-import parsePath from './parsePath.js';
+import parsePath, { interpretPathHints } from './parsePath.js';
 import LeafPath from './types/LeafPath.js';
 
 /** Get the leaf value at the given path.
  * Throws an error if the value returned isn't a leaf or doesn't exist.
  */
 export function get<T extends object>(obj: T, path: LeafPath<T>) {
-  // TODO assume the path `arr[]` means getting the first element
   // TODO handle `$` and `#` paths
+  path = interpretPathHints(path);
   if (!has(obj, path)) throw new Error('No leaf value found at the given path');
-  // return _.get<U | T, string>(obj, path);
   return _.get<object, string>(obj, path);
 }
 
 /** Checks whether the path refers to a leaf value */
 export function has<T extends object>(obj: T, path: LeafPath<T>) {
+  path = interpretPathHints(path);
   const parent = _.get(obj, _.toPath(path).slice(0, -1));
   if (typeof parent === 'string') return false;
   const value = _.get(obj, path, new Error());
