@@ -28,3 +28,21 @@ test('accessors', () => {
   expect(has(book, path)).toBe(true);
   expect(get(book, path)).toBe(newValue);
 });
+
+test('changes', () => {
+  const title = 'new title';
+  book.propose([['title', title]]);
+  expect(book.proposed.title).toBe(title);
+  expect(book.title).not.toBe(title);
+
+  book.discard();
+  expect(book.proposed.title).toBe(undefined);
+  expect(book.title).not.toBe(title);
+
+  book.discard();
+  book.propose([['author.books[].title', title]]);
+  expect(book.proposed.author?.books?.[0].title).toBe(title);
+  // FIXME?: it would be nice if `book.proposed.title` === `book.proposed.author.books[].title` for the same book, given the same reference
+  expect(book.proposed.title).not.toBe(title);
+  expect(book.title).not.toBe(title);
+});
