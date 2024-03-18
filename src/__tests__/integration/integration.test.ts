@@ -1,9 +1,12 @@
 /* eslint-disable */
 import { get, has, set } from '../../accessors.js';
 import { Author, Book, Chapter } from './Book.js';
-import { test, expect, beforeEach } from 'vitest';
+import { test, expect, beforeEach, describe } from 'vitest';
 import data from './book.json' assert { type: 'json' };
 import LeafPath from '../../types/LeafPath.js';
+import { Fragment } from '../../index.js';
+import findDifference from '../../findDifference.js';
+import { Primitive } from '../../types/Leaves.js';
 
 let book: Book;
 const p = <const T extends LeafPath<Book>>(x: T) => x;
@@ -29,20 +32,51 @@ test('accessors', () => {
   expect(get(book, path)).toBe(newValue);
 });
 
-test('changes', () => {
+test.todo('Different paths, same reference => same leaf', () => {
+  // TODO?: it would be nice if `book.proposed.title` === `book.proposed.author.books[].title` for the same book, given the same reference
+  book.propose([['author.books[].title', 'new title']]);
+  expect(book.proposed.title).not.toBeUndefined();
+  expect(book.proposed.title).toBe(book.proposed.author?.books?.[0].title);
+});
+
+describe('propose', () => {
   const title = 'new title';
-  book.propose([['title', title]]);
-  expect(book.proposed.title).toBe(title);
-  expect(book.title).not.toBe(title);
+  test('discard', () => {
+    book.propose([['author.books[].title', title]]);
+    expect(book.proposed.author?.books?.[0].title).toBe(title);
+    expect(book.title).not.toBe(title);
+    book.discard();
+    expect(book.proposed.author?.books?.[0].title).toBe(undefined);
+    expect(book.author?.books?.[0].title).not.toBe(title);
+  });
 
-  book.discard();
-  expect(book.proposed.title).toBe(undefined);
-  expect(book.title).not.toBe(title);
+  test('isSaved and asOriginal', () => {
+    book.propose([['title', title]]);
+    expect(book.proposed.title).toBe(title);
+    expect(book.title).not.toBe(title);
+    expect(book.isSaved()).toBe(false);
+    expect(book.asOriginal()).toEqual(book);
+  });
+});
 
-  book.discard();
-  book.propose([['author.books[].title', title]]);
-  expect(book.proposed.author?.books?.[0].title).toBe(title);
-  // FIXME?: it would be nice if `book.proposed.title` === `book.proposed.author.books[].title` for the same book, given the same reference
-  expect(book.proposed.title).not.toBe(title);
-  expect(book.title).not.toBe(title);
+describe('save', () => {
+  test('', () => {
+    const proposal: [LeafPath<Book>, Primitive][] = [
+      ['title', 'new title'],
+      ['year', 0],
+      ['author.name', 'someone'],
+      ['chapters[].title', 'chapter 42'],
+    ];
+    book.propose(proposal);
+    expect(book.isSaved()).toBe(false);
+    book.save();
+    const originalBook = book.asOriginal();
+    console.log(originalBook);
+    expect(originalBook).not.toEqual(book);
+    for (const [path] of proposal) {
+      expect(get(book, path)).not.toBe(get(originalBook, path)); //BUG
+    }
+    book.undo([proposal[0][0]]);
+    expect(book.title).toBe(book.asOriginal().title);
+  });
 });
