@@ -35,9 +35,10 @@ export function save<T extends object>(target: T) {
   if (!changes.isTouched() || changes.isEmptyProposed()) return;
   const changeLeaves = getChangedEntries(target);
   // Set values in-place
+  console.log(changeLeaves);
   for (const [path, changeValue] of walkLeaves(changeLeaves)) {
-    set(target, [path, changeValue]);
     set(changes.original, [path, changes.getOriginalValue(path)]);
+    set(target, [path, changeValue]);
   }
   changes.setEmptyProposed();
   return _.toPairs(changeLeaves);

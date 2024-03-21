@@ -22,7 +22,6 @@ beforeEach(() => {
 
 test('accessors', () => {
   const path = p('author.books[].chapters[].author.id');
-  console.log(book.author?.books[0].chapters[0].author?.id);
   let prevValue;
   const newValue = 2;
   if (has(book, path)) prevValue = get(book, path);
@@ -71,12 +70,12 @@ describe('save', () => {
     expect(book.isSaved()).toBe(false);
     book.save();
     const originalBook = book.asOriginal();
-    console.log(originalBook);
     expect(originalBook).not.toEqual(book);
     for (const [path] of proposal) {
-      expect(get(book, path)).not.toBe(get(originalBook, path)); //BUG
+      expect(get(book, path)).not.toBe(get(originalBook, path));
     }
-    book.undo([proposal[0][0]]);
+    book.undo(proposal.map((p) => p[0]));
+    book.save();
     expect(book.title).toBe(book.asOriginal().title);
   });
 });

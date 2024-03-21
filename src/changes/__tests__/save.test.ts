@@ -6,6 +6,7 @@ import {
   mockOriginals,
   mockProposal,
 } from './mocking.js';
+import _ from 'lodash';
 
 describe('asOriginal()', () => {
   beforeEach(() => {
@@ -30,8 +31,9 @@ describe('save()', () => {
   });
 
   test('empties the proposals list', () => {
+    expect(_.isEmpty(VAL.targetChanges.proposed)).not.toBe(true);
     save(VAL.target);
-    expect(VAL.targetChanges.proposed).toEqual({});
+    expect(_.isEmpty(VAL.targetChanges.proposed)).toBe(true);
   });
 
   test('non-original value proposal does not affect the stored original values', () => {
@@ -44,7 +46,7 @@ describe('save()', () => {
     VAL.sourceChanges.proposed = { ...proposal };
     VAL.targetChanges.proposed = { ...proposal };
     save(VAL.target);
-    expect(VAL.targetChanges.proposed).toEqual({});
+    expect(VAL.targetChanges.original).toEqual({});
   });
 
   test('affects none but the proposed fields', () => {
