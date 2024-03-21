@@ -17,49 +17,54 @@ export function asOriginal<T extends object>(target: T) {
   return original;
 }
 
-export function getSavedEntries<T extends object>(target: T) {
-  const nodes: [LeafPath<T>, Primitive][] = [];
-  const changes = new Changes(target);
-  if (!changes.isTouched() || changes.isEmptyOriginal()) return nodes;
-  for (const [path] of walkLeaves(changes.original)) {
-    nodes.push([path, get<T>(target, path)]);
-  }
-  return nodes;
-}
-
 /** Sets proposed leaf changes in-place
  * @returns the changed leaves
  */
 export function save<T extends object>(target: T) {
   const changes = new Changes(target);
   if (!changes.isTouched() || changes.isEmptyProposed()) return;
-  const changeLeaves = getChangedEntries(target);
+  const changedLeaves = getChangedEntries(target);
+  changes.setEmptyProposed();
+  const originals = { ...changes.original };
+  changes.setEmptyOriginal();
+  // do not add entries that are proposed back to original values
+  for (const [path, originalValue] of walkLeaves(originals)) {
+    if (Object.hasOwn(changedLeaves, path))
+      set(changes.original, [path, originalValue]);
+  }
   // Set values in-place
-  console.log(changeLeaves);
-  for (const [path, changeValue] of walkLeaves(changeLeaves)) {
+  for (const [path, changeValue] of walkLeaves(changedLeaves)) {
     set(changes.original, [path, changes.getOriginalValue(path)]);
     set(target, [path, changeValue]);
   }
-  changes.setEmptyProposed();
-  return _.toPairs(changeLeaves);
+  return _.toPairs(changedLeaves);
 }
 
 /** Union of saved and proposed */
 function getChangedEntries<T extends object>(target: T) {
   const changes = new Changes(target);
-  const changeLeaves = _.fromPairs(getSavedEntries(target)) as Partial<
+  const changedEntries = _.fromPairs(getSavedEntries(target)) as Partial<
     Record<LeafPath<T>, Primitive>
   >;
   // If the proposed change goes back to original value, ignore it
   for (const [path, proposedValue] of walkLeaves(changes.proposed)) {
     if (proposedValue === changes.getOriginalValue(path)) {
       set(target, [path, proposedValue]);
-      delete changeLeaves[path];
+      delete changedEntries[path];
     } else {
-      changeLeaves[path] = proposedValue;
+      changedEntries[path] = proposedValue;
     }
   }
-  return changeLeaves;
+  return changedEntries;
+}
+
+export function getSavedEntries<T extends object>(target: T) {
+  const nodes: [LeafPath<T>, Primitive][] = [];
+  const changes = new Changes(target);
+  if (!changes.isTouched() || changes.isEmptyOriginal()) return nodes;
+  for (const [path] of walkLeaves(changes.original))
+    nodes.push([path, get(target, path)]);
+  return nodes;
 }
 
 /** Proposes reverting back to original value */
