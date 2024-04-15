@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import walkLeaves from '@/walkLeaves.js';
 import { set, get } from '@/accessors.js';
-import { Primitive } from '@typings/Leaves.js';
+import { Primitive } from '@/types/Leaves.js';
 import LeafPath from '@/types/LeafPath.js';
 import { Changes } from './Changeable.js';
 
