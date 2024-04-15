@@ -1,4 +1,4 @@
-import { CHANGES_SYMBOL, Changeable } from '../changes/Changeable.js';
+import { CHANGES_SYMBOL, Changeable } from './Changeable.js';
 
 /** Boilerplate for a class getter of the stored fragment of original values.
  * @param thisRef a reference to the `this` class instance.

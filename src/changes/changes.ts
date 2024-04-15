@@ -1,9 +1,9 @@
 import _ from 'lodash';
-import walkLeaves from '../walkLeaves.js';
-import { set, get } from '../accessors.js';
+import walkLeaves from '@/walkLeaves.js';
+import { set, get } from '@/accessors.js';
+import { Primitive } from '@/types/Leaves.js';
+import LeafPath from '@/types/LeafPath.js';
 import { Changes } from './Changeable.js';
-import { Primitive } from '../types/Leaves.js';
-import LeafPath from '../types/LeafPath.js';
 
 /** Returns the initial object as it was before any proposed or saved changes */
 export function asOriginal<T extends object>(target: T) {
