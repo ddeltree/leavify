@@ -1,6 +1,6 @@
 import _ from 'lodash';
-import { Changes } from '../Changeable.js';
-import { Fragment } from '../../index.js';
+import { Changes } from '../../src/changes/Changeable.js';
+import { Fragment } from '../../src/index.js';
 
 export let VAL: {
   source: TestCase;

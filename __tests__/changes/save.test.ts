@@ -1,5 +1,5 @@
 import { expect, test, beforeEach, describe } from 'vitest';
-import { asOriginal, save } from '../changes.js';
+import { asOriginal, save } from '@/changes/changes.js';
 import {
   VAL,
   resetInitialValues,

@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 import _ from 'lodash';
 import { test, expect, describe } from 'vitest';
-import { set, get, has } from '../accessors.js';
+import { set, get, has } from '../../src/accessors/accessors.js';
 import { bitWordToBranch } from './helpers.js';
 
 // if this fails, get() will also

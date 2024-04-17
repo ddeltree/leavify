@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import Fragment from '../types/Fragment.js';
-import { get, has } from '../accessors.js';
+import { get, has } from '../accessors/accessors.js';
 import LeafPath from '../types/LeafPath.js';
 
 /** The symbol used to store original and proposed values */

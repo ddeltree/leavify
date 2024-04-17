@@ -1,5 +1,5 @@
 /* eslint-disable */
-import LeafPath from '../LeafPath.js';
+import LeafPath from '../../src/types/LeafPath.js';
 import { expectType } from 'tsd';
 
 declare function check<T extends object, U extends LeafPath<T> = LeafPath<T>>(

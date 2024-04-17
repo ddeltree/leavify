@@ -1,6 +1,6 @@
 import _ from 'lodash';
-import { Primitive, Property } from './types/Leaves.js';
-import LeafPath from './types/LeafPath.js';
+import { Primitive, Property } from '../types/Leaves.js';
+import LeafPath from '../types/LeafPath.js';
 
 export default function* walkLeaves<T extends object>(
   ob: T,
