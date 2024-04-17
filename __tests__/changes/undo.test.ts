@@ -1,6 +1,6 @@
 import { expect, test, describe, beforeEach } from 'vitest';
-import { undo } from '../../src/changes/changes.js';
-import LeafPath from '../../src/types/LeafPath.js';
+import { undo } from '@changes/changes.js';
+import LeafPath from '@typings/LeafPath.js';
 import { VAL, mockOriginals, resetInitialValues } from './mocking.js';
 
 describe('undo()', () => {

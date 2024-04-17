@@ -30,7 +30,9 @@
     "moduleResolution": "Node16" /* Specify how TypeScript looks up a file from a given module specifier. */,
     "baseUrl": "./" /* Specify the base directory to resolve non-relative module names. */,
     "paths": {
-      "@/*": ["./src/*"],
+      "@accessors/*": ["./src/accessors/*"],
+      "@changes/*": ["./src/changes/*"],
+      "@typings/*": ["./src/types/*"],
       "@utils/*": ["./utils/*"]
     } /* Specify a set of entries that re-map imports to additional lookup locations. */,
     // "rootDirs": [],                                   /* Allow multiple folders to be treated as one when resolving modules. */
@@ -109,21 +111,7 @@
     // "skipDefaultLibCheck": true,                      /* Skip type checking .d.ts files that are included with TypeScript. */
     "skipLibCheck": true /* Skip type checking all .d.ts files. */
   },
-  "include": [
-    "src/**/*.ts",
-    "utils/parsePath.ts",
-    "__tests__/accessors/accessors.test.ts",
-    "__tests__/accessors/findDifference.test.ts",
-    "__tests__/helpers.ts",
-    "__tests__/accessors/parsePath.test.ts",
-    "__tests__/accessors/walkLeaves.test.ts",
-    "__tests__/changes/mocking.ts",
-    "__tests__/changes/propose.test.ts",
-    "__tests__/changes/save.test.ts",
-    "__tests__/changes/undo.test.ts",
-    "__tests__/types/LeafPath.test-d.ts",
-    "__tests__/types/Fragment.test-d.ts"
-  ],
+  "include": ["src/**/*.ts", "utils/**/*.ts", "__tests__/**/*.ts"],
   "exclude": ["node_modules", "dist"],
   "ts-node": {
     "esm": true,

@@ -1,7 +1,7 @@
 import _ from 'lodash';
-import { Primitive } from '../types/Leaves.js';
+import { Primitive } from '@typings/Leaves.js';
 import parsePath, { interpretPathHints } from '@utils/parsePath.js';
-import LeafPath from '../types/LeafPath.js';
+import LeafPath from '@typings/LeafPath.js';
 
 /** Get the leaf value at the given path.
  * Throws an error if the value returned isn't a leaf or doesn't exist.

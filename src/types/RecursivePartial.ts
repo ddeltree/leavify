@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/ban-types */
 
-import { ChangeableEntry } from '../changes/Changeable.js';
+import { ChangeableEntry } from '@changes/Changeable.js';
 
 // CAUTION: do NOT expose this as a package import
 // LeafPath<RecursivePartial<T>> will run too many recursive calls

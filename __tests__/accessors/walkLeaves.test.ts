@@ -1,6 +1,6 @@
 import { test, expect, describe } from 'vitest';
-import walkLeaves from '../../src/accessors/walkLeaves.js';
-import toTree from '../../src/accessors/toTree.js';
+import walkLeaves from '@accessors/walkLeaves.js';
+import toTree from '@accessors/toTree.js';
 import { generateBranches } from './helpers.js';
 
 describe('reversing walkLeaves', () => {

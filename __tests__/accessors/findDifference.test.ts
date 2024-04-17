@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import { test, expect, describe, beforeEach } from 'vitest';
-import findDifference from '../../src/accessors/findDifference.js';
-import LeafPath from '../../src/types/LeafPath.js';
+import findDifference from '@accessors/findDifference.js';
+import LeafPath from '@typings/LeafPath.js';
 
 interface Example {
   nested: (

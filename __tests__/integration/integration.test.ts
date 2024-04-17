@@ -6,11 +6,11 @@ import data from './book.json' assert { type: 'json' };
 // TODO update imports to use the symbolic link created by the test script
 // e.g. `import leaves from 'leavify'`;
 
-import LeafPath from '../../src/types/LeafPath.js';
-import { Fragment } from '../../src/index.js';
-import findDifference from '../../src/accessors/findDifference.js';
-import { Primitive } from '../../src/types/Leaves.js';
-import { get, has, set } from '../../src/accessors/accessors.js';
+import LeafPath from '@typings/LeafPath.js';
+import Fragment from '@typings/Fragment.js';
+import findDifference from '@accessors/findDifference.js';
+import { Primitive } from '@typings/Leaves.js';
+import { get, has, set } from '@accessors/accessors.js';
 
 let book: Book;
 const p = <const T extends LeafPath<Book>>(x: T) => x;

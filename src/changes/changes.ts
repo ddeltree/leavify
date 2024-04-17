@@ -1,8 +1,8 @@
 import _ from 'lodash';
-import walkLeaves from '@/accessors/walkLeaves.js';
-import { set, get } from '@/accessors/accessors.js';
-import { Primitive } from '@/types/Leaves.js';
-import LeafPath from '@/types/LeafPath.js';
+import walkLeaves from '@accessors/walkLeaves.js';
+import { set, get } from '@accessors/accessors.js';
+import { Primitive } from '@typings/Leaves.js';
+import LeafPath from '@typings/LeafPath.js';
 import { Changes } from './Changeable.js';
 
 /** Returns the initial object as it was before any proposed or saved changes */

@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { ChangeableEntry } from '../changes/Changeable.js';
+import { ChangeableEntry } from '@changes/Changeable.js';
 import { Primitive } from './Leaves.js';
 
 /** [`key`, `value | ref`, `isLeaf | circular_ref`] */
