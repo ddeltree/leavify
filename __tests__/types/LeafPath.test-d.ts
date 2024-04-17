@@ -5,10 +5,10 @@ import {
   expectNotType,
   expectType,
 } from 'tsd';
-import LeafPath, { Refs } from '../LeafPath.js';
-import { OriginalEntries } from '../../changes/Changeable.js';
-import Fragment from '../Fragment.js';
-import { Primitive } from '../Leaves.js';
+import LeafPath, { Refs } from '@typings/LeafPath.js';
+import { OriginalEntries } from '@changes/Changeable.js';
+import Fragment from '@typings/Fragment.js';
+import Primitive from '@typings/Primitive.js';
 
 declare function check<T extends object, U extends LeafPath<T> = LeafPath<T>>(
   path: U,

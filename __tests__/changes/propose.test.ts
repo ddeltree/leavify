@@ -1,8 +1,7 @@
 import { expect, test, describe, beforeEach } from 'vitest';
-import { propose } from '../changes.js';
-import LeafPath from '../../types/LeafPath.js';
-import { Primitive } from '../../types/Leaves.js';
-import toTree from '../../toTree.js';
+import { propose } from '@changes/changes.js';
+import { LeafPath, Primitive } from '@typings';
+import toTree from '@accessors/toTree.js';
 import { TestCase, VAL, mockOriginals, resetInitialValues } from './mocking.js';
 
 beforeEach(() => {

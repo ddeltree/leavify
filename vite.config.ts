@@ -33,7 +33,7 @@ export default defineConfig({
   },
   plugins: [
     tsconfigPaths({
-      configNames: ['tsconfig.build.json'],
+      configNames: ['tsconfig.json'],
     }),
     dts({ tsconfigPath: 'tsconfig.build.json' }),
   ],

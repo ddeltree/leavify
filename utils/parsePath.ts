@@ -1,4 +1,4 @@
-import LeafPath from './types/LeafPath.js';
+import { LeafPath } from '@typings';
 
 export default function parsePath(path: string) {
   return split(path).map(
