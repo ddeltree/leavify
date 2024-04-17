@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import { set } from './accessors.js';
-import { Primitive } from '@typings/Leaves.js';
+import { Primitive } from '@typings';
 
 /** from path-value pairs to object */
 

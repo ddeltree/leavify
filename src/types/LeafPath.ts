@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { ChangeableEntry } from '@changes/Changeable.js';
-import { Primitive } from './Leaves.js';
+import Primitive from './Primitive.js';
 
 /** [`key`, `value | ref`, `isLeaf | circular_ref`] */
 type Ref = [string | number, object | Primitive, boolean | '...'];

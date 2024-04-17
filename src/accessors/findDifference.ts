@@ -1,5 +1,5 @@
 import { get } from './accessors.js';
-import Fragment from '@typings/Fragment.js';
+import { Fragment } from '@typings';
 import walkLeaves from './walkLeaves.js';
 
 /** Find the differences between an object and it's modified clone (of same type)

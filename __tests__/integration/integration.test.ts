@@ -7,9 +7,7 @@ import data from './book.json' assert { type: 'json' };
 // e.g. `import leaves from 'leavify'`;
 
 import LeafPath from '@typings/LeafPath.js';
-import Fragment from '@typings/Fragment.js';
-import findDifference from '@accessors/findDifference.js';
-import { Primitive } from '@typings/Leaves.js';
+import Primitive from '@typings/Primitive.js';
 import { get, has, set } from '@accessors/accessors.js';
 
 let book: Book;

@@ -1,7 +1,6 @@
 import { getOriginals, getProposed } from '@changes/getStore.js';
 import * as func from '@changes/changes.js';
-import LeafPath from '@typings/LeafPath.js';
-import { Primitive } from '@typings/Leaves.js';
+import { LeafPath, Primitive } from '@typings';
 
 class Book {
   readonly id = crypto.randomUUID();

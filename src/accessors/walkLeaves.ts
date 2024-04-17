@@ -1,6 +1,5 @@
 import _ from 'lodash';
-import { Primitive, Property } from '@typings/Leaves.js';
-import LeafPath from '@typings/LeafPath.js';
+import { Primitive, LeafPath } from '@typings';
 
 export default function* walkLeaves<T extends object>(
   ob: T,
@@ -47,3 +46,8 @@ function* makeGenerator(
     yield [path, value, { name: key, isArrayIndex: _.isArray(ob) }];
   }
 }
+
+export type Property = {
+  name: string;
+  isArrayIndex: boolean;
+};

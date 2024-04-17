@@ -10,17 +10,17 @@
   ],
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
+      "types": "./dist/src/index.d.ts",
       "default": "./dist/index.js"
     },
     "./changes": "./dist/changes/index.js",
     "./package.json": "./package.json"
   },
-  "types": "./dist/index.d.ts",
+  "types": "./dist/src/index.d.ts",
   "typesVersions": {
     "*": {
       ".": [
-        "./dist/index.d.ts"
+        "./dist/src/index.d.ts"
       ]
     }
   },
@@ -49,6 +49,7 @@
     "coverage": "vitest --coverage",
     "release": "standard-version",
     "build": "vite build",
+    "lint": "eslint src/** utils/** __tests__/**",
     "prepublishOnly": "npm run test && npm run build"
   },
   "author": "Davi Alexandre",
