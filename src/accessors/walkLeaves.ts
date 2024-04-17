@@ -47,7 +47,7 @@ function* makeGenerator(
   }
 }
 
-export type Property = {
+type Property = {
   name: string;
   isArrayIndex: boolean;
 };

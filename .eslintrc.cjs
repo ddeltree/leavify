@@ -17,7 +17,7 @@ module.exports = {
               '..*',
               '@typings/*.js',
               '@changes/*.js',
-              // '@accessors/*.js',
+              '@accessors/*.js',
             ],
           },
         ],

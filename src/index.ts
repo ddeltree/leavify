@@ -1,10 +1,7 @@
-import { get, set, has } from '@accessors/accessors.js';
-import toTree from '@accessors/toTree.js';
-import findDifference from '@accessors/findDifference.js';
+import { get, set, has, walkLeaves, toTree, findDifference } from '@accessors';
 import changes from './changes/index.js';
 
 import type { Primitive, Fragment } from '@typings';
-import walkLeaves from '@accessors/walkLeaves.js';
 
 const leaves = {
   get,

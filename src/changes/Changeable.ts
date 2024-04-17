@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import { Fragment, LeafPath } from '@typings';
-import { get, has } from '@accessors/accessors.js';
+import { get, has } from '@accessors';
 
 /** The symbol used to store original and proposed values */
 const CHANGES_SYMBOL = Symbol('leavify change tracking');
