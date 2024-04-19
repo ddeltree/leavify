@@ -45,7 +45,6 @@
   "scripts": {
     "dev": "npx tsx src/index.ts",
     "test": "bash ./test.sh",
-    "test-types": "if [ ! -d dist ]; then mkdir dist; fi && touch dist/index.d.ts && tsd --files __tests__/types/**/*.test-d.ts",
     "coverage": "vitest --coverage",
     "release": "standard-version",
     "build": "vite build",
