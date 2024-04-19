@@ -1,17 +1,13 @@
-import { get, set, has, walkLeaves, toTree, findDifference } from '@accessors';
-import changes from './changes/index.js';
-
-import type { Primitive, Fragment } from '@typings';
+import * as accessors from '@accessors';
+import changes from '@changes';
 
 const leaves = {
-  get,
-  set,
-  has,
-  toTree,
-  findDifference,
-  walkLeaves,
+  ...accessors,
   changes,
 };
 
 export default leaves;
-export { Primitive as Leaf, Fragment };
+
+export * from '@accessors';
+export type * from '@typings';
+export { default as changes } from '@changes';
