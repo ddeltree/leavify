@@ -1,14 +1,8 @@
 /* eslint-disable */
-import { Author, Book, Chapter } from './Book.js';
-import { test, expect, beforeEach, describe } from 'vitest';
 import data from './book.json' assert { type: 'json' };
-
-// TODO update imports to use the symbolic link created by the test script
-// e.g. `import leaves from 'leavify'`;
-
-import LeafPath from '@typings/LeafPath.js';
-import Primitive from '@typings/Primitive.js';
-import { get, has, set } from '@accessors/accessors.js';
+import { test, expect, beforeEach, describe } from 'vitest';
+import { LeafPath, has, set, get, Primitive } from 'leavify';
+import { Author, Book, Chapter } from './Book.js';
 
 let book: Book;
 const p = <const T extends LeafPath<Book>>(x: T) => x;
