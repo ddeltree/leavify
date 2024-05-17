@@ -5,7 +5,10 @@ if [[ " $@ " =~ " --types " ]]; then
   if [ ! -d dist ]; then
     mkdir dist;
   fi
-  touch dist/index.d.ts;
+  if [ ! -d dist/src ]; then
+    mkdir dist/src;
+  fi
+  touch dist/src/index.d.ts;
   tsd --files __tests__/types/**/*.test-d.ts;
 # BUILD PACKAGE THEN TEST
 elif [[ " $@ " =~ " --package " ]]; then
