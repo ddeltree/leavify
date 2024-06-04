@@ -8,10 +8,13 @@ export function asOriginal<T extends object>(target: T) {
   const changes = new Changes(target);
   if (!changes.isTouched() || changes.isEmptyOriginal()) return target;
   const original = _.cloneDeep(target);
+  Object.setPrototypeOf(
+    original,
+    Object.getPrototypeOf(Object.getPrototypeOf(original)),
+  );
   for (const [path, value] of walkLeaves(changes.original)) {
     set(original, [path, value]);
   }
-  new Changes(original).removeChest();
   return original;
 }
 
@@ -25,7 +28,7 @@ export function save<T extends object>(target: T) {
   changes.setEmptyProposed();
   const originals = { ...changes.original };
   changes.setEmptyOriginal();
-  // do not add entries that are proposed back to original values
+  // do not add entries that propose back to original values
   for (const [path, originalValue] of walkLeaves(originals)) {
     if (Object.hasOwn(changedLeaves, path))
       set(changes.original, [path, originalValue]);

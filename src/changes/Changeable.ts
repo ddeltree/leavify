@@ -3,7 +3,7 @@ import { Fragment, LeafPath } from '@typings';
 import { get, has } from '@accessors';
 
 /** The symbol used to store original and proposed values */
-const CHANGES_SYMBOL = Symbol('leavify change tracking');
+export const CHANGES_SYMBOL = Symbol('leavify change tracking');
 
 export type Changeable<T extends object> = T & Chest<T>;
 
@@ -20,11 +20,20 @@ export class Changes<T extends object> {
 
   constructor(target: T) {
     this.target = target as Changeable<T>;
+    let proto;
+    // TODO: iterate the prototype chain to find the nearest CHANGES_SYMBOL
+    // and keep a reference of the pertaining object (`target`) inside it.
+    // NOTE: A prototype chain with cycles would throw a TypeError
     if (this.existsChanges(target)) {
-      this.chest = target[CHANGES_SYMBOL];
+      proto = Object.getPrototypeOf(target);
+      this.chest = proto[CHANGES_SYMBOL];
     } else {
-      this.target[CHANGES_SYMBOL] = this.chest = this.getEmptyChest();
+      // destructuring would not copy property accessors
+      proto = Object.create(Object.getPrototypeOf(target));
+      this.chest = this.getEmptyChest();
     }
+    proto[CHANGES_SYMBOL] = this.chest;
+    Object.setPrototypeOf(target, proto);
   }
   private getEmptyChest() {
     return {
@@ -70,10 +79,11 @@ export class Changes<T extends object> {
     return this.existsChanges(this.target);
   }
   removeChest() {
-    delete (this.target as Partial<Changeable<T>>)[CHANGES_SYMBOL];
+    const proto = Object.getPrototypeOf(this.target);
+    delete proto[CHANGES_SYMBOL];
   }
   private existsChanges(target: T): target is Changeable<T> {
-    return Object.hasOwn(target, CHANGES_SYMBOL);
+    return Object.hasOwn(Object.getPrototypeOf(target), CHANGES_SYMBOL);
   }
 }
 
@@ -90,5 +100,3 @@ export type ProposedEntries<T extends object> = ChangeableEntry & Fragment<T>;
  * */
 export type ChangeableEntry = { [ENTRIES_SYMBOL]: never };
 const ENTRIES_SYMBOL = Symbol('Symbol to identify the type of changed entries');
-
-export { CHANGES_SYMBOL };
