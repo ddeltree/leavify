@@ -66,7 +66,7 @@ describe('save', () => {
     book.propose(proposal);
     expect(book.isSaved()).toBe(false);
     book.save();
-    const originalBook = book.asOriginal(); // BUG `title` and `year` get saved, but `author.name` and similars do not
+    const originalBook = book.asOriginal();
     expect(originalBook).not.toEqual(book);
     for (const [path] of proposal) {
       const newValue = get(book, path),

@@ -7,9 +7,7 @@ import { Changes } from './Changeable.js';
 export function asOriginal<T extends object>(target: T) {
   const changes = new Changes(target);
   if (!changes.isTouched() || changes.isEmptyOriginal()) return target;
-  // FIXME não clona a cadeia de protótipos. Logo, manterá a mesma referência às mudanças
-  // TODO: iter the proto chain
-  const original = _.clone(target);
+  const original = _.cloneDeep(target);
   Object.setPrototypeOf(
     original,
     Object.getPrototypeOf(Object.getPrototypeOf(original)),
@@ -17,7 +15,6 @@ export function asOriginal<T extends object>(target: T) {
   for (const [path, value] of walkLeaves(changes.original)) {
     set(original, [path, value]);
   }
-  // new Changes(original).removeChest();
   return original;
 }
 
@@ -40,7 +37,6 @@ export function save<T extends object>(target: T) {
   for (const [path, changeValue] of walkLeaves(changedLeaves)) {
     set(changes.original, [path, changes.getOriginalValue(path)]);
     set(target, [path, changeValue]);
-    console.log(path, changeValue, get(target, path));
   }
   return _.toPairs(changedLeaves);
 }
