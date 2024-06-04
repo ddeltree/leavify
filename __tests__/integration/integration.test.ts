@@ -3,6 +3,7 @@ import data from './book.json' assert { type: 'json' };
 import { test, expect, beforeEach, describe } from 'vitest';
 import { LeafPath, has, set, get, Primitive } from 'leavify';
 import { Author, Book, Chapter } from './Book.js';
+import { CHANGES_SYMBOL, Changes } from '@changes/Changeable';
 
 let book: Book;
 const p = <const T extends LeafPath<Book>>(x: T) => x;
@@ -65,13 +66,15 @@ describe('save', () => {
     book.propose(proposal);
     expect(book.isSaved()).toBe(false);
     book.save();
-    const originalBook = book.asOriginal();
+    const originalBook = book.asOriginal(); // BUG `title` and `year` get saved, but `author.name` and similars do not
     expect(originalBook).not.toEqual(book);
     for (const [path] of proposal) {
-      expect(get(book, path)).not.toBe(get(originalBook, path));
+      const newValue = get(book, path),
+        originalValue = get(originalBook, path);
+      expect(newValue).not.toBe(originalValue);
     }
     book.undo(proposal.map((p) => p[0]));
     book.save();
-    expect(book.title).toBe(book.asOriginal().title);
+    expect(book).toEqual(originalBook);
   });
 });

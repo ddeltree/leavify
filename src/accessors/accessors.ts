@@ -8,7 +8,8 @@ import parsePath, { interpretPathHints } from '@utils/parsePath.js';
 export function get<T extends object>(obj: T, path: LeafPath<T>) {
   // TODO handle `$` and `#` paths
   path = interpretPathHints(path);
-  if (!has(obj, path)) throw new Error('No leaf value found at the given path');
+  if (!has(obj, path))
+    throw new Error('No leaf value found at the given path: ' + path);
   return _.get<object, string>(obj, path);
 }
 

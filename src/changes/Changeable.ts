@@ -20,9 +20,18 @@ export class Changes<T extends object> {
 
   constructor(target: T) {
     this.target = target as Changeable<T>;
-    const proto = { ...Object.getPrototypeOf(target) };
-    if (this.existsChanges(target)) this.chest = proto[CHANGES_SYMBOL];
-    else this.chest = this.getEmptyChest();
+    let proto;
+    // TODO: iterate the prototype chain to find the nearest CHANGES_SYMBOL
+    // and keep a reference of the pertaining object (`target`) inside it.
+    // NOTE: A prototype chain with cycles would throw a TypeError
+    if (this.existsChanges(target)) {
+      proto = Object.getPrototypeOf(target);
+      this.chest = proto[CHANGES_SYMBOL];
+    } else {
+      // destructuring would not copy property accessors
+      proto = Object.create(Object.getPrototypeOf(target));
+      this.chest = this.getEmptyChest();
+    }
     proto[CHANGES_SYMBOL] = this.chest;
     Object.setPrototypeOf(target, proto);
   }
@@ -74,7 +83,6 @@ export class Changes<T extends object> {
     delete proto[CHANGES_SYMBOL];
   }
   private existsChanges(target: T): target is Changeable<T> {
-    // return Object.hasOwn(target, CHANGES_SYMBOL);
     return Object.hasOwn(Object.getPrototypeOf(target), CHANGES_SYMBOL);
   }
 }
