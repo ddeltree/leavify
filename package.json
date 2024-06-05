@@ -55,12 +55,12 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/davi-alexandre/leavify.git"
+    "url": "git+https://github.com/ddeltree/leavify.git"
   },
   "bugs": {
-    "url": "https://github.com/davi-alexandre/leavify/issues"
+    "url": "https://github.com/ddeltree/leavify/issues"
   },
-  "homepage": "https://github.com/davi-alexandre/leavify#readme",
+  "homepage": "https://github.com/ddeltree/leavify#readme",
   "keywords": [
     "object",
     "leaves",
