@@ -2,18 +2,6 @@ import _ from 'lodash';
 import { Fragment, LeafPath } from '@typings';
 import { get, has } from '@accessors';
 
-/** The symbol used to store original and proposed values */
-export const STORE_SYMBOL = Symbol('leavify change tracking');
-
-export type Changeable<T extends object> = T & Store<T>;
-
-export type Store<T extends object> = {
-  [STORE_SYMBOL]: {
-    original: OriginalEntries<T>;
-    proposed: ProposedEntries<T>;
-  };
-};
-
 export class Changes<T extends object> {
   private readonly target: Changeable<T>;
   readonly store: Store<T>[typeof STORE_SYMBOL];
@@ -40,6 +28,7 @@ export class Changes<T extends object> {
   }
   private getEmptyStore() {
     return {
+      owner: this.target,
       original: {} as OriginalEntries<T>,
       proposed: {} as ProposedEntries<T>,
     };
@@ -82,6 +71,36 @@ export class Changes<T extends object> {
   }
 }
 
+export function searchStore(target: object) {
+  let store: object | null = Object.getPrototypeOf(target);
+  let parent: object | undefined = undefined;
+  while (store && !isStoreOf(store, target)) {
+    parent = store;
+    store = Object.getPrototypeOf(store);
+  }
+  return { store, parent } as const;
+}
+
+function isStoreOf<T extends object>(
+  proto: object,
+  target: T,
+): proto is Store<T> {
+  return isStore(proto) && proto[STORE_SYMBOL].owner === target;
+}
+
+function isStore<T extends object>(proto: object): proto is Store<T> {
+  return Object.hasOwn(proto, STORE_SYMBOL);
+}
+
+export type Changeable<T extends object> = T & Store<T>;
+export type Store<T extends object> = {
+  [STORE_SYMBOL]: {
+    owner: T;
+    original: OriginalEntries<T>;
+    proposed: ProposedEntries<T>;
+  };
+};
+export const STORE_SYMBOL = Symbol('leavify change tracking');
 export type OriginalEntries<T extends object> = ChangeableEntry & Fragment<T>;
 export type ProposedEntries<T extends object> = ChangeableEntry & Fragment<T>;
 
