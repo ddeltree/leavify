@@ -25,8 +25,8 @@ describe('propose', () => {
 
   test('new proposal does not affect saved values', () => {
     propose(VAL.target, proposal);
-    VAL.targetChanges.removeChest();
-    VAL.sourceChanges.removeChest();
+    VAL.targetChanges.removeStore();
+    VAL.sourceChanges.removeStore();
     expect(VAL.target).toEqual(VAL.source);
   });
 });

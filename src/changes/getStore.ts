@@ -1,4 +1,4 @@
-import { CHANGES_SYMBOL, Changeable } from './Changeable.js';
+import { STORE_SYMBOL, Changeable } from './Changeable.js';
 
 // TODO implement for simple objects by passing nothing to _getterNames
 
@@ -11,7 +11,7 @@ export function getOriginals<T extends object, K extends keyof T>(
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   ..._getterNames: K[]
 ) {
-  return (thisRef as Changeable<Omit<T, K>>)[CHANGES_SYMBOL]?.original;
+  return (thisRef as Changeable<Omit<T, K>>)[STORE_SYMBOL]?.original;
 }
 
 /** Boilerplate for a class getter of the stored fragment of proposed values.
@@ -23,5 +23,5 @@ export function getProposed<T extends object, K extends keyof T>(
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   ..._getterNames: K[]
 ) {
-  return (thisRef as Changeable<Omit<T, K>>)[CHANGES_SYMBOL]?.proposed;
+  return (thisRef as Changeable<Omit<T, K>>)[STORE_SYMBOL]?.proposed;
 }

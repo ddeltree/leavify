@@ -15,7 +15,7 @@ describe('asOriginal()', () => {
   });
 
   test("applies the existent symbol's entries", () => {
-    VAL.sourceChanges.removeChest();
+    VAL.sourceChanges.removeStore();
     expect(asOriginal(VAL.target)).toEqual({
       ...VAL.source,
       ...VAL.sourceChanges.original,
@@ -51,7 +51,7 @@ describe('save()', () => {
 
   test('affects none but the proposed fields', () => {
     save(VAL.target);
-    VAL.targetChanges.removeChest(), VAL.sourceChanges.removeChest();
+    VAL.targetChanges.removeStore(), VAL.sourceChanges.removeStore();
     expect({ ...VAL.target }).toEqual({
       ...VAL.source,
       ...VAL.sourceChanges.proposed,

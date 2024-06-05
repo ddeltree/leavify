@@ -3,12 +3,12 @@ import { Fragment, LeafPath } from '@typings';
 import { get, has } from '@accessors';
 
 /** The symbol used to store original and proposed values */
-export const CHANGES_SYMBOL = Symbol('leavify change tracking');
+export const STORE_SYMBOL = Symbol('leavify change tracking');
 
-export type Changeable<T extends object> = T & Chest<T>;
+export type Changeable<T extends object> = T & Store<T>;
 
-export type Chest<T extends object> = {
-  [CHANGES_SYMBOL]: {
+export type Store<T extends object> = {
+  [STORE_SYMBOL]: {
     original: OriginalEntries<T>;
     proposed: ProposedEntries<T>;
   };
@@ -16,47 +16,45 @@ export type Chest<T extends object> = {
 
 export class Changes<T extends object> {
   private readonly target: Changeable<T>;
-  readonly chest: Chest<T>[typeof CHANGES_SYMBOL];
+  readonly store: Store<T>[typeof STORE_SYMBOL];
 
   constructor(target: T) {
     this.target = target as Changeable<T>;
     let proto;
-    // TODO: iterate the prototype chain to find the nearest CHANGES_SYMBOL
+    // TODO: iterate the prototype chain to find the nearest STORE_SYMBOL
     // and keep a reference of the pertaining object (`target`) inside it.
     // NOTE: A prototype chain with cycles would throw a TypeError
     if (this.existsChanges(target)) {
       proto = Object.getPrototypeOf(target);
-      this.chest = proto[CHANGES_SYMBOL];
+      this.store = proto[STORE_SYMBOL];
     } else {
       // destructuring would not copy property accessors
       proto = Object.create(Object.getPrototypeOf(target));
-      this.chest = this.getEmptyChest();
+      this.store = this.getEmptyStore();
     }
-    proto[CHANGES_SYMBOL] = this.chest;
+    proto[STORE_SYMBOL] = this.store;
     Object.setPrototypeOf(target, proto);
   }
-  private getEmptyChest() {
+  private existsChanges(target: T): target is Changeable<T> {
+    return Object.hasOwn(Object.getPrototypeOf(target), STORE_SYMBOL);
+  }
+  private getEmptyStore() {
     return {
       original: {} as OriginalEntries<T>,
       proposed: {} as ProposedEntries<T>,
     };
   }
-  setEmptyChest() {
-    const emptyChest = this.getEmptyChest();
-    this.chest.original = emptyChest.original;
-    this.chest.proposed = emptyChest.proposed;
-  }
   get proposed() {
-    return this.chest.proposed;
+    return this.store.proposed;
   }
   set proposed(value: Fragment<T>) {
-    this.chest.proposed = value as ProposedEntries<T>;
+    this.store.proposed = value as ProposedEntries<T>;
   }
   get original() {
-    return this.chest.original;
+    return this.store.original;
   }
   set original(value: Fragment<T>) {
-    this.chest.original = value as OriginalEntries<T>;
+    this.store.original = value as OriginalEntries<T>;
   }
   getOriginalValue(path: LeafPath<T>) {
     return has(this.original, path) ?
@@ -64,26 +62,23 @@ export class Changes<T extends object> {
       : get(this.target, path);
   }
   setEmptyProposed() {
-    this.chest.proposed = this.getEmptyChest().proposed;
+    this.store.proposed = this.getEmptyStore().proposed;
   }
   setEmptyOriginal() {
-    this.chest.original = this.getEmptyChest().original;
+    this.store.original = this.getEmptyStore().original;
   }
   isEmptyProposed() {
-    return _.isEmpty(this.chest.proposed);
+    return _.isEmpty(this.store.proposed);
   }
   isEmptyOriginal() {
-    return _.isEmpty(this.chest.original);
+    return _.isEmpty(this.store.original);
   }
   isTouched() {
     return this.existsChanges(this.target);
   }
-  removeChest() {
+  removeStore() {
     const proto = Object.getPrototypeOf(this.target);
-    delete proto[CHANGES_SYMBOL];
-  }
-  private existsChanges(target: T): target is Changeable<T> {
-    return Object.hasOwn(Object.getPrototypeOf(target), CHANGES_SYMBOL);
+    delete proto[STORE_SYMBOL];
   }
 }
 
@@ -93,7 +88,7 @@ export type ProposedEntries<T extends object> = ChangeableEntry & Fragment<T>;
 /** Marks stored fragments' types and excludes them from autocompletion.
  *
  * Marks OriginalEntries and ProposedEntries as to avoid path autocompletion
- * of a getter which returns [CHANGES_SYMBOL].original or [CHANGES_SYMBOL].proposed,
+ * of a getter which returns [STORE_SYMBOL].original or [STORE_SYMBOL].proposed,
  * since that would just duplicate the classes' fields under a new parent subpath
  *
  * This symbol only exists as a type, it is not actually in the object itself
