@@ -4,27 +4,23 @@ import { get, has } from '@accessors';
 
 export class Changes<T extends object> {
   private readonly target: Changeable<T>;
-  readonly store: Store<T>[typeof STORE_SYMBOL];
+  readonly storeEntries: StoreEntries<T>;
 
   constructor(target: T) {
     this.target = target as Changeable<T>;
-    let proto;
-    // TODO: iterate the prototype chain to find the nearest STORE_SYMBOL
-    // and keep a reference of the pertaining object (`target`) inside it.
-    // NOTE: A prototype chain with cycles would throw a TypeError
-    if (this.existsChanges(target)) {
-      proto = Object.getPrototypeOf(target);
-      this.store = proto[STORE_SYMBOL];
+    let { store, parent } = searchStore(target);
+    if (store) {
+      this.storeEntries = store[STORE_SYMBOL];
     } else {
-      // destructuring would not copy property accessors
-      proto = Object.create(Object.getPrototypeOf(target));
-      this.store = this.getEmptyStore();
+      const newStore = Object.create(Object.getPrototypeOf(target));
+      newStore[STORE_SYMBOL] = this.storeEntries = this.getEmptyStore();
+      store = newStore;
     }
-    proto[STORE_SYMBOL] = this.store;
-    Object.setPrototypeOf(target, proto);
-  }
-  private existsChanges(target: T): target is Changeable<T> {
-    return Object.hasOwn(Object.getPrototypeOf(target), STORE_SYMBOL);
+    if (parent === undefined || parent === Object.prototype) {
+      Object.setPrototypeOf(target, store);
+    } else {
+      Object.setPrototypeOf(parent, store);
+    }
   }
   private getEmptyStore() {
     return {
@@ -34,16 +30,16 @@ export class Changes<T extends object> {
     };
   }
   get proposed() {
-    return this.store.proposed;
+    return this.storeEntries.proposed;
   }
   set proposed(value: Fragment<T>) {
-    this.store.proposed = value as ProposedEntries<T>;
+    this.storeEntries.proposed = value as ProposedEntries<T>;
   }
   get original() {
-    return this.store.original;
+    return this.storeEntries.original;
   }
   set original(value: Fragment<T>) {
-    this.store.original = value as OriginalEntries<T>;
+    this.storeEntries.original = value as OriginalEntries<T>;
   }
   getOriginalValue(path: LeafPath<T>) {
     return has(this.original, path) ?
@@ -51,19 +47,19 @@ export class Changes<T extends object> {
       : get(this.target, path);
   }
   setEmptyProposed() {
-    this.store.proposed = this.getEmptyStore().proposed;
+    this.storeEntries.proposed = this.getEmptyStore().proposed;
   }
   setEmptyOriginal() {
-    this.store.original = this.getEmptyStore().original;
+    this.storeEntries.original = this.getEmptyStore().original;
   }
   isEmptyProposed() {
-    return _.isEmpty(this.store.proposed);
+    return _.isEmpty(this.storeEntries.proposed);
   }
   isEmptyOriginal() {
-    return _.isEmpty(this.store.original);
+    return _.isEmpty(this.storeEntries.original);
   }
   isTouched() {
-    return this.existsChanges(this.target);
+    return true;
   }
   removeStore() {
     const proto = Object.getPrototypeOf(this.target);
@@ -71,7 +67,7 @@ export class Changes<T extends object> {
   }
 }
 
-export function searchStore(target: object) {
+export function searchStore<T extends object>(target: T) {
   let store: object | null = Object.getPrototypeOf(target);
   let parent: object | undefined = undefined;
   while (store && !isStoreOf(store, target)) {
@@ -94,11 +90,12 @@ function isStore<T extends object>(proto: object): proto is Store<T> {
 
 export type Changeable<T extends object> = T & Store<T>;
 export type Store<T extends object> = {
-  [STORE_SYMBOL]: {
-    owner: T;
-    original: OriginalEntries<T>;
-    proposed: ProposedEntries<T>;
-  };
+  [STORE_SYMBOL]: StoreEntries<T>;
+};
+type StoreEntries<T extends object> = {
+  owner: T;
+  original: OriginalEntries<T>;
+  proposed: ProposedEntries<T>;
 };
 export const STORE_SYMBOL = Symbol('leavify change tracking');
 export type OriginalEntries<T extends object> = ChangeableEntry & Fragment<T>;
