@@ -8,7 +8,8 @@ export class Changes<T extends object> {
 
   constructor(target: T) {
     this.target = target as Changeable<T>;
-    let { store, parent } = searchForStore(target);
+    const { store: foundStore, parent } = searchForStore(target);
+    let store = foundStore;
     if (store) {
       this.storeEntries = store[STORE_SYMBOL];
     } else {
@@ -93,11 +94,12 @@ export type Store<T extends object> = {
   [STORE_SYMBOL]: StoreEntries<T>;
 };
 type StoreEntries<T extends object> = {
-  owner: T;
+  owner: OwnerEntry<T>;
   original: OriginalEntries<T>;
   proposed: ProposedEntries<T>;
 };
 export const STORE_SYMBOL = Symbol('leavify change tracking');
+export type OwnerEntry<T extends object> = T;
 export type OriginalEntries<T extends object> = ChangeableEntry & Fragment<T>;
 export type ProposedEntries<T extends object> = ChangeableEntry & Fragment<T>;
 
