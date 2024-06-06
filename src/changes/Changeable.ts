@@ -8,7 +8,7 @@ export class Changes<T extends object> {
 
   constructor(target: T) {
     this.target = target as Changeable<T>;
-    let { store, parent } = searchStore(target);
+    let { store, parent } = searchForStore(target);
     if (store) {
       this.storeEntries = store[STORE_SYMBOL];
     } else {
@@ -67,7 +67,7 @@ export class Changes<T extends object> {
   }
 }
 
-export function searchStore<T extends object>(target: T) {
+export function searchForStore<T extends object>(target: T) {
   let store: object | null = Object.getPrototypeOf(target);
   let parent: object | undefined = undefined;
   while (store && !isStoreOf(store, target)) {

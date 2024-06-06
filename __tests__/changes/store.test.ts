@@ -4,7 +4,7 @@ import originalBook from '../integration/book.json' assert { type: 'json' };
 import { getOriginals, getProposed } from '@changes/getStore';
 import { propose, save } from '@changes/changes';
 import { get, toTree } from 'src';
-import { STORE_SYMBOL, Store, searchStore } from '@changes/Changeable';
+import { STORE_SYMBOL, Store, searchForStore } from '@changes/Changeable';
 
 let book: typeof originalBook;
 const proposal = [
@@ -46,6 +46,6 @@ describe('Search store prototype', () => {
       const [prev, next] = refs.slice(i, i + 2);
       Object.setPrototypeOf(prev, next);
     }
-    expect(searchStore(target).store).not.toBeNull();
+    expect(searchForStore(target).store).not.toBeNull();
   });
 });
