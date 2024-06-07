@@ -3,7 +3,6 @@ import data from './book.json' assert { type: 'json' };
 import { test, expect, beforeEach, describe } from 'vitest';
 import { LeafPath, has, set, get, Primitive } from 'leavify';
 import { Author, Book, Chapter } from './Book.js';
-import { STORE_SYMBOL, Changes } from '@changes/Changeable';
 
 let book: Book;
 const p = <const T extends LeafPath<Book>>(x: T) => x;

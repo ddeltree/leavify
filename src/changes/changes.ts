@@ -4,17 +4,12 @@ import { Primitive, LeafPath } from '@typings';
 import { Changes } from './Changeable.js';
 
 /** Returns the initial object as it was before any proposed or saved changes */
-export function asOriginal<T extends object>(target: T) {
+export function cloneDeepAsOriginal<T extends object>(target: T) {
   const changes = new Changes(target);
   if (!changes.isTouched() || changes.isEmptyOriginal()) return target;
   const original = _.cloneDeep(target);
-  Object.setPrototypeOf(
-    original,
-    Object.getPrototypeOf(Object.getPrototypeOf(original)),
-  );
-  for (const [path, value] of walkLeaves(changes.original)) {
-    set(original, [path, value]);
-  }
+  propose(original, [...walkLeaves(changes.original)]);
+  save(original);
   return original;
 }
 
