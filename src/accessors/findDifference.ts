@@ -12,10 +12,10 @@ export default function* findDifference<T extends object>(
   original: T,
   fragment: T | Fragment<T>,
 ) {
-  for (const [path, changeValue, props] of walkLeaves(fragment)) {
+  for (const [path, changeValue] of walkLeaves(fragment)) {
     const originalValue = get(original, path);
     if (originalValue !== changeValue) {
-      yield [path, changeValue, props];
+      yield [path, changeValue];
     }
   }
 }
