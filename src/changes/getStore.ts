@@ -40,7 +40,7 @@ function getStoreEntry<T extends object>(
   target: T,
   entry: StoreEntryName<T>,
 ): ProposedEntries<T> | OriginalEntries<T> {
-  // CAUTION: make sure NOT to return undefined
+  // CAUTION: make sure NOT to return undefined, or IntelliSense will hang forever :)
   new Changes(target); // makes sure the store exists
   const store = searchForStore(target as Changeable<T>).store!;
   return store[STORE_SYMBOL][entry];

@@ -19,7 +19,7 @@ class ChangeableBook extends Book {
   }
   discard = () => func.discard(this);
   isSaved = () => func.isSaved(this);
-  asOriginal = () => func.asOriginal(this);
+  asOriginal = () => func.cloneDeepAsOriginal(this);
   save = () => func.save(this);
   propose = (change: readonly [LeafPath<this>, Primitive][]) =>
     func.propose(this, change);

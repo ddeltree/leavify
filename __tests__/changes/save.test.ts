@@ -1,5 +1,5 @@
 import { expect, test, beforeEach, describe } from 'vitest';
-import { asOriginal, save } from '@changes/changes.js';
+import { cloneDeepAsOriginal, save } from '@changes/changes.js';
 import {
   VAL,
   resetInitialValues,
@@ -16,7 +16,7 @@ describe('asOriginal()', () => {
 
   test("applies the existent symbol's entries", () => {
     VAL.sourceChanges.removeStore();
-    expect(asOriginal(VAL.target)).toEqual({
+    expect(cloneDeepAsOriginal(VAL.target)).toEqual({
       ...VAL.source,
       ...VAL.sourceChanges.original,
     });

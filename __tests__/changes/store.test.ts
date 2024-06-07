@@ -31,10 +31,12 @@ test('getOriginals()', () => {
   expect(getOriginals(book, 'year')).toEqual(toTree(saved));
 });
 
-describe('Search store prototype', () => {
-  test("when it's deep in the prototype chain", () => {
-    const target = {};
-    const store: Store<typeof target> = {
+describe('Store deep inside the prototype chain', () => {
+  let target: object;
+  let store: Store<typeof target>;
+  beforeEach(() => {
+    target = {};
+    store = {
       [STORE_SYMBOL]: {
         owner: target,
         original: {} as any,
@@ -46,6 +48,9 @@ describe('Search store prototype', () => {
       const [prev, next] = refs.slice(i, i + 2);
       Object.setPrototypeOf(prev, next);
     }
+  });
+
+  test('search', () => {
     expect(searchForStore(target).store).not.toBeNull();
   });
 });
