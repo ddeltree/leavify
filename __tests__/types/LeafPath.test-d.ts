@@ -10,9 +10,11 @@ import { OriginalEntries } from '@changes/Changeable.js';
 import Fragment from '@typings/Fragment.js';
 import Primitive from '@typings/Primitive.js';
 
-declare function check<T extends object, U extends LeafPath<T> = LeafPath<T>>(
-  path: U,
-): U;
+declare function check<
+  T extends object,
+  HINT extends boolean = false,
+  U extends LeafPath<T, HINT> = LeafPath<T, HINT>,
+>(path: U): U;
 
 // Inheritance
 class X {
@@ -108,7 +110,7 @@ type expected =
   | `[${number | ''}][${number | ''}]`
   | `[${number | ''}].${string | number}`
   | `[${number | ''}]${'$' | '#'}`;
-expectType<expected>(check<LeafTreeArray>('[1].'));
+expectType<expected>(check<LeafTreeArray, true>('[1].'));
 
 // empty array or object
 type M = ['value', {}, []];
@@ -127,7 +129,7 @@ type Records = {
   numbers: Record<number, number>;
 };
 expectType<`strings.${string}` | 'strings$' | 'numbers#' | `numbers.${number}`>(
-  check<Records>('strings.other'),
+  check<Records, true>('strings.other'),
 );
 
 type FalseCircularReference = (number | (number | number[])[])[];

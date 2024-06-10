@@ -30,10 +30,14 @@ export type Refs<T extends object, ACC extends Ref[] = []> =
     >]
   : never;
 
-type ToString<REFS extends Ref[], PREVIOUS extends Ref | null = null> =
+type ToString<
+  REFS extends Ref[],
+  PREVIOUS extends Ref | null = null,
+  HINT extends boolean = false,
+> =
   REFS extends [infer FIRST extends Ref, ...infer REST extends Ref[]] ?
     `${FIRST[1] extends readonly unknown[] ? Arr<FIRST>
-    : `${DotNotation<PREVIOUS, FIRST[0]>}`}${ToString<REST, FIRST>}`
+    : `${DotNotation<PREVIOUS, FIRST[0], HINT>}`}${ToString<REST, FIRST, HINT>}`
   : PREVIOUS extends Ref ?
     PREVIOUS[2] extends '...' ?
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -54,17 +58,20 @@ type Arr<T extends Ref> =
 type DotNotation<
   PREV,
   FIRST extends Ref[0],
-> = `${Dot<PREV, FIRST>}${Prefix<FIRST>}`;
+  HINT,
+> = `${Dot<PREV, FIRST>}${Prefix<FIRST, HINT>}`;
 
 type Dot<T, U> =
   T extends null ? ''
   : IsIndetermined<U> extends true ? ''
   : '.';
 
-type Prefix<T> =
+type Prefix<T, HINT> =
   IsIndetermined<T> extends true ?
     T extends string | number ?
-      Prefixes[T]
+      HINT extends true ?
+        Prefixes[T]
+      : T
     : T
   : T;
 
@@ -80,5 +87,9 @@ type Prefixes = {
   : '#' | `.${number}`;
 };
 
-type LeafPath<T extends object> = ToString<Refs<T>>;
+type LeafPath<T extends object, HINT extends boolean = false> = ToString<
+  Refs<T>,
+  null,
+  HINT
+>;
 export default LeafPath;
