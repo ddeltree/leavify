@@ -1,16 +1,16 @@
 import _ from 'lodash';
 import { Primitive, LeafPath } from '@typings';
 import parsePath, { interpretPathHints } from '@utils/parsePath.js';
+import { LeafValue } from '@typings/LeafPath';
 
 /** Get the leaf value at the given path.
  * Throws an error if the value returned isn't a leaf or doesn't exist.
  */
 export function get<T extends object>(obj: T, path: LeafPath<T>) {
-  // TODO handle `$` and `#` paths
   path = interpretPathHints(path);
   if (!has(obj, path))
     throw new Error('No leaf value found at the given path: ' + path);
-  return _.get<object, string>(obj, path);
+  return _.get(obj, path) as LeafValue<T>;
 }
 
 /** Checks whether the path refers to a leaf value */
