@@ -8,8 +8,6 @@ import {
   Changes,
 } from './Changeable.js';
 
-// TODO implement for simple objects by passing nothing to _getterNames
-
 /** Boilerplate for a class getter of the stored fragment of original values.
  * @param thisRef a reference to the `this` class instance.
  * @param _getterNames the names of the getters within the class,

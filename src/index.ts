@@ -1,5 +1,5 @@
 import * as accessors from '@accessors';
-import changes from '@changes';
+import * as changes from '@changes';
 
 const leaves = {
   ...accessors,
@@ -10,4 +10,4 @@ export default leaves;
 
 export * from '@accessors';
 export type * from '@typings';
-export { default as changes } from '@changes';
+export * as changes from '@changes';

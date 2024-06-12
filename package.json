@@ -45,6 +45,7 @@
   "scripts": {
     "dev": "npx tsx src/index.ts",
     "test": "bash ./test.sh",
+    "check": "npm run test && npm run test -- --types && npm run test -- --package",
     "coverage": "vitest --coverage",
     "release": "standard-version",
     "build": "vite build",

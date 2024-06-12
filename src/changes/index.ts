@@ -1,3 +1,2 @@
-import * as changes from './changes.js';
-
-export default changes;
+export * from './changes.js';
+export * from './getStore.js';
