@@ -4,7 +4,7 @@ A package that provides some helper functions for **implementing leaf value chan
 
 ### Functionality includes
 
-- ☘️ Accessors for leaf values
+- ☘️ Accessors for leaf values, including iteration
 - 🌿 IntelliSense for leaf paths
 - 🌳 Conversion of tree to/from leaves
 - 🍂 Proposing, saving and reverting changes
