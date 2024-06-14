@@ -1,6 +1,14 @@
-# Leavify
+# Leavify 🍃
 
-A package to find object leaf values, compare changes of leaves by path, and reconstruct the "tree" object from its leaves.
+A package that provides some helper functions for **implementing leaf value changes and change tracking functionality to javascript objects, including arrays and classes**.
+
+### Functionality includes
+
+- ☘️ Accessors for leaf values
+- 🌿 IntelliSense for leaf paths
+- 🌳 Conversion of tree to/from leaves
+- 🍂 Proposing, saving and reverting changes
+- 🍁 Listing the changes, both as a list or as an object fragment
 
 ## Installation
 
