@@ -15,6 +15,10 @@ export default defineConfig({
       formats: ['es'], // pure ESM package
     },
     rollupOptions: {
+      input: {
+        main: './src/index.ts',
+        changes: './src/changes/index.ts',
+      },
       external: [
         ...Object.keys(pkg.dependencies), // don't bundle dependencies
         /^node:.*/, // don't bundle built-in Node.js modules (use protocol imports!)

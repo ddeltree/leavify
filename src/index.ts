@@ -1,5 +1,5 @@
 import * as accessors from '@accessors';
-import * as changes from '@changes';
+import changes from '@changes';
 
 const leaves = {
   ...accessors,

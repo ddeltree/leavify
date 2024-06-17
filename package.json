@@ -11,9 +11,9 @@
   "exports": {
     ".": {
       "types": "./dist/src/index.d.ts",
-      "default": "./dist/index.js"
+      "default": "./dist/main.js"
     },
-    "./changes": "./dist/changes/index.js",
+    "./changes": "./dist/changes.js",
     "./package.json": "./package.json"
   },
   "types": "./dist/src/index.d.ts",
