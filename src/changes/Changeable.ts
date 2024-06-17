@@ -59,9 +59,6 @@ export class Changes<T extends object> {
   isEmptyOriginal() {
     return _.isEmpty(this.storeEntries.original);
   }
-  isTouched() {
-    return true;
-  }
   removeStore() {
     const proto = Object.getPrototypeOf(this.target);
     delete proto[STORE_SYMBOL];

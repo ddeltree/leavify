@@ -6,7 +6,7 @@ import { Changes } from './Changeable.js';
 /** Returns the initial object as it was before any proposed or saved changes */
 export function cloneDeepAsOriginal<T extends object>(target: T) {
   const changes = new Changes(target);
-  if (!changes.isTouched() || changes.isEmptyOriginal()) return target;
+  if (changes.isEmptyOriginal()) return target;
   const original = _.cloneDeep(target);
   propose(original, [...walkLeaves(changes.original)]);
   save(original);
@@ -18,7 +18,7 @@ export function cloneDeepAsOriginal<T extends object>(target: T) {
  */
 export function save<T extends object>(target: T) {
   const changes = new Changes(target);
-  if (!changes.isTouched() || changes.isEmptyProposed()) return;
+  if (changes.isEmptyProposed()) return;
   const changedLeaves = getChangedEntries(target);
   changes.setEmptyProposed();
   const originals = { ...changes.original };
@@ -57,7 +57,7 @@ function getChangedEntries<T extends object>(target: T) {
 export function getSavedEntries<T extends object>(target: T) {
   const nodes: [LeafPath<T>, Primitive][] = [];
   const changes = new Changes(target);
-  if (!changes.isTouched() || changes.isEmptyOriginal()) return nodes;
+  if (changes.isEmptyOriginal()) return nodes;
   for (const [path] of walkLeaves(changes.original))
     nodes.push([path, get(target, path)]);
   return nodes;
@@ -69,7 +69,7 @@ export function undo<T extends object>(
   paths: readonly LeafPath<T>[],
 ) {
   const changes = new Changes(target);
-  if (!changes.isTouched() || _.isEmpty(paths)) return;
+  if (_.isEmpty(paths)) return;
   // collect original values assuming the paths refer to existing original values
   const originals = changes.original;
   const proposal = paths.map((p) => [p, get(originals, p)] as const);
