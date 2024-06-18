@@ -1,8 +1,13 @@
-import * as accessors from '@accessors';
+import { findDifference, get, has, set, toTree, walkLeaves } from '@accessors';
 import changes from '@changes';
 
 const leaves = {
-  ...accessors,
+  findDifference,
+  get,
+  has,
+  set,
+  toTree,
+  walkLeaves,
   changes,
 };
 
