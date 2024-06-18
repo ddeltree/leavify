@@ -16,7 +16,7 @@ export default defineConfig({
     },
     rollupOptions: {
       input: {
-        main: './src/index.ts',
+        index: './src/index.ts',
         changes: './src/changes/index.ts',
       },
       external: [
