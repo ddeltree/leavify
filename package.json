@@ -13,7 +13,10 @@
       "types": "./dist/src/index.d.ts",
       "default": "./dist/main.js"
     },
-    "./changes": "./dist/changes.js",
+    "./changes": {
+      "types": "./dist/src/changes/index.d.ts",
+      "default": "./dist/changes.js"
+    },
     "./package.json": "./package.json"
   },
   "types": "./dist/src/index.d.ts",
