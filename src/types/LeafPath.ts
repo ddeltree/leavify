@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable no-restricted-imports */
 import type { ChangeableEntry } from '@changes/Changeable.js';
 import Primitive from './Primitive.js';
@@ -10,8 +11,7 @@ type LeafPath<T extends object, HINT extends boolean = false> = ToString<
 >;
 
 export type LeafValue<T extends object> =
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  Refs<T> extends readonly [...infer _, infer LAST extends KeyParentPair] ?
+  Refs<T> extends readonly [...infer _, infer LAST] ?
     LAST extends readonly [infer KEY, infer VALUE] ?
       KEY extends keyof VALUE ?
         VALUE[KEY]
@@ -21,18 +21,22 @@ export type LeafValue<T extends object> =
 
 export type Refs<
   T extends object,
-  ACC extends KeyParentPair[] = [],
-  ROOT = T,
+  CHAIN extends KeyParentPair[] = [],
+  ROOT = T extends infer X ? X : never,
   PARENT = T extends infer X ? X : never,
 > = {
   [KEY in keyof PARENT]-?: Exclude<PARENT[KEY], undefined> extends infer CHILD ?
-    [KEY, PARENT] extends infer REF extends KeyParentPair ?
-      CHILD extends Primitive ? [...ACC, REF]
-      : REF extends ACC[number] ?
+    [KEY, PARENT] extends infer PAIR extends KeyParentPair ?
+      CHILD extends Primitive ? [...CHAIN, PAIR]
+      : PAIR extends CHAIN[number] ?
         CHILD extends readonly unknown[] ?
-          Refs<CHILD, [...ACC, REF], ROOT>
+          Refs<CHILD, [...CHAIN, PAIR], ROOT>
         : never // circular reference
-      : CHILD extends object ? Refs<CHILD, [...ACC, REF], ROOT>
+      : CHAIN[number] extends readonly [...infer _, infer O] ?
+        O extends ROOT ?
+          never // circular reference
+        : CHILD extends object ? Refs<CHILD, [...CHAIN, PAIR], ROOT>
+        : never
       : never
     : never
   : never;
@@ -45,11 +49,11 @@ export type Refs<
 type KeyParentPair = [string | number, object | Primitive];
 
 type ToString<
-  REFS extends KeyParentPair[],
+  PAIRS extends KeyParentPair[],
   PREVIOUS extends KeyParentPair | null = null,
   HINT extends boolean = false,
 > =
-  REFS extends (
+  PAIRS extends (
     [infer FIRST extends KeyParentPair, ...infer REST extends KeyParentPair[]]
   ) ?
     `${FIRST[1] extends readonly unknown[] ? Arr<FIRST>
