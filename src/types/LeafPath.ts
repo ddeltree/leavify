@@ -22,21 +22,15 @@ export type LeafValue<T extends object> =
 export type Refs<
   T extends object,
   CHAIN extends KeyParentPair[] = [],
-  ROOT = T extends infer X ? X : never,
+  ROOT = T,
   PARENT = T extends infer X ? X : never,
 > = {
   [KEY in keyof PARENT]-?: Exclude<PARENT[KEY], undefined> extends infer CHILD ?
     [KEY, PARENT] extends infer PAIR extends KeyParentPair ?
       CHILD extends Primitive ? [...CHAIN, PAIR]
-      : PAIR extends CHAIN[number] ?
-        CHILD extends readonly unknown[] ?
-          Refs<CHILD, [...CHAIN, PAIR], ROOT>
-        : never // circular reference
-      : CHAIN[number] extends readonly [...infer _, infer O] ?
-        O extends ROOT ?
-          never // circular reference
-        : CHILD extends object ? Refs<CHILD, [...CHAIN, PAIR], ROOT>
-        : never
+      : CHILD extends readonly unknown[] ? Refs<CHILD, [...CHAIN, PAIR], ROOT>
+      : PARENT extends CHAIN[number][1] ? never
+      : CHILD extends object ? Refs<CHILD, [...CHAIN, PAIR], ROOT>
       : never
     : never
   : never;
