@@ -10,7 +10,8 @@ type LeafPath<T extends object, HINT extends boolean = false> = ToString<
 >;
 
 export type LeafValue<T extends object> =
-  Refs<T> extends readonly [...infer _, infer LAST extends KeyOfValuePair] ?
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  Refs<T> extends readonly [...infer _, infer LAST extends KeyParentPair] ?
     LAST extends readonly [infer KEY, infer VALUE] ?
       KEY extends keyof VALUE ?
         VALUE[KEY]
@@ -18,44 +19,42 @@ export type LeafValue<T extends object> =
     : never
   : never;
 
-export type Refs<T extends object, ACC extends KeyOfValuePair[] = []> =
-  T extends infer U ?
-    {
-      [K in keyof U]-?: Exclude<U[K], undefined> extends infer V ?
-        [K, U] extends infer REF extends KeyOfValuePair ?
-          V extends (
-            Primitive // leaf value
-          ) ?
-            [...ACC, REF]
-          : REF extends (
-            ACC[number] // circular reference
-          ) ?
-            V extends readonly unknown[] ?
-              Refs<V, [...ACC, REF]>
-            : never
-          : V extends object ? Refs<V, [...ACC, REF]>
-          : never
-        : never
-      : never;
-    }[Exclude<
-      U extends readonly unknown[] ? Exclude<keyof U, keyof []> : keyof U,
-      ChangeableKeys<U>
-    >]
+export type Refs<
+  T extends object,
+  ACC extends KeyParentPair[] = [],
+  ROOT = T,
+  PARENT = T extends infer X ? X : never,
+> = {
+  [KEY in keyof PARENT]-?: Exclude<PARENT[KEY], undefined> extends infer CHILD ?
+    [KEY, PARENT] extends infer REF extends KeyParentPair ?
+      CHILD extends Primitive ? [...ACC, REF]
+      : REF extends ACC[number] ?
+        CHILD extends readonly unknown[] ?
+          Refs<CHILD, [...ACC, REF], ROOT>
+        : never // circular reference
+      : CHILD extends object ? Refs<CHILD, [...ACC, REF], ROOT>
+      : never
+    : never
   : never;
+}[Exclude<
+  PARENT extends readonly unknown[] ? Exclude<keyof PARENT, keyof []>
+  : keyof PARENT,
+  ChangeableKeys<PARENT>
+>];
 
-type KeyOfValuePair = [string | number, object | Primitive];
+type KeyParentPair = [string | number, object | Primitive];
 
 type ToString<
-  REFS extends KeyOfValuePair[],
-  PREVIOUS extends KeyOfValuePair | null = null,
+  REFS extends KeyParentPair[],
+  PREVIOUS extends KeyParentPair | null = null,
   HINT extends boolean = false,
 > =
   REFS extends (
-    [infer FIRST extends KeyOfValuePair, ...infer REST extends KeyOfValuePair[]]
+    [infer FIRST extends KeyParentPair, ...infer REST extends KeyParentPair[]]
   ) ?
     `${FIRST[1] extends readonly unknown[] ? Arr<FIRST>
     : `${DotNotation<PREVIOUS, FIRST[0], HINT>}`}${ToString<REST, FIRST, HINT>}`
-  : PREVIOUS extends KeyOfValuePair ? ''
+  : PREVIOUS extends KeyParentPair ? ''
   : never;
 
 type ChangeableKeys<T> = {
@@ -64,12 +63,12 @@ type ChangeableKeys<T> = {
 
 // Notation string types
 
-type Arr<T extends KeyOfValuePair> =
+type Arr<T extends KeyParentPair> =
   Readonly<T[1]> extends T[1] ? `[${T[0]}]` : `[${T[0] | ''}]`;
 
 type DotNotation<
   PREV,
-  FIRST extends KeyOfValuePair[0],
+  FIRST extends KeyParentPair[0],
   HINT,
 > = `${Dot<PREV, FIRST>}${Prefix<FIRST, HINT>}`;
 
