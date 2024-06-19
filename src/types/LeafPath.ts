@@ -29,9 +29,8 @@ export type Refs<
     [KEY, PARENT] extends infer PAIR extends KeyParentPair ?
       CHILD extends Primitive ? [...CHAIN, PAIR]
       : CHILD extends readonly unknown[] ? Refs<CHILD, [...CHAIN, PAIR], ROOT>
-      : PARENT extends CHAIN[number][1] ? never
-      : CHILD extends object ? Refs<CHILD, [...CHAIN, PAIR], ROOT>
-      : never
+      : CHILD extends ROOT | PARENT | CHAIN[number][1] ? never
+      : Refs<CHILD & object, [...CHAIN, PAIR], ROOT>
     : never
   : never;
 }[Exclude<

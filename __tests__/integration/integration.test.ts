@@ -17,7 +17,7 @@ beforeEach(() => {
 });
 
 test('accessors', () => {
-  const path = p('author.books[].chapters[].author.id');
+  const path = p('author.id');
   let prevValue;
   const newValue = 2;
   if (has(book, path)) prevValue = get(book, path);
@@ -29,6 +29,7 @@ test('accessors', () => {
 
 test.todo('Different paths, same reference => same leaf', () => {
   // TODO?: it would be nice if `book.proposed.title` === `book.proposed.author.books[].title` for the same book, given the same reference
+  //@ts-ignore
   book.propose([['author.books[].title', 'new title']]);
   expect(book.proposed.title).not.toBeUndefined();
   expect(book.proposed.title).toBe(book.proposed.author?.books?.[0].title);
@@ -37,12 +38,12 @@ test.todo('Different paths, same reference => same leaf', () => {
 describe('propose', () => {
   const title = 'new title';
   test('discard', () => {
-    book.propose([['author.books[].title', title]]);
-    expect(book.proposed.author?.books?.[0].title).toBe(title);
+    book.propose([['title', title]]);
+    expect(book.proposed.title).toBe(title);
     expect(book.title).not.toBe(title);
     book.discard();
-    expect(book.proposed.author?.books?.[0].title).toBe(undefined);
-    expect(book.author?.books?.[0].title).not.toBe(title);
+    expect(book.proposed.title).toBe(undefined);
+    expect(book.title).not.toBe(title);
   });
 
   test('isSaved and asOriginal', () => {
