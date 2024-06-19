@@ -20,15 +20,15 @@ export type LeafValue<T extends object> =
     : never
   : never;
 
-export type Refs<T extends object, ACC extends Ref[] = []> =
+export type Refs<T extends object, ACC extends KeyOfValuePair[] = []> =
   T extends infer U ?
     {
       [K in keyof U]-?: Exclude<U[K], undefined> extends infer V ?
-        [K, U, false] extends infer REF extends Ref ?
+        [K, U] extends infer REF extends KeyOfValuePair ?
           V extends (
             Primitive // leaf value
           ) ?
-            [...ACC, [REF[0], REF[1], true]]
+            [...ACC, REF]
           : REF extends (
             ACC[number] // circular reference
           ) ?
@@ -45,18 +45,19 @@ export type Refs<T extends object, ACC extends Ref[] = []> =
     >]
   : never;
 
-/** [`key`, `value | ref`, `isLeaf | circular_ref`] */
-type Ref = [string | number, object | Primitive, boolean];
+type KeyOfValuePair = [string | number, object | Primitive];
 
 type ToString<
-  REFS extends Ref[],
-  PREVIOUS extends Ref | null = null,
+  REFS extends KeyOfValuePair[],
+  PREVIOUS extends KeyOfValuePair | null = null,
   HINT extends boolean = false,
 > =
-  REFS extends [infer FIRST extends Ref, ...infer REST extends Ref[]] ?
+  REFS extends (
+    [infer FIRST extends KeyOfValuePair, ...infer REST extends KeyOfValuePair[]]
+  ) ?
     `${FIRST[1] extends readonly unknown[] ? Arr<FIRST>
     : `${DotNotation<PREVIOUS, FIRST[0], HINT>}`}${ToString<REST, FIRST, HINT>}`
-  : PREVIOUS extends Ref ? ''
+  : PREVIOUS extends KeyOfValuePair ? ''
   : never;
 
 type ChangeableKeys<T> = {
@@ -65,12 +66,12 @@ type ChangeableKeys<T> = {
 
 // Notation string types
 
-type Arr<T extends Ref> =
+type Arr<T extends KeyOfValuePair> =
   Readonly<T[1]> extends T[1] ? `[${T[0]}]` : `[${T[0] | ''}]`;
 
 type DotNotation<
   PREV,
-  FIRST extends Ref[0],
+  FIRST extends KeyOfValuePair[0],
   HINT,
 > = `${Dot<PREV, FIRST>}${Prefix<FIRST, HINT>}`;
 
