@@ -34,7 +34,7 @@ export type Refs<T extends object, ACC extends Ref[] = []> =
           ) ?
             V extends readonly unknown[] ?
               Refs<V, [...ACC, REF]>
-            : [...ACC, [REF[0], REF[1], '...']]
+            : never
           : V extends object ? Refs<V, [...ACC, REF]>
           : never
         : never
@@ -46,7 +46,7 @@ export type Refs<T extends object, ACC extends Ref[] = []> =
   : never;
 
 /** [`key`, `value | ref`, `isLeaf | circular_ref`] */
-type Ref = [string | number, object | Primitive, boolean | '...'];
+type Ref = [string | number, object | Primitive, boolean];
 
 type ToString<
   REFS extends Ref[],
@@ -56,11 +56,7 @@ type ToString<
   REFS extends [infer FIRST extends Ref, ...infer REST extends Ref[]] ?
     `${FIRST[1] extends readonly unknown[] ? Arr<FIRST>
     : `${DotNotation<PREVIOUS, FIRST[0], HINT>}`}${ToString<REST, FIRST, HINT>}`
-  : PREVIOUS extends Ref ?
-    PREVIOUS[2] extends '...' ?
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      `${any}`
-    : ''
+  : PREVIOUS extends Ref ? ''
   : never;
 
 type ChangeableKeys<T> = {
@@ -70,7 +66,6 @@ type ChangeableKeys<T> = {
 // Notation string types
 
 type Arr<T extends Ref> =
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   Readonly<T[1]> extends T[1] ? `[${T[0]}]` : `[${T[0] | ''}]`;
 
 type DotNotation<
