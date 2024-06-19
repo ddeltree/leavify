@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable no-restricted-imports */
 import type { ChangeableEntry } from '@changes/Changeable.js';
 import Primitive from './Primitive.js';
@@ -10,57 +11,47 @@ type LeafPath<T extends object, HINT extends boolean = false> = ToString<
 >;
 
 export type LeafValue<T extends object> =
-  Refs<T> extends readonly (infer REF)[] ?
-    REF extends readonly [infer KEY, infer VALUE, infer IS_OVER] ?
-      IS_OVER extends true ?
-        KEY extends keyof VALUE ?
-          VALUE[KEY]
-        : never
+  Refs<T> extends readonly [...infer _, infer LAST] ?
+    LAST extends readonly [infer KEY, infer VALUE] ?
+      KEY extends keyof VALUE ?
+        VALUE[KEY]
       : never
     : never
   : never;
 
-export type Refs<T extends object, ACC extends Ref[] = []> =
-  T extends infer U ?
-    {
-      [K in keyof U]-?: Exclude<U[K], undefined> extends infer V ?
-        [K, U, false] extends infer REF extends Ref ?
-          V extends (
-            Primitive // leaf value
-          ) ?
-            [...ACC, [REF[0], REF[1], true]]
-          : REF extends (
-            ACC[number] // circular reference
-          ) ?
-            V extends readonly unknown[] ?
-              Refs<V, [...ACC, REF]>
-            : [...ACC, [REF[0], REF[1], '...']]
-          : V extends object ? Refs<V, [...ACC, REF]>
-          : never
-        : never
-      : never;
-    }[Exclude<
-      U extends readonly unknown[] ? Exclude<keyof U, keyof []> : keyof U,
-      ChangeableKeys<U>
-    >]
+export type Refs<
+  T extends object,
+  CHAIN extends KeyParentPair[] = [],
+  ROOT = T,
+  PARENT = T extends infer X ? X : never,
+> = {
+  [KEY in keyof PARENT]-?: Exclude<PARENT[KEY], undefined> extends infer CHILD ?
+    [KEY, PARENT] extends infer PAIR extends KeyParentPair ?
+      CHILD extends Primitive ? [...CHAIN, PAIR]
+      : CHILD extends readonly unknown[] ? Refs<CHILD, [...CHAIN, PAIR], ROOT>
+      : CHILD extends ROOT | PARENT | CHAIN[number][1] ? never
+      : Refs<CHILD & object, [...CHAIN, PAIR], ROOT>
+    : never
   : never;
+}[Exclude<
+  PARENT extends readonly unknown[] ? Exclude<keyof PARENT, keyof []>
+  : keyof PARENT,
+  ChangeableKeys<PARENT>
+>];
 
-/** [`key`, `value | ref`, `isLeaf | circular_ref`] */
-type Ref = [string | number, object | Primitive, boolean | '...'];
+type KeyParentPair = [string | number, object | Primitive];
 
 type ToString<
-  REFS extends Ref[],
-  PREVIOUS extends Ref | null = null,
+  PAIRS extends KeyParentPair[],
+  PREVIOUS extends KeyParentPair | null = null,
   HINT extends boolean = false,
 > =
-  REFS extends [infer FIRST extends Ref, ...infer REST extends Ref[]] ?
+  PAIRS extends (
+    [infer FIRST extends KeyParentPair, ...infer REST extends KeyParentPair[]]
+  ) ?
     `${FIRST[1] extends readonly unknown[] ? Arr<FIRST>
     : `${DotNotation<PREVIOUS, FIRST[0], HINT>}`}${ToString<REST, FIRST, HINT>}`
-  : PREVIOUS extends Ref ?
-    PREVIOUS[2] extends '...' ?
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      `${any}`
-    : ''
+  : PREVIOUS extends KeyParentPair ? ''
   : never;
 
 type ChangeableKeys<T> = {
@@ -69,13 +60,12 @@ type ChangeableKeys<T> = {
 
 // Notation string types
 
-type Arr<T extends Ref> =
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+type Arr<T extends KeyParentPair> =
   Readonly<T[1]> extends T[1] ? `[${T[0]}]` : `[${T[0] | ''}]`;
 
 type DotNotation<
   PREV,
-  FIRST extends Ref[0],
+  FIRST extends KeyParentPair[0],
   HINT,
 > = `${Dot<PREV, FIRST>}${Prefix<FIRST, HINT>}`;
 
