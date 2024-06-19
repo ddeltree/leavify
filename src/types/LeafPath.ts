@@ -10,12 +10,10 @@ type LeafPath<T extends object, HINT extends boolean = false> = ToString<
 >;
 
 export type LeafValue<T extends object> =
-  Refs<T> extends readonly (infer REF)[] ?
-    REF extends readonly [infer KEY, infer VALUE, infer IS_OVER] ?
-      IS_OVER extends true ?
-        KEY extends keyof VALUE ?
-          VALUE[KEY]
-        : never
+  Refs<T> extends readonly [...infer _, infer LAST extends KeyOfValuePair] ?
+    LAST extends readonly [infer KEY, infer VALUE] ?
+      KEY extends keyof VALUE ?
+        VALUE[KEY]
       : never
     : never
   : never;
