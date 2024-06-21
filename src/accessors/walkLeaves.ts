@@ -5,17 +5,23 @@ export default function* walkLeaves<T extends object>(
   target: T,
 ): Generator<readonly [LeafPath<T>, Primitive], undefined> {
   const branch = [makeChildEntryGenerator(target)];
+  const nodeValues: object[] = [target];
   const nodeKeys: string[] = [];
   while (branch.length > 0) {
     const innerNode = _.last(branch)!;
     const child = innerNode.next();
     if (child.done) {
       branch.pop();
+      nodeValues.pop();
       nodeKeys.pop();
       continue;
     }
     const [key, value] = child.value;
     if (_.isObject(value)) {
+      if (nodeValues.includes(value)) {
+        continue;
+      }
+      nodeValues.push(value);
       branch.push(makeChildEntryGenerator(value));
       nodeKeys.push(key);
     } else {
