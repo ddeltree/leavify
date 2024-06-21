@@ -4,19 +4,8 @@ import { Primitive, LeafPath } from '@typings';
 export default function* walkLeaves<T extends object>(
   target: T,
 ): Generator<readonly [LeafPath<T>, Primitive], undefined> {
-  const branch = new Branch(target);
-  while (!branch.isDone()) {
-    const child = branch.getNextChild();
-    if (child.done) {
-      branch.pop();
-      continue;
-    }
-    const [key, value] = child.value;
-    if (_.isObject(value)) {
-      branch.push([key, value]);
-    } else {
-      yield [(branch.toString() + key) as LeafPath<T>, value];
-    }
+  for (const [path, value] of new Branch(target)) {
+    yield [path as LeafPath<T>, value];
   }
 }
 
@@ -54,6 +43,22 @@ class Branch {
   }
   toString() {
     return this.keys.join('');
+  }
+
+  *[Symbol.iterator]() {
+    while (!this.isDone()) {
+      const child = this.getNextChild();
+      if (child.done) {
+        this.pop();
+        continue;
+      }
+      const [key, value] = child.value;
+      if (_.isObject(value)) {
+        this.push([key, value]);
+      } else {
+        yield [this.toString() + key, value];
+      }
+    }
   }
 }
 
