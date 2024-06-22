@@ -146,3 +146,14 @@ expectNotType<
 >(check<FalseCircularReference>('[][][]'));
 
 type ll = Refs<FalseCircularReference>;
+
+interface A {
+  value_A: 'a';
+  B?: B;
+}
+interface B {
+  value_B: 'b';
+  A: A;
+}
+type C = LeafPath<A> extends 'value_A' | 'B.value_B' ? true : never;
+expectType<C>(true);

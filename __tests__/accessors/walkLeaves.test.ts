@@ -33,6 +33,30 @@ describe('walkLeaves', () => {
     for (const branch of branches)
       expect(walkLeaves(branch).next().done).toBe(true);
   });
+
+  test('ignores circular references', () => {
+    interface A {
+      value_A: 'a';
+      B?: B;
+    }
+    interface B {
+      value_b: 'b';
+      A: A;
+    }
+
+    const a: A = {
+      value_A: 'a',
+    };
+    const b: B = {
+      A: a,
+      value_b: 'b',
+    };
+    a['B'] = b;
+    expect([...walkLeaves(a)]).toEqual([
+      ['value_A', 'a'],
+      ['B.value_b', 'b'],
+    ]);
+  });
 });
 
 function treeFromLeavesOf<T extends object>(tree: T) {
