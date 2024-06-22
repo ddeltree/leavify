@@ -24,8 +24,7 @@ class Branch {
     return this.values.includes(value);
   }
   push([key, value]: [string, object]) {
-    if (this.values.includes(value))
-      throw new Error('Unexpected circular reference!');
+    if (this.values.includes(value)) return;
     this.keys.push(key);
     this.values.push(value);
     this.childrenIterators.push(makeChildEntryGenerator(value));
