@@ -1,0 +1,26 @@
+name: Run tests
+
+on:
+  push:
+    branches: ['main']
+  pull_request:
+    branches: ['main']
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 20
+      - run: npm ci
+      - name: Build leavify
+        run: npm run build
+      - name: Run unit tests
+        run: npm run test
+      - name: Run package tests
+        run: npm run test -- --package
+      - name: Run type tests
+        run: npm run test -- --types
