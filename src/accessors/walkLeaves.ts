@@ -1,6 +1,7 @@
 import _ from 'lodash';
 import { Primitive, LeafPath } from '@typings';
 
+/** Generate the leaf value entries inside the object */
 export default function* walkLeaves<T extends object>(
   target: T,
 ): Generator<readonly [LeafPath<T>, Primitive], undefined> {

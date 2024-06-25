@@ -8,28 +8,59 @@ import {
   Changes,
 } from './Changeable.js';
 
-/** Boilerplate for a class getter of the stored fragment of original values.
- * @param thisRef a reference to the `this` class instance.
- * @param _getterNames the names of the getters within the class,
- * for both `proposed` and `original` fragments, in order to prevent circular reference.
+/** Get the stored object of original values.
+ * @param thisRef a reference to the `this` class or object instance.
+ * @param _classGetterNames use this when implementing getter methods inside a class to prevent circular reference, by passing both proposed and original names as arguments.
+ * @example
+ * import changes from 'leavify/changes';
+ *
+ * class Book {
+ *    title = 'default title'
+ *    get original() {
+ *      return changes.getOriginals(this, 'original', 'proposed')
+ *    }
+ *    get proposed() {
+ *      return changes.getProposed(this, 'original', 'proposed')
+ *    }
+ * }
+ *
+ * const book = new Book()
+ * changes.propose(book, [['title', 'new title']])
+ * changes.save(book)
+ * console.log(book.original.title) // 'default title'
  */
 export function getOriginals<T extends object, K extends keyof T>(
   thisRef: T,
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  ..._getterNames: K[]
+  ..._classGetterNames: K[]
 ) {
   return getStoreEntry<Omit<T, K>>(thisRef, 'original');
 }
 
-/** Boilerplate for a class getter of the stored fragment of proposed values.
- * @param thisRef a reference to the `this` class instance.
- * @param getterNames the names of the getters within the class,
- * for both `proposed` and `original` fragments, in order to prevent circular reference.
+/** Get the stored object of proposed values.
+ * @param thisRef a reference to the `this` class or object instance.
+ * @param _classGetterNames use this when implementing getter methods inside a class to prevent circular reference, by passing both proposed and original names as arguments.
+ * @example
+ * import changes from 'leavify/changes';
+ *
+ * class Book {
+ *    title = 'default title'
+ *    get original() {
+ *      return changes.getOriginals(this, 'original', 'proposed')
+ *    }
+ *    get proposed() {
+ *      return changes.getProposed(this, 'original', 'proposed')
+ *    }
+ * }
+ *
+ * const book = new Book()
+ * changes.propose(book, [['title', 'new title']])
+ * console.log(book.proposed.title) // 'new title'
  */
 export function getProposed<T extends object, K extends keyof T>(
   thisRef: T,
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  ..._getterNames: K[]
+  ..._classGetterNames: K[]
 ) {
   return getStoreEntry<Omit<T, K>>(thisRef, 'proposed');
 }

@@ -13,7 +13,7 @@ export function cloneDeepAsOriginal<T extends object>(target: T) {
   return original;
 }
 
-/** Sets proposed leaf changes in-place */
+/** Sets the proposed leaf changes in-place */
 export function save<T extends object>(target: T) {
   const changes = new Changes(target);
   if (changes.isEmptyProposed()) return;
@@ -51,6 +51,7 @@ function getChangedEntries<T extends object>(target: T) {
   return changedEntries;
 }
 
+/** @returns a list of pairs, each containing a path and its original value */
 export function getSavedEntries<T extends object>(target: T) {
   const nodes: [LeafPath<T>, Primitive][] = [];
   const changes = new Changes(target);
@@ -60,7 +61,9 @@ export function getSavedEntries<T extends object>(target: T) {
   return nodes;
 }
 
-/** Proposes reverting back to original value */
+/** Proposes reverting back to the original values associated with each path.
+ * To apply the original values, you must call `save()` after `undo()`.
+ */
 export function undo<T extends object>(
   target: T,
   paths: readonly LeafPath<T>[],
@@ -76,7 +79,9 @@ export function undo<T extends object>(
   propose(target, proposal);
 }
 
-/** Propose a leaf value change, which can then be applied to the object by using `save()` or deleted by `discard()` */
+/** Propose a list of path-value entries as changes to the target object.
+ *
+ * Apply the changes by calling `save()`, or delete them with `discard()` */
 export function propose<T extends object>(
   target: T,
   proposal: readonly (readonly [LeafPath<T>, Primitive])[],

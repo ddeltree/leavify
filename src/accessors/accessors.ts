@@ -13,7 +13,7 @@ export function get<T extends object>(obj: T, path: LeafPath<T>) {
   return _.get(obj, path) as LeafValue<T>;
 }
 
-/** Checks whether the path refers to a leaf value */
+/** Check whether the path refers to a leaf value */
 export function has<T extends object>(obj: T, path: LeafPath<T>) {
   path = interpretPathHints(path);
   const parent = _.get(obj, _.toPath(path).slice(0, -1));
@@ -30,7 +30,7 @@ export function has<T extends object>(obj: T, path: LeafPath<T>) {
   }
 }
 
-/** in-place setter for a deeply nested value */
+/** Set a leaf value by path in-place. */
 export function set<T extends object>(
   obj: T,
   // eslint-disable-next-line @typescript-eslint/ban-types
