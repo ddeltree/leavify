@@ -29,7 +29,7 @@ import {
  * changes.save(book)
  * console.log(book.original.title) // 'default title'
  */
-export function getOriginals<T extends object, K extends keyof T>(
+export function getOriginal<T extends object, K extends keyof T>(
   thisRef: T,
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   ..._classGetterNames: K[]

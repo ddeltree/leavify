@@ -1,4 +1,4 @@
-import { getOriginals, getProposed } from '@changes/getStore.js';
+import { getOriginal, getProposed } from '@changes/getStore.js';
 import * as func from '@changes/changes.js';
 import { LeafPath, Primitive } from '@typings';
 
@@ -12,7 +12,7 @@ class Book {
 
 class ChangeableBook extends Book {
   get original() {
-    return getOriginals(this, 'original', 'proposed');
+    return getOriginal(this, 'original', 'proposed');
   }
   get proposed() {
     return getProposed(this, 'original', 'proposed');

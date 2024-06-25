@@ -98,7 +98,7 @@ export function discard<T extends object>(target: T) {
   changes.setEmptyProposed();
 }
 
-/** Checks whether there are any proposed changes */
+/** Truthy when the current list of proposed changes is empty */
 export function isSaved<T extends object>(target: T) {
   const changes = new Changes(target);
   return changes.isEmptyProposed();

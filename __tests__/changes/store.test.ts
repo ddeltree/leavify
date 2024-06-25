@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { test, expect, beforeEach, describe } from 'vitest';
 import originalBook from '../integration/book.json' assert { type: 'json' };
-import { getOriginals, getProposed } from '@changes/getStore';
+import { getOriginal, getProposed } from '@changes/getStore';
 import { propose, save } from '@changes/changes';
 import { get, toTree } from 'src';
 import { STORE_SYMBOL, Store, searchForStore } from '@changes/Changeable';
@@ -28,7 +28,7 @@ test('getOriginals()', () => {
   propose(book, proposal);
   save(book);
   const saved = proposal.map(([p]) => [p, get(originalBook, p)] as const);
-  expect(getOriginals(book, 'year')).toEqual(toTree(saved));
+  expect(getOriginal(book, 'year')).toEqual(toTree(saved));
 });
 
 describe('Store deep inside the prototype chain', () => {
