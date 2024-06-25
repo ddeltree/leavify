@@ -2,7 +2,7 @@ import _ from 'lodash';
 import { set } from './accessors.js';
 import { Primitive } from '@typings';
 
-/** from path-value pairs to object */
+/** Create a new object from a list of path-value entries  */
 
 export default function toTree(
   leaves: readonly (readonly [string, Primitive])[],
