@@ -13,9 +13,7 @@ export function cloneDeepAsOriginal<T extends object>(target: T) {
   return original;
 }
 
-/** Sets proposed leaf changes in-place
- * @returns the changed leaves
- */
+/** Sets proposed leaf changes in-place */
 export function save<T extends object>(target: T) {
   const changes = new Changes(target);
   if (changes.isEmptyProposed()) return;
@@ -33,7 +31,6 @@ export function save<T extends object>(target: T) {
     set(changes.original, [path, changes.getOriginalValue(path)]);
     set(target, [path, changeValue]);
   }
-  return _.toPairs(changedLeaves);
 }
 
 /** Union of saved and proposed */
