@@ -29,7 +29,7 @@ import {
  * changes.save(book)
  * console.log(book.original.title) // 'default title'
  */
-export function getOriginal<T extends object, K extends keyof T>(
+export function getOriginal<T extends object, K extends keyof T | '' = ''>(
   thisRef: T,
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   ..._classGetterNames: K[]
@@ -57,7 +57,7 @@ export function getOriginal<T extends object, K extends keyof T>(
  * changes.propose(book, [['title', 'new title']])
  * console.log(book.proposed.title) // 'new title'
  */
-export function getProposed<T extends object, K extends keyof T>(
+export function getProposed<T extends object, K extends keyof T | '' = ''>(
   thisRef: T,
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   ..._classGetterNames: K[]
