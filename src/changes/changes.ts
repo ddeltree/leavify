@@ -51,7 +51,8 @@ function getChangedEntries<T extends object>(target: T) {
   return changedEntries;
 }
 
-/** @returns a list of pairs, each containing a path and its original value */
+/** List all entries of this object whose current value differs from the original value (i.e. the applied entries - proposed and saved)
+ * @returns a list of pairs, each containing a path and its original value */
 export function getSavedEntries<T extends object>(target: T) {
   const nodes: [LeafPath<T>, Primitive][] = [];
   const changes = new Changes(target);
