@@ -16,9 +16,11 @@ A package that provides some helper functions for **implementing leaf value chan
 
 ## Examples
 
-Suppose we have the following interfaces:
+### propose and save a list of entries
 
 ```ts
+import changes from 'leavify/changes';
+
 interface Book {
   title: string;
   author: string;
@@ -29,19 +31,12 @@ interface Chapter {
   title: string;
   number: number;
 }
-
 const book: Book = {
   title: 'The Golden Compass',
   author: 'Philip Pullman',
   year: 1995,
   chapters: [{ title: 'The Decanter of Tokay', number: 1 }],
 };
-```
-
-### propose and save a list of entries
-
-```ts
-import changes from 'leavify/changes';
 
 changes.propose(book, [
   ['author', 'Pullman'],
@@ -50,19 +45,6 @@ changes.propose(book, [
 changes.save(book);
 
 changes.getOriginal(book).chapters?.[0].number; // 1
-```
-
-### iterate the leaf entries of an object
-
-```ts
-import { walkLeaves, toTree } from 'leavify';
-
-for (const [path, value] of walkLeaves(book)) {
-  console.log(path, value); // ['title', 'new title']
-}
-
-// Leaves to/from tree
-const tree = toTree([...walkLeaves(book)]);
 ```
 
 ### set up getter methods for a class
@@ -86,6 +68,19 @@ changes.save(book);
 
 book.title; // 'new title'
 book.original.title; // 'default title'
+```
+
+### iterate the leaf entries of an object
+
+```ts
+import { walkLeaves, toTree } from 'leavify';
+
+for (const [path, value] of walkLeaves(book)) {
+  console.log(path, value); // ['title', 'new title']
+}
+
+// Leaves to/from tree
+const tree = toTree([...walkLeaves(book)]);
 ```
 
 ## API
