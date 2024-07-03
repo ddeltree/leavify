@@ -2,11 +2,9 @@ import _ from 'lodash';
 import { Primitive, LeafPath } from '@typings';
 
 /** Generate the leaf value entries inside the object */
-export default function* walkLeaves<T extends object>(
-  target: T,
-): Generator<readonly [LeafPath<T>, Primitive], undefined> {
+export default function* walkLeaves<T extends object>(target: T) {
   for (const [path, value] of new Branch(target)) {
-    yield [path as LeafPath<T>, value];
+    yield [path as LeafPath<T>, value] as const;
   }
 }
 
@@ -36,7 +34,8 @@ class Branch {
     this.childrenIterators.pop();
   }
   getNextChild() {
-    return _.last(this.childrenIterators)!.next();
+    const { value, done } = _.last(this.childrenIterators)!.next();
+    return done === true ? undefined : value;
   }
   isDone() {
     return this.childrenIterators.length == 0;
@@ -48,15 +47,15 @@ class Branch {
   *[Symbol.iterator]() {
     while (!this.isDone()) {
       const child = this.getNextChild();
-      if (child.done) {
+      if (!child) {
         this.pop();
         continue;
       }
-      const [key, value] = child.value;
+      const [key, value] = child;
       if (_.isObject(value)) {
         this.push([key, value]);
       } else {
-        yield [this.toString() + key, value];
+        yield [this.toString() + key, value] as const;
       }
     }
   }
