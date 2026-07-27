@@ -1,29 +1,9 @@
-import { getOriginal, getProposed } from '@changes/getStore.js';
-import * as func from '@changes/changes.js';
-import { LeafPath, Primitive } from '@typings';
-
 class Book {
   readonly id = crypto.randomUUID();
   chapters: ChainableChapter[] = [];
   year?: number;
   author?: ChainableAuthor;
   constructor(public title: string) {}
-}
-
-class ChangeableBook extends Book {
-  get original() {
-    return getOriginal(this, 'original', 'proposed');
-  }
-  get proposed() {
-    return getProposed(this, 'original', 'proposed');
-  }
-  discard = () => func.discard(this);
-  isSaved = () => func.isSaved(this);
-  asOriginal = () => func.cloneDeepAsOriginal(this);
-  save = () => func.save(this);
-  propose = (change: readonly [LeafPath<this>, Primitive][]) =>
-    func.propose(this, change);
-  undo = (paths: readonly LeafPath<this>[]) => func.undo(this, paths);
 }
 
 class Chapter {
@@ -43,7 +23,7 @@ class Author {
 
 // Setting up chainable methods
 
-class ChainableBook extends ChangeableBook {
+class ChainableBook extends Book {
   setAuthor = setChainableField(this, 'author');
   setTitle = setChainableField(this, 'title');
   setYear = setChainableField(this, 'year');

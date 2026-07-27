@@ -6,7 +6,7 @@ import {
   expectType,
 } from 'tsd';
 import LeafPath, { Refs } from '@typings/LeafPath.js';
-import { OriginalEntries } from '@changes/Changeable.js';
+import type { Hidden } from '@typings/Hidden.js';
 import Fragment from '@typings/Fragment.js';
 import Primitive from '@typings/Primitive.js';
 
@@ -59,24 +59,28 @@ class Test {
 expectNotType<any>(check<Test>('other[1]'));
 expectError(check<Test>('myFunction'));
 
-// LeafPath<Fragment> <=> LeafPath<ChangeableFragment> <=> LeafPath<ChangeableEntry>
-// No intellisense for OriginalEntries' fields
+// A Hidden field is excluded from the path space, so a field holding a nested
+// copy of the same shape does not duplicate every path under a new prefix.
 type Fragm = {
   leaf: number;
   arr: number[];
   ob1: Record<string, string>;
   ob2: Record<number, string>;
 };
-interface Changeable extends Fragm {
-  original: OriginalEntries<Fragm>;
+interface WithHidden extends Fragm {
+  snapshot: Hidden<Fragm>;
 }
-expectType<LeafPath<Fragm>>(
-  check<Fragm & OriginalEntries<Fragm> & Changeable>('leaf'),
-);
-expectType<LeafPath<Fragm>>(check<Changeable>('leaf'));
-expectType<LeafPath<Fragm>>(
-  check<Changeable['original']>('leaf' as LeafPath<Changeable>),
-);
+expectType<LeafPath<Fragm>>(check<Fragm & Hidden<Fragm> & WithHidden>('leaf'));
+expectType<LeafPath<Fragm>>(check<WithHidden>('leaf'));
+expectError(check<WithHidden>('snapshot.leaf'));
+
+// Hidden hides a plain leaf too
+interface User {
+  name: string;
+  passwordHash: Hidden<string>;
+}
+expectType<'name'>(check<User>('name'));
+expectError(check<User>('passwordHash'));
 
 // Non-as-const array
 const obInArr = [1, '2', { id: '123' }],
@@ -123,7 +127,7 @@ type Bug = { values: number[] };
 expectType<`values[${number | ''}]`>(check<Bug>('values[0]'));
 
 // Record type inside object
-// this can be messed up by ChangeableEntries' definition
+// this can be messed up by the Hidden marker's definition
 type Records = {
   strings: Record<string, string>;
   numbers: Record<number, number>;

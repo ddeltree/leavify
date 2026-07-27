@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable no-restricted-imports */
-import type { ChangeableEntry } from '@changes/Changeable.js';
+import type { HiddenKeys } from './Hidden.js';
 import Primitive from './Primitive.js';
 
 export default LeafPath;
@@ -10,11 +9,58 @@ type LeafPath<T extends object, HINT extends boolean = false> = ToString<
   HINT
 >;
 
-export type LeafValue<T extends object> =
-  Refs<T> extends readonly [...infer _, infer LAST] ?
-    LAST extends readonly [infer KEY, infer VALUE] ?
-      KEY extends keyof VALUE ?
-        VALUE[KEY]
+/** The type of the leaf value sitting at path `P` inside `T`.
+ *
+ * Omitting `P` yields the union of every leaf type in `T`.
+ *
+ * @example
+ * type Order = { id: string; items: { qty: number }[] };
+ * type A = LeafValue<Order, 'id'>;          // string
+ * type B = LeafValue<Order, 'items[0].qty'>; // number
+ */
+export type LeafValue<
+  T extends object,
+  P extends LeafPath<T> = LeafPath<T>,
+> = MatchChain<Refs<T>, P>;
+
+/** Narrows the path space of `T` down to the paths matching `P`.
+ *
+ * @example
+ * type Editable = PickLeaves<Order, `customer.${string}`>;
+ */
+export type PickLeaves<T extends object, P extends string> = Extract<
+  LeafPath<T>,
+  P
+>;
+
+/** Removes `P` from the path space of `T`.
+ *
+ * Use this for per-field permissions and masking when the field must stay
+ * addressable elsewhere. To hide a field everywhere, mark its type with
+ * {@link Hidden} instead.
+ *
+ * @example
+ * type Public = OmitLeaves<Order, 'customer.taxId'>;
+ */
+export type OmitLeaves<T extends object, P extends string> = Exclude<
+  LeafPath<T>,
+  P
+>;
+
+/** Distributes over the union of chains, keeping the ones whose path matches `P`. */
+type MatchChain<CHAINS, P extends string> =
+  CHAINS extends KeyParentPair[] ?
+    P extends ToString<CHAINS> ?
+      ChainValue<CHAINS>
+    : never
+  : never;
+
+/** The value type at the end of a single `[key, parent]` chain. */
+type ChainValue<CHAIN extends KeyParentPair[]> =
+  CHAIN extends readonly [...infer _, infer LAST] ?
+    LAST extends readonly [infer KEY, infer PARENT] ?
+      KEY extends keyof PARENT ?
+        PARENT[KEY]
       : never
     : never
   : never;
@@ -36,7 +82,7 @@ export type Refs<
 }[Exclude<
   PARENT extends readonly unknown[] ? Exclude<keyof PARENT, keyof []>
   : keyof PARENT,
-  ChangeableKeys<PARENT>
+  HiddenKeys<PARENT>
 >];
 
 type KeyParentPair = [string | number, object | Primitive];
@@ -53,10 +99,6 @@ type ToString<
     : `${DotNotation<PREVIOUS, FIRST[0], HINT>}`}${ToString<REST, FIRST, HINT>}`
   : PREVIOUS extends KeyParentPair ? ''
   : never;
-
-type ChangeableKeys<T> = {
-  [K in keyof T]: T[K] extends ChangeableEntry ? K : never;
-}[keyof T];
 
 // Notation string types
 

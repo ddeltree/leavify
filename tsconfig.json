@@ -33,9 +33,6 @@
       "@accessors/*": ["src/accessors/*"],
       "@accessors": ["src/accessors"],
 
-      "@changes/*": ["src/changes/*"],
-      "@changes": ["src/changes"],
-
       "@typings/*": ["src/types/*"],
       "@typings": ["src/types"],
 

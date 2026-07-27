@@ -2,7 +2,7 @@
   "name": "leavify",
   "type": "module",
   "version": "0.3.0",
-  "description": "Helper functions for manipulating and tracking changes to object leaf values",
+  "description": "Type-safe leaf paths for nested objects: autocompleted paths, per-path value types, diffing and JSON Pointer interop",
   "main": "./dist/index.js",
   "module": "./dist/index.js",
   "files": [
@@ -12,10 +12,6 @@
     ".": {
       "types": "./dist/src/index.d.ts",
       "default": "./dist/index.js"
-    },
-    "./changes": {
-      "types": "./dist/src/changes/index.d.ts",
-      "default": "./dist/changes.js"
     },
     "./package.json": "./package.json"
   },
@@ -66,14 +62,21 @@
   },
   "homepage": "https://github.com/ddeltree/leavify#readme",
   "keywords": [
-    "object",
-    "leaves",
-    "leaf",
+    "typescript",
+    "type-safe",
     "path",
-    "value",
-    "path-value",
-    "change",
-    "difference",
+    "paths",
+    "leaf",
+    "leaves",
+    "nested",
+    "object",
+    "get",
+    "set",
+    "diff",
+    "json-patch",
+    "json-pointer",
+    "rfc6901",
+    "autocomplete",
     "tree"
   ]
 }
