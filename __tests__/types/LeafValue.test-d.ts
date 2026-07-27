@@ -1,7 +1,7 @@
 /* eslint-disable */
 import { expectType, expectError, expectAssignable } from 'tsd';
 import { get, set, setUnchecked } from '@accessors';
-import type { LeafValue } from '@typings';
+import type { LeafValue, OmitLeaves, PickLeaves } from '@typings';
 
 interface Order {
   id: string;
@@ -38,3 +38,11 @@ expectError(set(order, ['paid', 'yes']));
 
 // setUnchecked is the escape hatch for runtime-built paths
 expectAssignable<object>(setUnchecked({} as object, ['a.b[0]', 1]));
+
+// ---------- path-space filtering ----------
+expectType<'customer.name' | 'customer.address.city' | 'customer.address.zip'>(
+  null as unknown as PickLeaves<Order, `customer.${string}`>,
+);
+expectType<never>(
+  null as unknown as Extract<OmitLeaves<Order, 'id'>, 'id'>,
+);

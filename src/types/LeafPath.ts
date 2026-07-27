@@ -23,6 +23,30 @@ export type LeafValue<
   P extends LeafPath<T> = LeafPath<T>,
 > = MatchChain<Refs<T>, P>;
 
+/** Narrows the path space of `T` down to the paths matching `P`.
+ *
+ * @example
+ * type Editable = PickLeaves<Order, `customer.${string}`>;
+ */
+export type PickLeaves<T extends object, P extends string> = Extract<
+  LeafPath<T>,
+  P
+>;
+
+/** Removes `P` from the path space of `T`.
+ *
+ * Use this for per-field permissions and masking when the field must stay
+ * addressable elsewhere. To hide a field everywhere, mark its type with
+ * {@link Hidden} instead.
+ *
+ * @example
+ * type Public = OmitLeaves<Order, 'customer.taxId'>;
+ */
+export type OmitLeaves<T extends object, P extends string> = Exclude<
+  LeafPath<T>,
+  P
+>;
+
 /** Distributes over the union of chains, keeping the ones whose path matches `P`. */
 type MatchChain<CHAINS, P extends string> =
   CHAINS extends KeyParentPair[] ?
