@@ -1,7 +1,17 @@
 /* eslint-disable */
 import data from './book.json' assert { type: 'json' };
-import { test, expect, beforeEach } from 'vitest';
-import { LeafPath, get, has, set, toTree, walkLeaves } from 'leavify';
+import { test, expect, beforeEach, describe } from 'vitest';
+import {
+  LeafPath,
+  diff,
+  fromPointer,
+  get,
+  has,
+  set,
+  toPointer,
+  toTree,
+  walkLeaves,
+} from 'leavify';
 import { Author, Book, Chapter } from './Book.js';
 
 let book: Book;
@@ -27,6 +37,13 @@ test('accessors', () => {
   expect(get(book, path)).toBe(newValue);
 });
 
+test('get() is typed per path through the published package', () => {
+  const title: string = get(book, p('title'));
+  const year: number | undefined = get(book, p('year'));
+  expect(title).toBe(data.title);
+  expect(year).toBe(data.year);
+});
+
 test('walkLeaves and toTree round trip', () => {
   const leaves = [...walkLeaves(book)];
   expect(leaves.length).toBeGreaterThan(0);
@@ -34,4 +51,31 @@ test('walkLeaves and toTree round trip', () => {
   for (const [path, value] of leaves) {
     expect(get(tree as object, path as never)).toBe(value);
   }
+});
+
+describe('diff', () => {
+  test('reports the leaves that changed, with both values', () => {
+    const before = toTree([...walkLeaves(book)]) as object;
+    set(book, [p('title'), 'a different title']);
+    const changes = [...diff(before, toTree([...walkLeaves(book)]) as object)];
+    expect(changes).toEqual([['title', data.title, 'a different title']]);
+  });
+
+  test('an unchanged object yields nothing', () => {
+    const snapshot = toTree([...walkLeaves(book)]) as object;
+    expect([...diff(snapshot, snapshot)]).toEqual([]);
+  });
+});
+
+describe('JSON Pointer interop', () => {
+  test('every leaf path converts to a pointer and back', () => {
+    for (const [path] of walkLeaves(book)) {
+      expect(fromPointer(toPointer(path))).toBe(path);
+    }
+  });
+
+  test('produces RFC 6901 pointers', () => {
+    expect(toPointer(p('author.name'))).toBe('/author/name');
+    expect(toPointer(p('chapters[0].title'))).toBe('/chapters/0/title');
+  });
 });
