@@ -1,5 +1,5 @@
-import _ from 'lodash';
 import { Primitive, LeafPath } from '@typings';
+import { isObject, last } from '@utils/objects.js';
 
 /** Generate the leaf value entries inside the object */
 export default function* walkLeaves<T extends object>(target: T) {
@@ -34,7 +34,7 @@ class Branch {
     this.childrenIterators.pop();
   }
   getNextChild() {
-    const { value, done } = _.last(this.childrenIterators)!.next();
+    const { value, done } = last(this.childrenIterators)!.next();
     return done === true ? undefined : value;
   }
   isDone() {
@@ -52,7 +52,7 @@ class Branch {
         continue;
       }
       const [key, value] = child;
-      if (_.isObject(value)) {
+      if (isObject(value)) {
         this.push([key, value]);
       } else {
         yield [this.toString() + key, value] as const;
@@ -65,8 +65,8 @@ function* makeChildEntryGenerator(
   ob: object,
 ): Generator<readonly [string, object | Primitive], undefined> {
   for (const [key, value] of Object.entries(ob)) {
-    let path = _.isArray(ob) ? `[${key}]` : key;
-    if (_.isObject(value) && !_.isArray(value)) path += '.';
+    let path = Array.isArray(ob) ? `[${key}]` : key;
+    if (isObject(value) && !Array.isArray(value)) path += '.';
     yield [path, value];
   }
 }

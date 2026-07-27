@@ -1,4 +1,3 @@
-import _ from 'lodash';
 import { test, expect, describe, beforeEach } from 'vitest';
 import diff from '@accessors/diff.js';
 import { LeafPath } from '@typings';
@@ -25,7 +24,7 @@ describe('diff()', () => {
       unchanged: { other: [0, 1] },
       flat: 'X',
     };
-    after = _.cloneDeep(before);
+    after = structuredClone(before);
   });
 
   test('flat value change', () => {
@@ -37,7 +36,7 @@ describe('diff()', () => {
 
   test('nested value change', () => {
     const path: LeafPath<Example> = 'nested[1].prop';
-    _.set(after, path, 'change value');
+    (after.nested[1] as { prop: string }).prop = 'change value';
     const changes = diff(before, after);
     expect(changes.next().value).toEqual([path, 'X', 'change value']);
     expect(changes.next().done).toBe(true);

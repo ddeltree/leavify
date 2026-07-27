@@ -1,6 +1,6 @@
-import _ from 'lodash';
 import { Primitive, LeafPath, LeafValue } from '@typings';
 import parsePath, { interpretPathHints } from '@utils/parsePath.js';
+import { getByPath, last } from '@utils/objects.js';
 
 /** Get the leaf value at the given path.
  *
@@ -13,16 +13,17 @@ export function get<T extends object, P extends LeafPath<T>>(obj: T, path: P) {
   const resolved = interpretPathHints<T>(path);
   if (!has(obj, resolved))
     throw new Error('No leaf value found at the given path: ' + resolved);
-  return _.get(obj, resolved) as LeafValue<T, P>;
+  return getByPath(obj, parsePath(resolved).flat()) as LeafValue<T, P>;
 }
 
 /** Check whether the path refers to a leaf value */
 export function has<T extends object>(obj: T, path: LeafPath<T>) {
   path = interpretPathHints(path);
-  const parent = _.get(obj, _.toPath(path).slice(0, -1));
+  const keys = parsePath(path).flat();
+  const parent = getByPath(obj, keys.slice(0, -1));
   if (typeof parent === 'string') return false;
-  const value = _.get(obj, path, new Error());
-  if (value instanceof Error) return false;
+  const value = getByPath(obj, keys);
+  if (value === undefined) return false;
   switch (typeof value) {
     case 'function':
     case 'symbol':
@@ -62,7 +63,7 @@ export function setUnchecked<T extends object>(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let ref: any = obj;
   for (const group of groups) {
-    const isLastGroup = group === _.last(groups);
+    const isLastGroup = group === last(groups);
     if (group.length === 1) {
       if (isLastGroup) break;
       const key = group[0];

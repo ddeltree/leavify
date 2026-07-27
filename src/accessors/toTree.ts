@@ -1,4 +1,3 @@
-import _ from 'lodash';
 import { setUnchecked } from './accessors.js';
 import { Primitive } from '@typings';
 
@@ -7,7 +6,7 @@ import { Primitive } from '@typings';
 export default function toTree(
   leaves: readonly (readonly [string, Primitive])[],
 ): object | undefined {
-  if (_.isEmpty(leaves)) return undefined;
+  if (leaves.length === 0) return undefined;
   const [firstPath] = leaves[0];
   const tree: object = firstPath.startsWith('[') ? [] : {};
   for (const [path, value] of leaves) {

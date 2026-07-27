@@ -36,7 +36,7 @@ Paths are strings mixing dot and bracket notation: `chapters[0].title`, `values[
 
 - `split()` splits on unescaped `.` then unescaped `[n]` groups; `[]` normalizes to `[0]`.
 - `parsePath()` returns groups of keys — one group per dot-segment, with the root key followed by its indices. `setUnchecked()` relies on this grouping to know whether to create `{}` or `[]` for a missing intermediate node.
-- `interpretPathHints()` strips the autocomplete hint suffixes (`$`, `#`) that `LeafPath<T, true>` emits for `Record<string, _>` / `Record<number, _>` index signatures. Every public accessor calls it before touching lodash.
+- `interpretPathHints()` strips the autocomplete hint suffixes (`$`, `#`) that `LeafPath<T, true>` emits for `Record<string, _>` / `Record<number, _>` index signatures. Every public accessor calls it, then tokenizes with `parsePath()` before walking the object.
 
 A "leaf" is any non-object value **plus `null`** — see the `switch` in `has()`. Functions and symbols are not leaves.
 
@@ -74,7 +74,7 @@ Changes here are easy to get subtly wrong and are covered only by `__tests__/typ
 - **Relative imports must carry the `.js` extension** (`./diff.js`), even from `.ts` sources — ESM + `moduleResolution: "Bundler"`.
 - **Cross-directory imports use path aliases**, never relative parent paths. ESLint's `no-restricted-imports` bans `..*` and deep alias imports (`@typings/*.js`) inside `src/**` and `utils/**`, forcing everything through each folder's `index.ts` barrel. Aliases: `@accessors`, `@typings`, `@utils/*` (see `tsconfig.json` `paths`). Test files may import deep paths.
 - Adding a new public entry point means updating three places: `vite.config.ts` `rollupOptions.input`, the `exports` map in `package.json`, and the relevant barrel.
-- lodash is the only runtime dependency and is external to the bundle.
+- No runtime dependencies. The object helpers the accessors need — `getByPath`, `isObject`, `last` — live in `utils/objects.ts`; extend that file rather than pulling a library back in. `vite.config.ts` still externalizes `pkg.dependencies`, so adding one later keeps it out of the bundle.
 - Commit messages follow Conventional Commits (`standard-version` generates the changelog from them).
 - `.gitignore` includes `*.js` — never commit compiled output; source is `.ts` only.
 - README examples are verified, not illustrative: type claims by `tsd`, runtime claims against the built bundle. Keep them that way when editing.

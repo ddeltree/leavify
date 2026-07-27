@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
-import _ from 'lodash';
 import { test, expect, describe } from 'vitest';
 import { bitWordToBranch } from './helpers.js';
 import { set, get, has } from '@accessors/accessors.js';
@@ -57,7 +56,7 @@ describe('get(), has(), set() integration', () => {
       c: [{ e: [] }, [2]],
       change: [0, 2, { target: 42 }],
     };
-    const copy = _.cloneDeep(tree);
+    const copy = structuredClone(tree);
     const path = 'change[2].target',
       value = 13;
     // set new value

@@ -5,6 +5,10 @@ import dts from 'vite-plugin-dts';
 import tsconfigPaths from 'vite-tsconfig-paths';
 import pkg from './package.json' assert { type: 'json' };
 
+// there are none today, but a dependency added later must stay out of the bundle
+const dependencies: Record<string, string> =
+  (pkg as { dependencies?: Record<string, string> }).dependencies ?? {};
+
 export default defineConfig({
   esbuild: {
     target: 'es2020',
@@ -19,7 +23,7 @@ export default defineConfig({
         index: './src/index.ts',
       },
       external: [
-        ...Object.keys(pkg.dependencies), // don't bundle dependencies
+        ...Object.keys(dependencies), // don't bundle dependencies
         /^node:.*/, // don't bundle built-in Node.js modules (use protocol imports!)
       ],
       output: {

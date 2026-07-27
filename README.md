@@ -56,7 +56,7 @@ type P = LeafPath<A>; // 'value_A' | 'B.value_B'
 npm install leavify
 ```
 
-Pure ESM, one runtime dependency (lodash).
+Pure ESM, zero runtime dependencies.
 
 ## API
 
