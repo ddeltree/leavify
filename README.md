@@ -1,109 +1,163 @@
 # Leavify 🍃
 
-A package that provides some helper functions for **implementing leaf value changes and change tracking functionality to javascript objects, including arrays and classes**.
+**Type-safe leaf paths for nested objects.** Autocompleted paths, the right value
+type at the end of each one, and the runtime to go with them.
 
-### Functionality includes
+```ts
+import { get, set } from 'leavify';
 
-- ☘️ Accessors for leaf values, including iteration
-- 🌿 IntelliSense for leaf paths
-- 🌳 Conversion of tree to/from leaves
-- 🍂 Proposing, saving and reverting changes
-- 🍁 Listing the changes, both as a list or as an object fragment
+interface Order {
+  id: string;
+  customer: { name: string; address: { city: string; zip: string } };
+  items: { sku: string; qty: number }[];
+}
+
+get(order, 'customer.address.city'); // string  — not `string | number`
+get(order, 'items[0].qty'); // number
+
+get(order, 'customer'); // ✗ not a leaf
+get(order, 'customer.addres.city'); // ✗ typo caught at compile time
+set(order, ['items[0].qty', 'three']); // ✗ wrong value type for this path
+```
+
+`LeafPath<Order>` resolves to exactly this — leaves only, bracket notation,
+literal or interpolated index:
+
+```
+"id" | "customer.name" | "customer.address.city" | "customer.address.zip"
+| "items[].sku" | `items[${number}].sku` | "items[].qty" | `items[${number}].qty`
+```
+
+## Why
+
+The ecosystem is split in half. `type-fest` and friends give you **types with no
+runtime**, and cap recursion at a fixed depth. `dot-prop`, `object-path` and
+`lodash.get` give you **runtime with no types**. Leavify is both halves, matched:
+the path grammar the types generate is the one the accessors parse.
+
+It also handles what a depth counter can't — genuinely cyclic types terminate
+structurally, by tracking the ancestor chain:
+
+```ts
+interface A {
+  value_A: string;
+  B?: B;
+}
+interface B {
+  value_B: string;
+  A: A;
+}
+type P = LeafPath<A>; // 'value_A' | 'B.value_B'
+```
 
 ## Installation
 
-`npm install leavify`
-
-## Examples
-
-### propose and save a list of entries
-
-```ts
-import changes from 'leavify/changes';
-
-interface Book {
-  title: string;
-  author: string;
-  year: number;
-  chapters: Chapter[];
-}
-interface Chapter {
-  title: string;
-  number: number;
-}
-const book: Book = {
-  title: 'The Golden Compass',
-  author: 'Philip Pullman',
-  year: 1995,
-  chapters: [{ title: 'The Decanter of Tokay', number: 1 }],
-};
-
-changes.propose(book, [
-  ['author', 'Pullman'],
-  ['chapters[0].number', 0],
-]);
-changes.save(book);
-
-changes.getOriginal(book).chapters?.[0].number; // 1
+```
+npm install leavify
 ```
 
-### set up getter methods for a class
+Pure ESM, one runtime dependency (lodash).
 
-```ts
-import changes from 'leavify/changes';
+## API
 
-class Book {
-  title = 'default title';
-  get original() {
-    return changes.getOriginal(this, 'original', 'proposed');
-  }
-  get proposed() {
-    return changes.getProposed(this, 'original', 'proposed');
-  }
-}
+### Accessors
 
-const book = new Book();
-changes.propose(book, [['title', 'new title']]);
-changes.save(book);
-
-book.title; // 'new title'
-book.original.title; // 'default title'
+```yaml
+get: read the leaf at a path — typed as that leaf, not as a union
+set: write the leaf at a path — the value is checked against that path
+setUnchecked: escape hatch for paths only known at runtime
+has: truthy when the path refers to a leaf that exists
+walkLeaves: iterate the path-value entries inside an object
+toTree: build a new object from a list of path-value entries
+diff: compare two objects, yielding [path, before, after] per changed leaf
+toPointer / fromPointer: convert between a leaf path and an RFC 6901 JSON Pointer
 ```
 
-### iterate the leaf entries of an object
+### Iterating and rebuilding
 
 ```ts
 import { walkLeaves, toTree } from 'leavify';
 
-for (const [path, value] of walkLeaves(book)) {
-  console.log(path, value); // ['title', 'new title']
+for (const [path, value] of walkLeaves(order)) {
+  console.log(path, value); // 'customer.address.city', 'Lisbon'
 }
 
-// Leaves to/from tree
-const tree = toTree([...walkLeaves(book)]);
+const rebuilt = toTree([...walkLeaves(order)]);
 ```
 
-## API
+### Diffing
 
-Here's a brief description of each function defined:
+`diff` yields a discriminated union over the path, so narrowing the path narrows
+both values:
 
-```yaml
-get: get the leaf value of a given path
-set: set the leaf value of a given path
-has: truthy for a path that refers to a leaf value that exists
+```ts
+import { diff } from 'leavify';
 
-toTree: create a new object from a list of path-value entries
-walkLeaves: iterate the path-value entries inside an object
-findDifference: compare two objects and return the entries by which they differ
-
-changes:
-  propose: push a list of entries to change
-  discard: delete the list of proposed entries
-  save: apply the proposed entries in-place
-  undo: propose a list of paths back to the original values, without applying
-  isSaved: truthy when there are no proposed (unsaved) changes
-  getOriginal: make an object from the original entries
-  getProposed: make an object from the proposed entries
-  getSavedEntries: list the applied entries - proposed and saved
-  cloneDeepAsOriginal: clone deep and undo changes
+for (const [path, before, after] of diff(saved, edited)) {
+  console.log(`${path}: ${before} → ${after}`);
+}
 ```
+
+Only leaves reachable in the second argument are visited, so removals are not
+reported. The second argument may also be a sparse fragment:
+
+```ts
+[...diff(order, { customer: { name: 'someone else' } })];
+// [['customer.name', 'someone', 'someone else']]
+```
+
+### JSON Patch interop
+
+Leavify does not implement RFC 6902 — it hands the wire format to the libraries
+that already do, and sells the types on the way in:
+
+```ts
+import { diff, toPointer } from 'leavify';
+import { applyPatch } from 'fast-json-patch';
+
+const patch = [...diff(saved, edited)].map(([path, , after]) => ({
+  op: 'replace' as const,
+  path: toPointer(path),
+  value: after,
+}));
+
+applyPatch(saved, patch);
+```
+
+### Hiding fields from the path space
+
+A field marked `Hidden` keeps working normally but never appears in `LeafPath`,
+so it is excluded from autocompletion and rejected by the accessors. Use it for
+derived getters, internal bookkeeping, or data that must not be addressable.
+
+```ts
+import type { Hidden, LeafPath, OmitLeaves, PickLeaves } from 'leavify';
+
+interface User {
+  name: string;
+  passwordHash: Hidden<string>;
+}
+type P = LeafPath<User>; // 'name'
+```
+
+`PickLeaves` and `OmitLeaves` narrow the path space per use site, for when a
+field must stay addressable elsewhere:
+
+```ts
+type Editable = PickLeaves<Order, `customer.${string}`>;
+type Public = OmitLeaves<Order, 'customer.taxId'>;
+```
+
+## Path grammar
+
+Dot and bracket notation mix freely: `chapters[0].title`, `values[]`, `[1][2]`.
+`[]` is shorthand for `[0]`. A literal `.`, `[`, `]` or `\` in a key is escaped
+with a backslash.
+
+For index signatures, `LeafPath<T, true>` emits hint suffixes — `$` for
+`Record<string, _>` and `#` for `Record<number, _>` — which the accessors strip
+before resolving.
+
+## License
+
+MIT
