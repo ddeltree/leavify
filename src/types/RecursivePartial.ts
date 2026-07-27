@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/ban-types */
-/* eslint-disable no-restricted-imports */
-import type { ChangeableEntry } from '@changes/Changeable.js';
+import type { HiddenMarker } from './Hidden.js';
 
 // CAUTION: do NOT expose this as a package import
 // LeafPath<RecursivePartial<T>> will run too many recursive calls
@@ -21,7 +20,7 @@ type NoFunctionKeys<T> =
 // Based on https://stackoverflow.com/a/51365037
 type RecursivePartial<T> =
   T extends Function ? never
-  : T[keyof T] extends ChangeableEntry ? never
+  : T[keyof T] extends HiddenMarker ? never
   : {
       [K in NoFunctionKeys<T>]?: T[K] extends (infer U)[] ?
         RecursivePartial<U>[]

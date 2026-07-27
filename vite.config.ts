@@ -17,7 +17,6 @@ export default defineConfig({
     rollupOptions: {
       input: {
         index: './src/index.ts',
-        changes: './src/changes/index.ts',
       },
       external: [
         ...Object.keys(pkg.dependencies), // don't bundle dependencies

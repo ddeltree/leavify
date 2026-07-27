@@ -13,12 +13,7 @@ module.exports = {
         'no-restricted-imports': [
           'error',
           {
-            patterns: [
-              '..*',
-              '@typings/*.js',
-              '@changes/*.js',
-              '@accessors/*.js',
-            ],
+            patterns: ['..*', '@typings/*.js', '@accessors/*.js'],
           },
         ],
       },

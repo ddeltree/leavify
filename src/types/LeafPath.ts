@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable no-restricted-imports */
-import type { ChangeableEntry } from '@changes/Changeable.js';
+import type { HiddenKeys } from './Hidden.js';
 import Primitive from './Primitive.js';
 
 export default LeafPath;
@@ -36,7 +35,7 @@ export type Refs<
 }[Exclude<
   PARENT extends readonly unknown[] ? Exclude<keyof PARENT, keyof []>
   : keyof PARENT,
-  ChangeableKeys<PARENT>
+  HiddenKeys<PARENT>
 >];
 
 type KeyParentPair = [string | number, object | Primitive];
@@ -53,10 +52,6 @@ type ToString<
     : `${DotNotation<PREVIOUS, FIRST[0], HINT>}`}${ToString<REST, FIRST, HINT>}`
   : PREVIOUS extends KeyParentPair ? ''
   : never;
-
-type ChangeableKeys<T> = {
-  [K in keyof T]: T[K] extends ChangeableEntry ? K : never;
-}[keyof T];
 
 // Notation string types
 
