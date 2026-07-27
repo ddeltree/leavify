@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import { set } from './accessors.js';
+import { setUnchecked } from './accessors.js';
 import { Primitive } from '@typings';
 
 /** Create a new object from a list of path-value entries  */
@@ -11,7 +11,7 @@ export default function toTree(
   const [firstPath] = leaves[0];
   const tree: object = firstPath.startsWith('[') ? [] : {};
   for (const [path, value] of leaves) {
-    set(tree, [path, value]);
+    setUnchecked(tree, [path, value]);
   }
   return tree;
 }

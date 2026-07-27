@@ -9,11 +9,34 @@ type LeafPath<T extends object, HINT extends boolean = false> = ToString<
   HINT
 >;
 
-export type LeafValue<T extends object> =
-  Refs<T> extends readonly [...infer _, infer LAST] ?
-    LAST extends readonly [infer KEY, infer VALUE] ?
-      KEY extends keyof VALUE ?
-        VALUE[KEY]
+/** The type of the leaf value sitting at path `P` inside `T`.
+ *
+ * Omitting `P` yields the union of every leaf type in `T`.
+ *
+ * @example
+ * type Order = { id: string; items: { qty: number }[] };
+ * type A = LeafValue<Order, 'id'>;          // string
+ * type B = LeafValue<Order, 'items[0].qty'>; // number
+ */
+export type LeafValue<
+  T extends object,
+  P extends LeafPath<T> = LeafPath<T>,
+> = MatchChain<Refs<T>, P>;
+
+/** Distributes over the union of chains, keeping the ones whose path matches `P`. */
+type MatchChain<CHAINS, P extends string> =
+  CHAINS extends KeyParentPair[] ?
+    P extends ToString<CHAINS> ?
+      ChainValue<CHAINS>
+    : never
+  : never;
+
+/** The value type at the end of a single `[key, parent]` chain. */
+type ChainValue<CHAIN extends KeyParentPair[]> =
+  CHAIN extends readonly [...infer _, infer LAST] ?
+    LAST extends readonly [infer KEY, infer PARENT] ?
+      KEY extends keyof PARENT ?
+        PARENT[KEY]
       : never
     : never
   : never;

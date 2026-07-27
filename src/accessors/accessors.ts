@@ -1,16 +1,19 @@
 import _ from 'lodash';
-import { Primitive, LeafPath } from '@typings';
+import { Primitive, LeafPath, LeafValue } from '@typings';
 import parsePath, { interpretPathHints } from '@utils/parsePath.js';
-import { LeafValue } from '@typings/LeafPath';
 
 /** Get the leaf value at the given path.
+ *
+ * The return type is the type of the leaf sitting at `path`, not a union of
+ * every leaf in the object.
+ *
  * Throws an error if the value returned isn't a leaf or doesn't exist.
  */
-export function get<T extends object>(obj: T, path: LeafPath<T>) {
-  path = interpretPathHints(path);
-  if (!has(obj, path))
-    throw new Error('No leaf value found at the given path: ' + path);
-  return _.get(obj, path) as LeafValue<T>;
+export function get<T extends object, P extends LeafPath<T>>(obj: T, path: P) {
+  const resolved = interpretPathHints<T>(path);
+  if (!has(obj, resolved))
+    throw new Error('No leaf value found at the given path: ' + resolved);
+  return _.get(obj, resolved) as LeafValue<T, P>;
 }
 
 /** Check whether the path refers to a leaf value */
@@ -30,12 +33,28 @@ export function has<T extends object>(obj: T, path: LeafPath<T>) {
   }
 }
 
-/** Set a leaf value by path in-place. */
-export function set<T extends object>(
+/** Set a leaf value by path in-place.
+ *
+ * The value is checked against the type of the leaf at that path. For paths
+ * that are only known at runtime, use {@link setUnchecked}.
+ */
+export function set<T extends object, P extends LeafPath<T>>(
   obj: T,
-  // eslint-disable-next-line @typescript-eslint/ban-types
-  entry: readonly [(string & {}) | LeafPath<T>, Primitive],
-) {
+  entry: readonly [P, LeafValue<T, P>],
+): T {
+  return setUnchecked(obj, entry as unknown as [string, Primitive]);
+}
+
+/** Set a leaf value by path in-place, without checking the path or the value.
+ *
+ * The escape hatch for entries built at runtime — replaying a stored changeset,
+ * assembling a fragment from parsed input. Prefer {@link set} when the path is
+ * known statically.
+ */
+export function setUnchecked<T extends object>(
+  obj: T,
+  entry: readonly [string, Primitive],
+): T {
   const [path, value] = entry;
   const groups = parsePath(path);
   // [a]        => {a: {}}
