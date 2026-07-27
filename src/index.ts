@@ -1,7 +1,7 @@
-import { findDifference, get, has, set, toTree, walkLeaves } from '@accessors';
+import { diff, get, has, set, toTree, walkLeaves } from '@accessors';
 
 const leaves = {
-  findDifference,
+  diff,
   get,
   has,
   set,
