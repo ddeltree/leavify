@@ -62,12 +62,19 @@ The type-level half of the library, and the hard part.
 
 `Hidden.ts` holds the path-space exclusion marker — a `declare const` unique symbol, so it exists only in the types and emits no runtime code. A field typed `Hidden<T>` is dropped from `Refs` via `HiddenKeys`, so it never appears in any path. `PickLeaves`/`OmitLeaves` do the same narrowing per use site instead of per declaration.
 
-Changes here are easy to get subtly wrong and are covered only by `__tests__/types/*.test-d.ts` — run `npm run test -- --types` after touching anything in `src/types/`.
+Changes here are easy to get subtly wrong, and they are covered by **two** suites that check different properties:
+
+- `__tests__/types/*.test-d.ts` (tsd, `npm run test -- --types`) — assignability: does this path resolve to this type, is this one rejected.
+- `__tests__/types/completions.test.ts` (vitest, part of the normal run) — **what an editor offers at the cursor**, via the real TypeScript language service over a virtual file (`__tests__/types/languageService.ts`).
+
+The second suite exists because the first one structurally cannot catch a missing completion. A type parameter constrained to `string` type-checks every call while offering no suggestion at all, so an assignability suite stays green while autocompletion — the headline feature — is broken. That is exactly how `PickLeaves`/`OmitLeaves` shipped with zero completions. Any new public API that takes a path needs a case in *both*.
 
 **Watch for two traps that already bit once:**
 
 1. A loose overload on `set` (`[string & {}, Primitive]`) silently defeats value checking — every string matches it, so the strict signature never fails. That is why the escape hatch is a separate `setUnchecked` function, not an overload. `__tests__/types/LeafValue.test-d.ts` catches the regression.
 2. `LeafValue<T, P>` instantiated with `P` at its full constraint is O(paths × chains) and can trip *"type instantiation is excessively deep"*. Keep it inferred from a concrete argument.
+
+`PickLeaves`/`OmitLeaves` do use `LeafPath<T> | (string & {})`, which looks like trap 1 but is not it. The trap is a loose **overload** on a mutating call, where any string matches and the strict signature never gets to fail. Here the loose half sits in a **constraint** whose only job is to keep subtree patterns (`` `customer.${string}` ``) assignable while the `LeafPath<T>` half keeps completions alive — a bare `string` swallows the union and the editor offers nothing. The residual cost is narrow and documented in the JSDoc: `OmitLeaves` with a path that matches nothing removes nothing instead of failing. `PickLeaves` yields `never`, which is loud.
 
 ## Conventions
 

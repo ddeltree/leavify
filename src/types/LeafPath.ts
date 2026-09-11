@@ -25,13 +25,17 @@ export type LeafValue<
 
 /** Narrows the path space of `T` down to the paths matching `P`.
  *
+ * `P` accepts a literal leaf path — autocompleted from `LeafPath<T>` — or a
+ * pattern that several paths match, for filtering a whole subtree at once.
+ *
  * @example
+ * type City = PickLeaves<Order, 'customer.address.city'>;
  * type Editable = PickLeaves<Order, `customer.${string}`>;
  */
-export type PickLeaves<T extends object, P extends string> = Extract<
-  LeafPath<T>,
-  P
->;
+export type PickLeaves<
+  T extends object,
+  P extends LeafPathOrPattern<T>,
+> = Extract<LeafPath<T>, P>;
 
 /** Removes `P` from the path space of `T`.
  *
@@ -39,13 +43,34 @@ export type PickLeaves<T extends object, P extends string> = Extract<
  * addressable elsewhere. To hide a field everywhere, mark its type with
  * {@link Hidden} instead.
  *
+ * `P` accepts a literal leaf path — autocompleted from `LeafPath<T>` — or a
+ * pattern that several paths match, for hiding a whole subtree at once.
+ *
+ * Note that a `P` matching no leaf of `T` removes nothing rather than failing;
+ * the pattern half of the constraint cannot tell a typo from a deliberate
+ * pattern. Use {@link PickLeaves} when you want a miss to be loud: it yields
+ * `never`.
+ *
  * @example
  * type Public = OmitLeaves<Order, 'customer.taxId'>;
+ * type NoCustomer = OmitLeaves<Order, `customer.${string}`>;
  */
-export type OmitLeaves<T extends object, P extends string> = Exclude<
-  LeafPath<T>,
-  P
->;
+export type OmitLeaves<
+  T extends object,
+  P extends LeafPathOrPattern<T>,
+> = Exclude<LeafPath<T>, P>;
+
+/** A literal leaf path of `T`, or a pattern matching several of them.
+ *
+ * The `string & {}` half keeps patterns such as `` `customer.${string}` ``
+ * assignable while leaving the `LeafPath<T>` half intact, so an editor still
+ * offers every leaf path as a completion at this position. A bare `string`
+ * constraint would swallow the union and offer nothing.
+ */
+type LeafPathOrPattern<T extends object> =
+  | LeafPath<T>
+  // eslint-disable-next-line @typescript-eslint/ban-types
+  | (string & {});
 
 /** Distributes over the union of chains, keeping the ones whose path matches `P`. */
 type MatchChain<CHAINS, P extends string> =

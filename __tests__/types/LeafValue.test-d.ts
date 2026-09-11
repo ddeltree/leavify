@@ -1,7 +1,13 @@
 /* eslint-disable */
 import { expectType, expectError, expectAssignable } from 'tsd';
 import { get, set, setUnchecked } from '@accessors';
-import type { LeafValue, OmitLeaves, PickLeaves } from '@typings';
+import type {
+  Hidden,
+  LeafPath,
+  LeafValue,
+  OmitLeaves,
+  PickLeaves,
+} from '@typings';
 
 interface Order {
   id: string;
@@ -40,9 +46,51 @@ expectError(set(order, ['paid', 'yes']));
 expectAssignable<object>(setUnchecked({} as object, ['a.b[0]', 1]));
 
 // ---------- path-space filtering ----------
+// Pinned first, so the assertions below read as "the whole space minus X"
+// instead of restating an unverified union.
+type OrderPaths =
+  | 'id'
+  | 'paid'
+  | 'customer.name'
+  | 'customer.address.city'
+  | 'customer.address.zip'
+  | `items[${number | ''}].sku`
+  | `items[${number | ''}].qty`;
+expectType<OrderPaths>(null as unknown as LeafPath<Order>);
+
+// a pattern keeps every path it matches
 expectType<'customer.name' | 'customer.address.city' | 'customer.address.zip'>(
   null as unknown as PickLeaves<Order, `customer.${string}`>,
 );
-expectType<never>(
-  null as unknown as Extract<OmitLeaves<Order, 'id'>, 'id'>,
+// a literal leaf path keeps exactly itself
+expectType<'customer.address.city'>(
+  null as unknown as PickLeaves<Order, 'customer.address.city'>,
 );
+// a union of literals keeps exactly those
+expectType<'id' | 'paid'>(null as unknown as PickLeaves<Order, 'id' | 'paid'>);
+// picking nothing is loud: it yields never
+expectType<never>(null as unknown as PickLeaves<Order, 'customer.nmae'>);
+
+// Omit is the complement of Pick over the same space
+expectType<Exclude<OrderPaths, 'id'>>(
+  null as unknown as OmitLeaves<Order, 'id'>,
+);
+expectType<
+  'id' | 'paid' | `items[${number | ''}].sku` | `items[${number | ''}].qty`
+>(null as unknown as OmitLeaves<Order, `customer.${string}`>);
+// removing the whole space leaves never
+expectType<never>(null as unknown as OmitLeaves<Order, OrderPaths>);
+// a path that matches nothing removes nothing — documented, not accidental
+expectType<OrderPaths>(null as unknown as OmitLeaves<Order, 'customer.nmae'>);
+
+// the filters still constrain P to a string
+expectError(null as unknown as PickLeaves<Order, 42>);
+expectError(null as unknown as OmitLeaves<Order, 42>);
+
+// a Hidden field is outside the path space, so it cannot be picked back in
+interface Account {
+  email: string;
+  passwordHash: Hidden<string>;
+}
+expectType<never>(null as unknown as PickLeaves<Account, 'passwordHash'>);
+expectType<'email'>(null as unknown as OmitLeaves<Account, 'passwordHash'>);
