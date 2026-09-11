@@ -1,14 +1,20 @@
 import parsePath from '@utils/parsePath.js';
+import type { FromPointer, ToPointer } from '@typings';
 
 /** Convert a leaf path into an RFC 6901 JSON Pointer.
  *
  * `'items[0].sku'` becomes `'/items/0/sku'`, which is what RFC 6902 patch
  * libraries (`fast-json-patch`, `generate-json-patch`, …) expect. Leavify sells
  * the types and the ergonomics; they carry the wire format.
+ *
+ * The pointer is computed at the type level too, so a literal path yields a
+ * literal pointer — the paths stay typed all the way to the wire. A path that
+ * is not a literal (`` `items[${number}].sku` ``) widens to `string`.
  */
-export function toPointer(path: string): string {
+export function toPointer<P extends string>(path: P): ToPointer<P> {
   const tokens = parsePath(path).flat();
-  return '/' + tokens.map(unescapeKey).map(escapeToken).join('/');
+  return ('/' +
+    tokens.map(unescapeKey).map(escapeToken).join('/')) as ToPointer<P>;
 }
 
 /** Convert an RFC 6901 JSON Pointer into a leaf path.
@@ -16,10 +22,14 @@ export function toPointer(path: string): string {
  * `'/items/0/sku'` becomes `'items[0].sku'`. A numeric token is read as an
  * array index, matching leavify's path grammar.
  *
+ * Inverse of {@link toPointer} at the type level as well as at runtime.
+ *
  * @throws if the pointer is non-empty and does not start with `/`.
  */
-export function fromPointer(pointer: string): string {
-  if (pointer === '') return '';
+export function fromPointer<PTR extends string>(
+  pointer: PTR,
+): FromPointer<PTR> {
+  if (pointer === '') return '' as FromPointer<PTR>;
   if (!pointer.startsWith('/'))
     throw new Error('A JSON Pointer must start with "/": ' + pointer);
   return pointer
@@ -31,7 +41,7 @@ export function fromPointer(pointer: string): string {
       : i === 0 ? escapeKey(token)
       : '.' + escapeKey(token),
     )
-    .join('');
+    .join('') as FromPointer<PTR>;
 }
 
 const isIndex = (token: string) => /^\d+$/.test(token);

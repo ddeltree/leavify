@@ -90,4 +90,13 @@ describe('JSON Pointer interop', () => {
     expect(toPointer(p('author.name'))).toBe('/author/name');
     expect(toPointer(p('chapters[0].title'))).toBe('/chapters/0/title');
   });
+
+  test('the pointer is a literal type through the published .d.ts', () => {
+    // These annotations only compile if the template-literal conversion
+    // survived the declaration build — `npm run typecheck` is what checks it.
+    const pointer: '/author/name' = toPointer('author.name');
+    const path: 'chapters[0].title' = fromPointer('/chapters/0/title');
+    expect(pointer).toBe('/author/name');
+    expect(path).toBe('chapters[0].title');
+  });
 });

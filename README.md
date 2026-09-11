@@ -70,7 +70,7 @@ has: truthy when the path refers to a leaf that exists
 walkLeaves: iterate the path-value entries inside an object
 toTree: rebuild the object from a list of path-value entries — the inverse of walkLeaves
 diff: compare two objects, yielding [path, before, after] per changed leaf
-toPointer / fromPointer: convert between a leaf path and an RFC 6901 JSON Pointer
+toPointer / fromPointer: convert between a leaf path and an RFC 6901 JSON Pointer, at the type level too
 ```
 
 ### Iterating and rebuilding
@@ -120,7 +120,21 @@ reported. The second argument may also be a sparse fragment:
 ### JSON Patch interop
 
 Leavify does not implement RFC 6902 — it hands the wire format to the libraries
-that already do, and sells the types on the way in:
+that already do, and sells the types on the way in. The conversion runs at the
+type level as well, so a literal path yields a literal pointer and the paths stay
+typed all the way to the wire:
+
+```ts
+import { toPointer, fromPointer } from 'leavify';
+
+toPointer('items[0].sku'); // '/items/0/sku'  — the type, not just the value
+fromPointer('/items/0/sku'); // 'items[0].sku'
+```
+
+A path that is not fully literal converts as far as the grammar allows:
+`` `items[${number}].sku` `` yields `` `/items/${number}/sku` ``, since a numeric
+hole cannot contain a delimiter. A `` `${string}` `` hole can, so those widen to
+`string`.
 
 ```ts
 import { diff, toPointer } from 'leavify';

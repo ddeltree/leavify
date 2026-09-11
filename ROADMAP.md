@@ -8,7 +8,7 @@ Leavify is **a typed addressing layer for nested state** — a bidirectional bri
 
 Once every leaf has a typed address, a family of problems collapses into "do something per address": diff, patch, audit, per-field permissions, i18n keys, form fields, layered config.
 
-**The product, in one sentence:** *how do these two **typed** objects differ, with paths you can autocomplete, filter by permission, render as a readable changelog, and send as a minimal PATCH?*
+**The product, in one sentence:** _how do these two **typed** objects differ, with paths you can autocomplete, filter by permission, render as a readable changelog, and send as a minimal PATCH?_
 
 Nobody answers that today. `immer` answers "what did I mutate inside this producer?" (patches from a mutation recorder). `fast-json-patch`, `generate-json-patch`, `json-diff-ts`, `jsondiffpatch` answer "how do these two blobs differ?" — and all of them return `path: string`, untyped against your model. That gap is the bet.
 
@@ -46,18 +46,18 @@ emit, unlike the `Symbol()` call it replaced). `leavify/changes` is gone.
 
 ### 1. ✅ `LeafValue<T, P>` — value type per path
 
-Today `LeafValue<T>` takes only `T` and returns the union of *every* leaf type in the object:
+Today `LeafValue<T>` takes only `T` and returns the union of _every_ leaf type in the object:
 
 ```ts
 get(order, 'customer.name'); // string | number   ← should be string
-get(order, 'items[0].qty');  // string | number   ← should be number
+get(order, 'items[0].qty'); // string | number   ← should be number
 ```
 
-`Refs<T>` already carries the `[key, parent]` tuples, so the information is there — it needs to be indexed *by path* instead of taking the last of everything. Prerequisite for everything in L1.
+`Refs<T>` already carries the `[key, parent]` tuples, so the information is there — it needs to be indexed _by path_ instead of taking the last of everything. Prerequisite for everything in L1.
 
 Landed as `MatchChain`/`ChainValue` in `LeafPath.ts`, covered by `__tests__/types/LeafValue.test-d.ts`.
 
-Note on `set`: the first attempt kept a loose `[string & {}, Primitive]` overload as an escape hatch, which silently swallowed every wrong-value error — any string matched the loose signature, so the strict one never got to fail. It also blew up as *"type instantiation is excessively deep"*. Both went away by splitting the escape hatch into a separate `setUnchecked` instead of an overload. If a loose overload is ever reintroduced, the tsd cases in `LeafValue.test-d.ts` are what catch the regression.
+Note on `set`: the first attempt kept a loose `[string & {}, Primitive]` overload as an escape hatch, which silently swallowed every wrong-value error — any string matched the loose signature, so the strict one never got to fail. It also blew up as _"type instantiation is excessively deep"_. Both went away by splitting the escape hatch into a separate `setUnchecked` instead of an overload. If a loose overload is ever reintroduced, the tsd cases in `LeafValue.test-d.ts` are what catch the regression.
 
 ### 2. ✅ Typed `diff(a, b)`
 
@@ -71,9 +71,9 @@ A leaf absent from `before` yields `undefined` rather than throwing, which is wh
 
 Strategic point: **hand the wire format to `fast-json-patch` instead of competing with it.** We sell types and ergonomics; they carry the RFC 6902 standard and the ecosystem. Verified end to end: `diff` + `toPointer` produces valid RFC 6902 `replace` ops.
 
-Landed as `src/accessors/pointer.ts`. Note the two escaping layers, which are *not* the same set: RFC 6901 reserves `~` and `/`; leavify's grammar reserves `.`, `[`, `]` and `\`. A key containing `/` needs no leavify escape, and a key containing `.` needs no pointer escape. `toPointer` unescapes the leavify layer before emitting.
+Landed as `src/accessors/pointer.ts`. Note the two escaping layers, which are _not_ the same set: RFC 6901 reserves `~` and `/`; leavify's grammar reserves `.`, `[`, `]` and `\`. A key containing `/` needs no leavify escape, and a key containing `.` needs no pointer escape. `toPointer` unescapes the leavify layer before emitting.
 
-**Open refinement:** `toPointer`/`fromPointer` are typed `string -> string`. A template-literal `Pointer<P>` mapping would make the conversion type-level too, closing the loop on "typed all the way to the wire". Not done — it needs recursive template parsing over the escape rules.
+**Refinement landed.** `toPointer`/`fromPointer` were typed `string -> string`; they are now generic over the string, with `src/types/PointerString.ts` mirroring the runtime as template-literal types. The recursive template parsing over the escape rules is written and covered: one shared table in `__tests__/accessors/pointer.test.ts` drives both halves, so they cannot drift. A numeric hole survives the conversion (`` `items[${number}].sku` `` → `` `/items/${number}/sku` ``); a `` `${string}` `` hole widens to `string`, since it could contain a delimiter. That closes the loop on "typed all the way to the wire".
 
 ### 4. ✅ Public `Hidden` marker + `PickLeaves`/`OmitLeaves`
 
@@ -113,12 +113,12 @@ Removed in step 0. Rationale, recorded so the decision isn't relitigated:
 
 Defects found on 2026-07-27, kept as a record in case the module is ever revived:
 
-1. `cloneDeepAsOriginal` does not return a pristine clone — the value rewinds correctly, but the clone carries phantom history (`getSavedEntries` → `[["title","x"]]`, `getOriginal` → the *pre*-rewind value). Should be `[]` and `{}`.
-2. `getSavedEntries` contradicts its own JSDoc: the doc promises the *original* value, the code pushes `get(target, path)` — the *current* one.
+1. `cloneDeepAsOriginal` does not return a pristine clone — the value rewinds correctly, but the clone carries phantom history (`getSavedEntries` → `[["title","x"]]`, `getOriginal` → the _pre_-rewind value). Should be `[]` and `{}`.
+2. `getSavedEntries` contradicts its own JSDoc: the doc promises the _original_ value, the code pushes `get(target, path)` — the _current_ one.
 3. `undo` throws `No leaf value found at the given path` for a path with no history. Reverting something unchanged should be a no-op.
 4. Dead code in `undo`: `.map()` already builds the proposal and the `for` below pushes everything again, duplicated.
 
-Measured cost of the design: `save` over 20k objects = ~1370ms (~68µs each) vs. 80ms to install the stores. The `Changes` constructor calls `Object.setPrototypeOf` on *every* invocation even when the store exists, and nearly every exported function instantiates it (`save` does so 3× in its call tree).
+Measured cost of the design: `save` over 20k objects = ~1370ms (~68µs each) vs. 80ms to install the stores. The `Changes` constructor calls `Object.setPrototypeOf` on _every_ invocation even when the store exists, and nearly every exported function instantiates it (`save` does so 3× in its call tree).
 
 **If an editing session is ever wanted back**, it returns as a thin layer over typed diff + `Fragment<T>`, on a `WeakMap` from day one — not as a revival of this code.
 

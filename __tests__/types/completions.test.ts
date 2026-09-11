@@ -66,9 +66,15 @@ describe('editor completions for leaf paths', () => {
     ).toEqual([]);
   });
 
-  it.todo(
-    'offers leaf paths at toPointer() — it is typed `string`, so it offers none',
-  );
+  it('offers nothing at toPointer, which converts without a model', () => {
+    // `toPointer` infers its path from the argument and maps it to a pointer at
+    // the type level; it never sees the model, so there is no path space to
+    // enumerate here. The paths reaching it are already typed — they come from
+    // `walkLeaves`, `diff`, or a `LeafPath<T>`-typed constant.
+    const offered = completionsAt(snippet(`const p = toPointer('${CURSOR}');`));
+    // The only suggestion is the empty literal already typed, echoed back.
+    expect(offered.filter((name) => LEAVES.includes(name))).toEqual([]);
+  });
 });
 
 describe('path-space filters accept literal paths and patterns alike', () => {

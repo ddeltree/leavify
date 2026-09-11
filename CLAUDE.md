@@ -27,7 +27,7 @@ npm run release               # standard-version (conventional commits -> CHANGE
 
 `npm run typecheck` (`tsconfig.typecheck.json`) is the gate for everything vitest only transpiles. Vitest does not type-check, so a type regression in a runtime test file is invisible to `npm test` — that is how a broken `toTree` call sat green. The config excludes `__tests__/types/*.test-d.ts`, since those are full of deliberate errors that `tsd` owns.
 
-`npm test` dispatches through `test.sh`, which switches on `--types` / `--package` flags. `--types` requires `dist/src/index.d.ts` to exist (it touches an empty one if missing) because tsd resolves the package's declared `types` field. `--package` runs against the *built* artifact via `npm link`, so it catches packaging/export-map regressions that unit tests can't.
+`npm test` dispatches through `test.sh`, which switches on `--types` / `--package` flags. `--types` requires `dist/src/index.d.ts` to exist (it touches an empty one if missing) because tsd resolves the package's declared `types` field. `--package` runs against the _built_ artifact via `npm link`, so it catches packaging/export-map regressions that unit tests can't.
 
 CI (`.github/workflows/test.yml`) runs build → unit → package → types on push/PR to `main`.
 
@@ -43,7 +43,9 @@ Paths are strings mixing dot and bracket notation: `chapters[0].title`, `values[
 
 A "leaf" is any non-object value **plus `null`** — see the `switch` in `has()`. Functions and symbols are not leaves.
 
-Two escaping layers exist and they reserve *different* characters. Leavify's grammar reserves `.`, `[`, `]`, `\`; RFC 6901 reserves `~` and `/`. A key containing `/` needs no leavify escape; a key containing `.` needs no pointer escape. `pointer.ts` translates between them — `toPointer` unescapes the leavify layer before emitting.
+`IsIndex` in `PointerString.ts` is digits-only on purpose: `` `${number}` `` also admits `-1`, `1.5` and `1e5`, which the runtime `/^\d+$/` reads as ordinary keys. Using the wider one would make the two halves disagree on `/a/-1`.
+
+Two escaping layers exist and they reserve _different_ characters. Leavify's grammar reserves `.`, `[`, `]`, `\`; RFC 6901 reserves `~` and `/`. A key containing `/` needs no leavify escape; a key containing `.` needs no pointer escape. `pointer.ts` translates between them — `toPointer` unescapes the leavify layer before emitting.
 
 ### `src/accessors/`
 
@@ -51,9 +53,9 @@ Runtime primitives, all path-based:
 
 - `accessors.ts` — `get` (typed as the leaf at that path), `has`, `set` (value checked against the path), `setUnchecked` (escape hatch for runtime-built paths; `set` delegates to it).
 - `walkLeaves.ts` — generator over leaf entries, cycle-guarded by the `Branch` value stack. Yields `LeafEntry<T>`, a discriminated union over the path (same shape as `LeafDiff`), so the value narrows with the path.
-- `toTree.ts` — entries → new object; root is an array if the first path starts with `[`. Generic over the model, which must be passed explicitly (`toTree<Order>(…)`) because `LeafPath<T>` is not an inferable position. The `T = never` default routes unannotated calls to a plain `[string, Primitive]` entry, deliberately keeping `LeafEntry` off that path: `LeafEntry` of an index-signature model distributes over `` `${string}` `` and trips *"type instantiation is excessively deep"* (trap 2 below). `diff` binds `walkLeaves` to `T` rather than `T | Fragment<T>` for the same reason.
+- `toTree.ts` — entries → new object; root is an array if the first path starts with `[`. Generic over the model, which must be passed explicitly (`toTree<Order>(…)`) because `LeafPath<T>` is not an inferable position. The `T = never` default routes unannotated calls to a plain `[string, Primitive]` entry, deliberately keeping `LeafEntry` off that path: `LeafEntry` of an index-signature model distributes over `` `${string}` `` and trips _"type instantiation is excessively deep"_ (trap 2 below). `diff` binds `walkLeaves` to `T` rather than `T | Fragment<T>` for the same reason.
 - `diff.ts` — yields `[path, before, after]` as `LeafDiff<T>`, a discriminated union over the path. Only visits leaves reachable in `after`, so removals are not reported; a leaf absent from `before` yields `undefined`.
-- `pointer.ts` — `toPointer` / `fromPointer` for RFC 6901 interop.
+- `pointer.ts` — `toPointer` / `fromPointer` for RFC 6901 interop. Both are generic over the string, and `src/types/PointerString.ts` mirrors the runtime step for step as template-literal types (`ToPointer` / `FromPointer`). The two halves are kept honest by one shared table in `__tests__/accessors/pointer.test.ts` that drives the runtime assertion and the type assertion, plus a negative pass — without it a conversion resolving to `never` would satisfy every type assertion silently.
 
 ### `src/types/`
 
@@ -70,12 +72,12 @@ Changes here are easy to get subtly wrong, and they are covered by **two** suite
 - `__tests__/types/*.test-d.ts` (tsd, `npm run test -- --types`) — assignability: does this path resolve to this type, is this one rejected.
 - `__tests__/types/completions.test.ts` (vitest, part of the normal run) — **what an editor offers at the cursor**, via the real TypeScript language service over a virtual file (`__tests__/types/languageService.ts`).
 
-The second suite exists because the first one structurally cannot catch a missing completion. A type parameter constrained to `string` type-checks every call while offering no suggestion at all, so an assignability suite stays green while autocompletion — the headline feature — is broken. That is exactly how `PickLeaves`/`OmitLeaves` shipped with zero completions. Any new public API that takes a path needs a case in *both*.
+The second suite exists because the first one structurally cannot catch a missing completion. A type parameter constrained to `string` type-checks every call while offering no suggestion at all, so an assignability suite stays green while autocompletion — the headline feature — is broken. That is exactly how `PickLeaves`/`OmitLeaves` shipped with zero completions. Any new public API that takes a path needs a case in _both_.
 
 **Watch for two traps that already bit once:**
 
 1. A loose overload on `set` (`[string & {}, Primitive]`) silently defeats value checking — every string matches it, so the strict signature never fails. That is why the escape hatch is a separate `setUnchecked` function, not an overload. `__tests__/types/LeafValue.test-d.ts` catches the regression.
-2. `LeafValue<T, P>` instantiated with `P` at its full constraint is O(paths × chains) and can trip *"type instantiation is excessively deep"*. Keep it inferred from a concrete argument.
+2. `LeafValue<T, P>` instantiated with `P` at its full constraint is O(paths × chains) and can trip _"type instantiation is excessively deep"_. Keep it inferred from a concrete argument.
 
 `PickLeaves`/`OmitLeaves` do use `LeafPath<T> | (string & {})`, which looks like trap 1 but is not it. The trap is a loose **overload** on a mutating call, where any string matches and the strict signature never gets to fail. Here the loose half sits in a **constraint** whose only job is to keep subtree patterns (`` `customer.${string}` ``) assignable while the `LeafPath<T>` half keeps completions alive — a bare `string` swallows the union and the editor offers nothing. The residual cost is narrow and documented in the JSDoc: `OmitLeaves` with a path that matches nothing removes nothing instead of failing. `PickLeaves` yields `never`, which is loud.
 
