@@ -41,7 +41,8 @@
   "scripts": {
     "dev": "npx tsx src/index.ts",
     "test": "bash ./test.sh",
-    "check": "npm run test && npm run test -- --types && npm run test -- --package",
+    "typecheck": "tsc --noEmit -p tsconfig.typecheck.json",
+    "check": "npm run typecheck && npm run test && npm run test -- --types && npm run test -- --package",
     "coverage": "vitest --coverage",
     "release": "standard-version",
     "build": "vite build",

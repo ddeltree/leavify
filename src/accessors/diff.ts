@@ -30,7 +30,9 @@ export default function* diff<T extends object>(
   before: T,
   after: T | Fragment<T>,
 ): Generator<LeafDiff<T>> {
-  for (const [path, afterValue] of walkLeaves(after)) {
+  // Walk it as a `T`: a Fragment is a sparse `T`, and binding the generic to
+  // the union instead would ask `LeafEntry` to describe both shapes at once.
+  for (const [path, afterValue] of walkLeaves(after as T)) {
     const p = path as LeafPath<T>;
     const beforeValue = has(before, p) ? get(before, p) : undefined;
     if (beforeValue !== afterValue) {

@@ -16,13 +16,16 @@ See `ROADMAP.md`. The package is positioned as **a typed addressing layer for ne
 npm run test                  # unit tests (vitest, excludes __tests__/integration)
 npm run test -- --types       # type-level tests via tsd on __tests__/types/*.test-d.ts
 npm run test -- --package     # builds, npm-links the package, runs __tests__/integration
-npm run check                 # all three of the above, in order
+npm run typecheck             # tsc --noEmit over sources + runtime tests
+npm run check                 # typecheck, then all three of the above, in order
 npm run test -- accessors     # single file/pattern: extra args pass through to vitest
 npm run coverage              # vitest --coverage (watch mode)
 npm run build                 # vite build -> dist/
 npm run lint                  # eslint src/** utils/** __tests__/**
 npm run release               # standard-version (conventional commits -> CHANGELOG + tag)
 ```
+
+`npm run typecheck` (`tsconfig.typecheck.json`) is the gate for everything vitest only transpiles. Vitest does not type-check, so a type regression in a runtime test file is invisible to `npm test` — that is how a broken `toTree` call sat green. The config excludes `__tests__/types/*.test-d.ts`, since those are full of deliberate errors that `tsd` owns.
 
 `npm test` dispatches through `test.sh`, which switches on `--types` / `--package` flags. `--types` requires `dist/src/index.d.ts` to exist (it touches an empty one if missing) because tsd resolves the package's declared `types` field. `--package` runs against the *built* artifact via `npm link`, so it catches packaging/export-map regressions that unit tests can't.
 
@@ -47,8 +50,8 @@ Two escaping layers exist and they reserve *different* characters. Leavify's gra
 Runtime primitives, all path-based:
 
 - `accessors.ts` — `get` (typed as the leaf at that path), `has`, `set` (value checked against the path), `setUnchecked` (escape hatch for runtime-built paths; `set` delegates to it).
-- `walkLeaves.ts` — generator over leaf entries, cycle-guarded by the `Branch` value stack.
-- `toTree.ts` — entries → new object; root is an array if the first path starts with `[`.
+- `walkLeaves.ts` — generator over leaf entries, cycle-guarded by the `Branch` value stack. Yields `LeafEntry<T>`, a discriminated union over the path (same shape as `LeafDiff`), so the value narrows with the path.
+- `toTree.ts` — entries → new object; root is an array if the first path starts with `[`. Generic over the model, which must be passed explicitly (`toTree<Order>(…)`) because `LeafPath<T>` is not an inferable position. The `T = never` default routes unannotated calls to a plain `[string, Primitive]` entry, deliberately keeping `LeafEntry` off that path: `LeafEntry` of an index-signature model distributes over `` `${string}` `` and trips *"type instantiation is excessively deep"* (trap 2 below). `diff` binds `walkLeaves` to `T` rather than `T | Fragment<T>` for the same reason.
 - `diff.ts` — yields `[path, before, after]` as `LeafDiff<T>`, a discriminated union over the path. Only visits leaves reachable in `after`, so removals are not reported; a leaf absent from `before` yields `undefined`.
 - `pointer.ts` — `toPointer` / `fromPointer` for RFC 6901 interop.
 

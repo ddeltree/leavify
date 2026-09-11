@@ -1,10 +1,24 @@
-import { Primitive, LeafPath } from '@typings';
+import { Primitive, LeafPath, LeafValue } from '@typings';
 import { isObject, last } from '@utils/objects.js';
 
-/** Generate the leaf value entries inside the object */
-export default function* walkLeaves<T extends object>(target: T) {
+/** One leaf of `T`: its path, paired with the value sitting at that path.
+ *
+ * This is a discriminated union over the path, so narrowing on the path narrows
+ * the value to that leaf's type — the same shape as {@link LeafDiff}.
+ */
+export type LeafEntry<T extends object, P extends LeafPath<T> = LeafPath<T>> =
+  P extends unknown ? readonly [path: P, value: LeafValue<T, P>] : never;
+
+/** Generate the leaf value entries inside the object.
+ *
+ * A field marked `Hidden` is absent from `LeafPath<T>` but still enumerated
+ * here — the marker emits no runtime code, so this walker cannot see it.
+ */
+export default function* walkLeaves<T extends object>(
+  target: T,
+): Generator<LeafEntry<T>> {
   for (const [path, value] of new Branch(target)) {
-    yield [path as LeafPath<T>, value] as const;
+    yield [path, value] as unknown as LeafEntry<T>;
   }
 }
 

@@ -44,6 +44,7 @@ describe('get(), has(), set() integration', () => {
       value = 42;
     // @ts-expect-error
     expect(get(branch, path)).not.toBe(value);
+    // @ts-expect-error — `branch` is typed `object`, so its path space is empty
     set(branch, [path, value]);
     // @ts-expect-error
     expect(get(branch, path)).toBe(value);
@@ -76,6 +77,7 @@ describe('get(), has(), set() integration', () => {
       value = 42;
     // @ts-expect-error
     expect(() => get(branch, path)).toThrow();
+    // @ts-expect-error — `branch` is typed `object`, so its path space is empty
     set(branch, [path, value]);
     // @ts-expect-error
     expect(get(branch, path)).toBe(value);

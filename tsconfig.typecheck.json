@@ -1,0 +1,7 @@
+{
+  "extends": "./tsconfig.json",
+  // The tsd suites are full of deliberate errors asserted with `expectError`,
+  // and `tsd` is what checks them. Everything else — sources, utils, and the
+  // runtime test files that vitest only transpiles — is checked here.
+  "exclude": ["dist", "__tests__/types/*.test-d.ts"]
+}

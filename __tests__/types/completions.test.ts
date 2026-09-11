@@ -5,7 +5,7 @@ import { CURSOR, completionsAt, errorsIn } from './languageService.js';
  * position in the API should ever offer it. */
 const PRELUDE = `
 import type { Hidden, LeafPath, LeafValue, OmitLeaves, PickLeaves } from '@typings';
-import { get, set, setUnchecked, has, toPointer } from '@accessors';
+import { get, set, setUnchecked, has, toPointer, toTree } from '@accessors';
 
 interface Order {
   id: string;
@@ -28,6 +28,7 @@ describe('editor completions for leaf paths', () => {
     ['get()', `const v = get(order, '${CURSOR}');`],
     ['set()', `set(order, ['${CURSOR}', 'x']);`],
     ['has()', `const h = has(order, '${CURSOR}');`],
+    ['toTree<T>()', `const t = toTree<Order>([['${CURSOR}', 'x']]);`],
   ])('%s', (_label, line) => {
     it('offers every leaf path of the model', () => {
       expect(completionsAt(snippet(line))).toEqual(LEAVES);

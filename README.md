@@ -68,22 +68,33 @@ set: write the leaf at a path — the value is checked against that path
 setUnchecked: escape hatch for paths only known at runtime
 has: truthy when the path refers to a leaf that exists
 walkLeaves: iterate the path-value entries inside an object
-toTree: build a new object from a list of path-value entries
+toTree: rebuild the object from a list of path-value entries — the inverse of walkLeaves
 diff: compare two objects, yielding [path, before, after] per changed leaf
 toPointer / fromPointer: convert between a leaf path and an RFC 6901 JSON Pointer
 ```
 
 ### Iterating and rebuilding
 
+`walkLeaves` yields `[path, value]` as a discriminated union over the path, so
+narrowing the path narrows the value — the same shape `diff` returns:
+
 ```ts
 import { walkLeaves, toTree } from 'leavify';
 
 for (const [path, value] of walkLeaves(order)) {
   console.log(path, value); // 'customer.address.city', 'Lisbon'
+  if (path === 'items[0].qty') value.toFixed(); // number here
 }
 
-const rebuilt = toTree([...walkLeaves(order)]);
+const rebuilt = toTree<Order>([...walkLeaves(order)]); // Order | undefined
 ```
+
+`toTree` takes the model as an explicit type argument: `LeafPath<T>` is a
+conditional type and TypeScript cannot run it backwards, so there is nothing to
+infer `T` from. Given it, the entries are checked against the path space and
+against the leaf at each path. Without it, the call still accepts entries built
+at runtime, as before. The result is `undefined` for an empty list — with no
+first path there is no way to tell an array root from an object one.
 
 ### Diffing
 
@@ -127,8 +138,9 @@ applyPatch(saved, patch);
 ### Hiding fields from the path space
 
 A field marked `Hidden` keeps working normally but never appears in `LeafPath`,
-so it is excluded from autocompletion and rejected by the accessors. Use it for
-derived getters, internal bookkeeping, or data that must not be addressable.
+so it is excluded from autocompletion and rejected by `get`, `set` and `has` at
+compile time. Use it for derived getters, internal bookkeeping, or fields that
+should not be addressable by path.
 
 ```ts
 import type { Hidden, LeafPath, OmitLeaves, PickLeaves } from 'leavify';
@@ -139,6 +151,11 @@ interface User {
 }
 type P = LeafPath<User>; // 'name'
 ```
+
+This narrows the path space — it does not redact the value. The marker is
+types-only and emits no runtime code, so `walkLeaves` (and `diff`/`toTree`
+through it) still enumerate the field. Keep data that must not leave the object
+out of it, rather than relying on `Hidden` to strip it.
 
 `PickLeaves` and `OmitLeaves` narrow the path space per use site, for when a
 field must stay addressable elsewhere:

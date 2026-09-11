@@ -8,10 +8,18 @@ export type HiddenMarker = { [HIDDEN]: never };
  *
  * A field whose type is wrapped in `Hidden` keeps working at runtime and in
  * regular property access, but never shows up in `LeafPath`, so it is excluded
- * from autocompletion and rejected by the accessors.
+ * from autocompletion and rejected by `get`, `set` and `has` at compile time.
  *
- * Useful for derived getters, internal bookkeeping, and fields that must not be
- * addressable by path (sensitive data, server-owned columns).
+ * Useful for derived getters, internal bookkeeping, and fields that should not
+ * be addressable by path.
+ *
+ * **This narrows the path space; it does not redact the value.** The marker is
+ * types-only — the symbol below is declared, never constructed — so nothing
+ * about it survives to runtime, and the walkers that enumerate an object with
+ * `Object.entries` (`walkLeaves`, and `diff`/`toTree` through it) still visit
+ * the field. Data that must not leave the object has to be kept out of it, or
+ * removed before it reaches those functions. `__tests__/accessors/hidden.test.ts`
+ * pins where the boundary falls.
  *
  * @example
  * interface User {

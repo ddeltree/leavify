@@ -44,26 +44,38 @@ test('get() is typed per path through the published package', () => {
   expect(year).toBe(data.year);
 });
 
+/** Rebuilds the book from its leaves. Typed end to end: no cast anywhere. */
+function snapshot(): Book {
+  const tree = toTree<Book>([...walkLeaves(book)]);
+  if (tree === undefined) throw new Error('the book has no leaves');
+  return tree;
+}
+
 test('walkLeaves and toTree round trip', () => {
   const leaves = [...walkLeaves(book)];
   expect(leaves.length).toBeGreaterThan(0);
-  const tree = toTree(leaves);
+  const tree = snapshot();
   for (const [path, value] of leaves) {
-    expect(get(tree as object, path as never)).toBe(value);
+    expect(get(tree, p(path))).toBe(value);
   }
+});
+
+test('toTree gives the model back, not a bare object', () => {
+  const rebuilt: Book = snapshot();
+  expect(rebuilt.title).toBe(data.title);
 });
 
 describe('diff', () => {
   test('reports the leaves that changed, with both values', () => {
-    const before = toTree([...walkLeaves(book)]) as object;
+    const before = snapshot();
     set(book, [p('title'), 'a different title']);
-    const changes = [...diff(before, toTree([...walkLeaves(book)]) as object)];
+    const changes = [...diff(before, snapshot())];
     expect(changes).toEqual([['title', data.title, 'a different title']]);
   });
 
   test('an unchanged object yields nothing', () => {
-    const snapshot = toTree([...walkLeaves(book)]) as object;
-    expect([...diff(snapshot, snapshot)]).toEqual([]);
+    const unchanged = snapshot();
+    expect([...diff(unchanged, unchanged)]).toEqual([]);
   });
 });
 

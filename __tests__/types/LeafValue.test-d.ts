@@ -1,10 +1,17 @@
 /* eslint-disable */
-import { expectType, expectError, expectAssignable } from 'tsd';
-import { get, set, setUnchecked } from '@accessors';
+import {
+  expectType,
+  expectError,
+  expectAssignable,
+  expectNotAssignable,
+} from 'tsd';
+import { get, set, setUnchecked, toTree, walkLeaves } from '@accessors';
+import type { LeafEntry } from '@accessors/walkLeaves.js';
 import type {
   Hidden,
   LeafPath,
   LeafValue,
+  Primitive,
   OmitLeaves,
   PickLeaves,
 } from '@typings';
@@ -94,3 +101,26 @@ interface Account {
 }
 expectType<never>(null as unknown as PickLeaves<Account, 'passwordHash'>);
 expectType<'email'>(null as unknown as OmitLeaves<Account, 'passwordHash'>);
+
+// ---------- toTree() is the typed inverse of walkLeaves() ----------
+// The model is explicit: `LeafPath<T>` is a conditional type, so TypeScript
+// cannot infer T backwards out of the entries.
+expectType<Order | undefined>(toTree<Order>([...walkLeaves(order)]));
+expectType<Order | undefined>(toTree<Order>([['items[0].qty', 3]]));
+
+// entries are checked against the path space and against the leaf at the path
+expectError(toTree<Order>([['customer.nmae', 'x']]));
+expectError(toTree<Order>([['items[0].qty', 'three']]));
+expectError(toTree<Order>([['paid', 'yes']]));
+
+// an unannotated call still takes runtime-built entries, as it always did
+declare const runtimeEntries: (readonly [string, string])[];
+expectAssignable<Record<string, Primitive> | undefined>(toTree(runtimeEntries));
+
+// ---------- walkLeaves() correlates the value with the path ----------
+declare const entry: LeafEntry<Order>;
+// narrowing the path narrows the value, the same way LeafDiff does
+if (entry[0] === 'items[0].qty') expectAssignable<number>(entry[1]);
+if (entry[0] === 'id') expectAssignable<string>(entry[1]);
+// and it is not narrowed to the wrong leaf
+if (entry[0] === 'id') expectNotAssignable<number>(entry[1]);
