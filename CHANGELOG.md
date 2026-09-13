@@ -2,6 +2,67 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.4.0](https://github.com/ddeltree/leavify/compare/v0.3.0...v0.4.0) (2026-09-13)
+
+This release turns leavify into a typed addressing layer for nested state. Every
+path-taking API is now checked _and_ autocompleted against the model, the
+change-tracking surface is gone, and the package has no runtime dependencies.
+
+### ⚠ BREAKING CHANGES
+
+- **The `leavify/changes` entry point is removed**, along with `propose`,
+  `save`, `undo`, `discard`, `isSaved`, `getOriginal`, `getProposed`,
+  `getSavedEntries` and `cloneDeepAsOriginal`. Change tracking is an explicit
+  non-goal; use `immer` or a state library for that, and leavify for addressing.
+  ([12f70b5](https://github.com/ddeltree/leavify/commit/12f70b55a66caf45cbfae5457929fedf5740a8b7))
+- **`findDifference` is replaced by `diff`**, which yields
+  `[path, before, after]` instead of a 2-tuple, as a discriminated union over
+  the path — so the two values narrow with it.
+  ([a7eb89f](https://github.com/ddeltree/leavify/commit/a7eb89f676598489553cf3dfec5a45abdcada84e))
+
+### Features
+
+- **`get()` and `set()` are typed by the leaf at each path.** `get` returns the
+  type of that leaf, and `set` rejects a value that does not belong there.
+  `setUnchecked` stays as the escape hatch for runtime-built paths — a separate
+  function on purpose, since a loose overload would silently defeat the check.
+  ([d93b671](https://github.com/ddeltree/leavify/commit/d93b6719518bc24905ea9fa8abb0d0b2393790f8))
+- **`PickLeaves` and `OmitLeaves` narrow the path space per use site**, and now
+  autocomplete the model's leaf paths at the cursor while still accepting
+  subtree patterns such as `` `customer.${string}` ``. They shipped offering no
+  completions at all; that is fixed and pinned by a suite driven through the
+  real TypeScript language service, which is the only thing that can see a
+  missing suggestion.
+  ([5d31dd0](https://github.com/ddeltree/leavify/commit/5d31dd0abb5b4dd04812835f9a2833d55aea5e45),
+  [57dcb1f](https://github.com/ddeltree/leavify/commit/57dcb1f6ea1758bd70ca13f9c461611234bb303b))
+- **`toPointer` and `fromPointer` convert at the type level too.** A literal
+  path yields a literal RFC 6901 pointer and back again, so paths stay typed all
+  the way to the wire; a non-literal widens to `string`. This is the interop
+  seam with `fast-json-patch` and friends — leavify does not compete on the
+  patch format.
+  ([bbe9df6](https://github.com/ddeltree/leavify/commit/bbe9df6fbc8a443f57008520707a9ae4c6a343fa),
+  [d252ca7](https://github.com/ddeltree/leavify/commit/d252ca7aabf23a6ed286cff2c4089666d3189880))
+- **`toTree<T>()` returns `T`, and `walkLeaves` correlates each path with its
+  own value type.** `toTree` round-trips the entries of `walkLeaves`/`diff` back
+  into the model without a cast; called without a model it still accepts plain
+  `[string, Primitive]` entries.
+  ([c64ae38](https://github.com/ddeltree/leavify/commit/c64ae3890f054be87e52930a7b319bd01f121229))
+- **`Hidden<T>` marks a field as outside the path space**, so it never appears
+  in `LeafPath` and no accessor will address it.
+  ([12f70b5](https://github.com/ddeltree/leavify/commit/12f70b55a66caf45cbfae5457929fedf5740a8b7))
+- **No runtime dependencies.** `lodash` is gone, replaced by the few object
+  helpers the accessors actually need.
+  ([54b64e6](https://github.com/ddeltree/leavify/commit/54b64e61650418be441b2077817e4f2f3ebf56a7))
+
+### Documentation
+
+- **Corrected the `Hidden<T>` guarantee.** It is a compile-time boundary only:
+  `walkLeaves`, `diff` and `toTree` still enumerate a hidden field at runtime.
+  The previous docs implied it was redacted from traversal and used
+  `passwordHash` as the example, which read as a security guarantee it never
+  made.
+  ([c64ae38](https://github.com/ddeltree/leavify/commit/c64ae3890f054be87e52930a7b319bd01f121229))
+
 ## 0.3.0 (2024-06-26)
 
 ### ⚠ BREAKING CHANGES
