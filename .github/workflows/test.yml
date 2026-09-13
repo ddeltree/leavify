@@ -18,6 +18,8 @@ jobs:
       - run: npm ci
       - name: Build leavify
         run: npm run build
+      - name: Type-check sources and runtime tests
+        run: npm run typecheck
       - name: Run unit tests
         run: npm run test
       - name: Run package tests

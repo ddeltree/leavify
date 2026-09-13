@@ -16,6 +16,10 @@
     "./package.json": "./package.json"
   },
   "types": "./dist/src/index.d.ts",
+  "sideEffects": false,
+  "engines": {
+    "node": ">=18"
+  },
   "typesVersions": {
     "*": {
       ".": [
@@ -47,7 +51,7 @@
     "release": "standard-version",
     "build": "vite build",
     "lint": "eslint src/** utils/** __tests__/**",
-    "prepublishOnly": "npm run test && npm run build"
+    "prepublishOnly": "npm run check && npm run build"
   },
   "author": "Davi Alexandre",
   "license": "MIT",
