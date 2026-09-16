@@ -4,10 +4,67 @@ All notable changes to this project will be documented in this file. It is gener
 
 ## [0.5.0](https://github.com/ddeltree/leavify/compare/v0.4.0...v0.5.0) (2026-09-16)
 
+This release adds the runtime half of path filtering — masking — and makes `set`
+curried, which is a breaking change driven by measurement rather than taste.
+
+### ⚠ BREAKING CHANGES
+
+- **`set` now takes the value in a second call**: `set(obj, path)(value)`
+  instead of `set(obj, [path, value])`. The value is still checked against the
+  leaf at that path, and the error now points at the value rather than at the
+  pair.
+
+  ```diff
+  - set(order, ['items[0].qty', 3]);
+  + set(order, 'items[0].qty')(3);
+  ```
+
+  With the path and the value in one argument list, TypeScript has to type the
+  value against `LeafValue<T, P>` while `P` is still the whole of `LeafPath<T>`.
+  On an 800-leaf model, completing a path there took **5.2s**; curried it takes
+  **0.8s**, which is the cost of a signature that checks no value at all. Fixing
+  `P` in the first call is what makes the second one cheap.
+
+  `setUnchecked` is unchanged and still takes a `[path, value]` entry — it has
+  no value type to defer, and it exists to replay the entries `walkLeaves` and
+  `diff` produce.
+  ([f7118f7](https://github.com/ddeltree/leavify/commit/f7118f750863758d816e17b101493b3aed6cfe24))
 
 ### Features
 
-* introduce masking functionality with pickLeaves and omitLeaves ([f7118f7](https://github.com/ddeltree/leavify/commit/f7118f750863758d816e17b101493b3aed6cfe24))
+- **`pickLeaves`, `omitLeaves` and `mask()`** — the runtime twins of the
+  `PickLeaves` / `OmitLeaves` types. They project an object down to a set of
+  paths and return a sparse `Fragment<T>`, so the result composes with `diff`
+  without a cast.
+
+  ```ts
+  const support = mask<Order>().pick('customer').omit('customer.taxId');
+  support.apply(order);
+  support.allows('customer.taxId'); // false
+  ```
+
+  A rule names one leaf or a whole branch; `omit` wins over `pick`; masks are
+  immutable, so a base can be specialised per role. Three behaviours worth
+  knowing: **`[]` means _any_ index in a rule** (elsewhere in the grammar it
+  resolves to `[0]` — resolving it here would redact one row and leak the rest),
+  indices are preserved so a skipped element leaves a hole, and the output is a
+  plain object, without the source's prototype.
+
+  A mask is **not** redaction for `Hidden` fields: it cannot see the marker,
+  which is types-only. An allow-list of exact paths drops them only because they
+  are never offered as completions — naming one outright still works, and
+  picking a whole subtree sweeps them back in.
+  ([f7118f7](https://github.com/ddeltree/leavify/commit/f7118f750863758d816e17b101493b3aed6cfe24))
+- `LeafPathOrPattern<T>` is now exported, for writing your own path-taking
+  wrappers without rediscovering why the constraint needs its `string & {}` half.
+
+### Documentation
+
+- `interpretPathHints` never stripped the `$`/`#` index-signature hint suffixes;
+  it only resolves `[]`. The README and `CLAUDE.md` both claimed otherwise. No
+  behaviour depended on it — an accessor takes `LeafPath<T>` with hints off, so
+  a suffix cannot reach one — but a mask rule may carry one, and the matcher
+  strips it itself.
 
 ## [0.4.0](https://github.com/ddeltree/leavify/compare/v0.3.0...v0.4.0) (2026-09-13)
 
