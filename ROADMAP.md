@@ -105,7 +105,7 @@ This step is not marketing. A general-purpose primitive with no one-sentence "wh
 
 - README leads with the typed-path story, and every example in it is verified — the type claims by `tsd`, the runtime ones against the built bundle.
 - `package.json` `description` and `keywords` follow.
-- Main bundle went from 7.16 kB (shared chunk) + two entry points to a single 4.22 kB entry.
+- Main bundle went from 7.16 kB (shared chunk) + two entry points to a single entry: 4.22 kB at the time, 6.14 kB since the masking functions landed.
 
 ## Before publishing
 
