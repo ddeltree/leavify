@@ -127,6 +127,15 @@ type ToString<
 
 // Notation string types
 
+/** Bracket notation for one array step.
+ *
+ * A readonly tuple has literal indices, so `[0]`, `[1]`, … are emitted directly.
+ * A mutable array only has `` `[${number}]` ``, for which TypeScript offers no
+ * completion at all (microsoft/TypeScript#57545) — the editor would go silent at
+ * `roles`. The extra `''` member adds the literal `roles[]` beside it, which the
+ * editor can offer; `split()` reads it back as index `0`. It is not spelled `[0]`
+ * because an array of unknown length promises no element there.
+ */
 type Arr<T extends KeyParentPair> =
   Readonly<T[1]> extends T[1] ? `[${T[0]}]` : `[${T[0] | ''}]`;
 

@@ -182,8 +182,11 @@ type Public = OmitLeaves<Order, 'customer.taxId'>;
 ## Path grammar
 
 Dot and bracket notation mix freely: `chapters[0].title`, `values[]`, `[1][2]`.
-`[]` is shorthand for `[0]`. A literal `.`, `[`, `]` or `\` in a key is escaped
-with a backslash.
+`[]` is shorthand for `[0]`, and exists so that arrays of unknown length stay
+autocompletable: TypeScript offers no completion for the `` `[${number}]` ``
+half of the path union ([TS#57545](https://github.com/microsoft/TypeScript/issues/57545)),
+so `values[]` is the literal an editor can actually suggest. A literal `.`, `[`,
+`]` or `\` in a key is escaped with a backslash.
 
 For index signatures, `LeafPath<T, true>` emits hint suffixes — `$` for
 `Record<string, _>` and `#` for `Record<number, _>` — which the accessors strip

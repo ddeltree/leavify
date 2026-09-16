@@ -64,6 +64,18 @@ Paths are strings mixing dot and bracket notation: `chapters[0].title`, `values[
 - `parsePath()` returns groups of keys — one group per dot-segment, with the root key followed by its indices. `setUnchecked()` relies on this grouping to know whether to create `{}` or `[]` for a missing intermediate node.
 - `interpretPathHints()` strips the autocomplete hint suffixes (`$`, `#`) that `LeafPath<T, true>` emits for `Record<string, _>` / `Record<number, _>` index signatures. Every public accessor calls it, then tokenizes with `parsePath()` before walking the object.
 
+`[]` is not typist's sugar — it is the only *completable* spelling of an index into a mutable
+array. `Arr` in `LeafPath.ts` emits `` `[${number | ''}]` `` for one, and TypeScript offers no
+completion for the `` `[${number}]` `` half ([microsoft/TypeScript#57545](https://github.com/microsoft/TypeScript/issues/57545)):
+type `user.roles` at a `PickLeaves`/`LeafPath` position and the editor suggests nothing, so the
+interpolated paths that genuinely exist in the type stay invisible. The `''` member puts the
+literal `user.roles[]` in the union beside them, which the editor *can* offer. It spells `[]`
+rather than `[0]` because a non-`as const` array literal has no known length — offering `[0]`
+would assert an element nobody promised. Resolving `[]` to index `0` in `split()` is the
+compromise that keeps the runtime consistent with a path the type space had to invent. A
+readonly tuple needs none of this: its indices are literal, so `Arr` emits `[0]`, `[1]`, …
+directly.
+
 A "leaf" is any non-object value **plus `null`** — see the `switch` in `has()`. Functions and symbols are not leaves.
 
 `IsIndex` in `PointerString.ts` is digits-only on purpose: `` `${number}` `` also admits `-1`, `1.5` and `1e5`, which the runtime `/^\d+$/` reads as ordinary keys. Using the wider one would make the two halves disagree on `/a/-1`.

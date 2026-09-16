@@ -26,6 +26,8 @@ export function split(path: string) {
     const groups = match.groups!;
     const rootKey = groups.key === '' ? undefined : groups.key;
     const indices = groups.indices
+      // `[]` is the completable spelling `Arr` emits for a mutable array
+      // (microsoft/TypeScript#57545); index 0 is what it resolves to.
       ?.replaceAll('[]', '[0]')
       .match(/\d+/g)
       ?.map((i) => parseInt(i));
