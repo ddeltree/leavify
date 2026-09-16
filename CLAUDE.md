@@ -22,7 +22,6 @@ npm run test -- accessors     # single file/pattern: extra args pass through to 
 npm run coverage              # vitest --coverage (watch mode)
 npm run build                 # vite build -> dist/
 npm run lint                  # eslint src/** utils/** __tests__/**
-npm run release               # standard-version (conventional commits -> CHANGELOG + tag)
 ```
 
 `npm run typecheck` (`tsconfig.typecheck.json`) is the gate for everything vitest only transpiles. Vitest does not type-check, so a type regression in a runtime test file is invisible to `npm test` — that is how a broken `toTree` call sat green. The config excludes `__tests__/types/*.test-d.ts`, since those are full of deliberate errors that `tsd` owns.
@@ -30,6 +29,30 @@ npm run release               # standard-version (conventional commits -> CHANGE
 `npm test` dispatches through `test.sh`, which switches on `--types` / `--package` flags. `--types` requires `dist/src/index.d.ts` to exist (it touches an empty one if missing) because tsd resolves the package's declared `types` field. `--package` runs against the _built_ artifact via `npm link`, so it catches packaging/export-map regressions that unit tests can't.
 
 CI (`.github/workflows/test.yml`) runs build → unit → package → types on push/PR to `main`.
+
+## Releasing
+
+`.github/workflows/release.yml` runs **release-please** on every push to `main`. It keeps one
+open release PR (`chore(main): release x.y.z`) holding the version bump and the generated
+`CHANGELOG.md` entry; merging that PR tags the release. There is no local release command and
+no `standard-version` — the bump cannot be forgotten, because it *is* the PR.
+
+Publishing stays manual and stays on your machine:
+
+```bash
+git pull                      # after the release PR merges
+npm publish                   # prepublishOnly runs `npm run check && npm run build` first
+```
+
+Two configuration points worth knowing before touching `release-please-config.json`:
+
+- **`bump-minor-pre-major: true`** preserves the pre-1.0 semantics this package has always had —
+  a `BREAKING CHANGE:` bumps the minor (0.4.0 → 0.5.0), not the major. release-please's own
+  default is `false`, which would ship the next breaking change as **1.0.0**. Go to 1.0.0 by
+  deliberately flipping this, never by accident.
+- **`.release-please-manifest.json`** is the source of truth for the current version. It was
+  seeded at `0.4.0`, the last release cut by hand; release-please maintains it from there and
+  does not need to infer the version from tags.
 
 ## Architecture
 
@@ -87,6 +110,7 @@ The second suite exists because the first one structurally cannot catch a missin
 - **Cross-directory imports use path aliases**, never relative parent paths. ESLint's `no-restricted-imports` bans `..*` and deep alias imports (`@typings/*.js`) inside `src/**` and `utils/**`, forcing everything through each folder's `index.ts` barrel. Aliases: `@accessors`, `@typings`, `@utils/*` (see `tsconfig.json` `paths`). Test files may import deep paths.
 - Adding a new public entry point means updating three places: `vite.config.ts` `rollupOptions.input`, the `exports` map in `package.json`, and the relevant barrel.
 - No runtime dependencies. The object helpers the accessors need — `getByPath`, `isObject`, `last` — live in `utils/objects.ts`; extend that file rather than pulling a library back in. `vite.config.ts` still externalizes `pkg.dependencies`, so adding one later keeps it out of the bundle.
-- Commit messages follow Conventional Commits (`standard-version` generates the changelog from them). A `BREAKING CHANGE:` note runs to the **end of the body**, so anything after it — `Co-Authored-By`, `Refs`, any trailer — is copied verbatim into the public changelog. Put the note last and keep trailers out of a breaking commit, or hand-write that release's entry and ship it with `npm run release -- --skip.changelog`, as 0.4.0 did.
+- Commit messages follow Conventional Commits — **release-please** reads them. There is no local release command; see "Releasing" below.
+- A `BREAKING CHANGE:` note runs to the **end of the commit body**, so anything after it — `Co-Authored-By`, `Refs`, any trailer — is copied verbatim into the public changelog. Put the note last and keep trailers out of a breaking commit. When an entry still needs fixing up, edit `CHANGELOG.md` on the release PR's branch rather than after the fact, as 0.4.0 had to be hand-written.
 - `.gitignore` includes `*.js` — never commit compiled output; source is `.ts` only.
 - README examples are verified, not illustrative: type claims by `tsd`, runtime claims against the built bundle. Keep them that way when editing.
