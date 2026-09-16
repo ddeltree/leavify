@@ -1,7 +1,7 @@
 {
   "name": "leavify",
   "type": "module",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Type-safe leaf paths for nested objects: autocompleted paths, per-path value types, diffing and JSON Pointer interop",
   "main": "./dist/index.js",
   "module": "./dist/index.js",
