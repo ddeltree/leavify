@@ -34,16 +34,22 @@ export function has<T extends object>(obj: T, path: LeafPath<T>) {
   }
 }
 
-/** Set a leaf value by path in-place.
+/** Set a leaf value by path in-place: `set(obj, path)(value)`.
  *
  * The value is checked against the type of the leaf at that path. For paths
  * that are only known at runtime, use {@link setUnchecked}.
+ *
+ * Taking the value in a *second* call is not a style choice. With the path and
+ * the value in one argument list, TypeScript has to type the value against
+ * `LeafValue<T, P>` while `P` is still the whole of `LeafPath<T>` — the
+ * excessively-deep trap, surfacing as editor latency rather than as an error.
+ * Completing a path here took 5.2s on an 800-leaf model as a `[path, value]`
+ * tuple and 0.8s curried, which is the cost of no value checking at all. Fixing
+ * `P` in the first call is what makes the second one cheap. See `__bench__/`.
  */
-export function set<T extends object, P extends LeafPath<T>>(
-  obj: T,
-  entry: readonly [P, LeafValue<T, P>],
-): T {
-  return setUnchecked(obj, entry as unknown as [string, Primitive]);
+export function set<T extends object, P extends LeafPath<T>>(obj: T, path: P) {
+  return (value: LeafValue<T, P>): T =>
+    setUnchecked(obj, [path, value as Primitive]);
 }
 
 /** Set a leaf value by path in-place, without checking the path or the value.
@@ -51,6 +57,13 @@ export function set<T extends object, P extends LeafPath<T>>(
  * The escape hatch for entries built at runtime — replaying a stored changeset,
  * assembling a fragment from parsed input. Prefer {@link set} when the path is
  * known statically.
+ *
+ * This one keeps the `[path, value]` entry and is *not* curried, which is the
+ * shape of the entries {@link walkLeaves} yields and {@link toTree} consumes.
+ * It costs nothing: with no `LeafValue` in the signature there is no
+ * instantiation to defer, and `toTree` calls it once per leaf, where a closure
+ * per leaf would be waste. So the two are asymmetric on purpose — `set` takes a
+ * path you wrote, `setUnchecked` replays an entry you already have.
  */
 export function setUnchecked<T extends object>(
   obj: T,

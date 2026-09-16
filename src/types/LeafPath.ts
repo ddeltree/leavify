@@ -67,7 +67,7 @@ export type OmitLeaves<
  * offers every leaf path as a completion at this position. A bare `string`
  * constraint would swallow the union and offer nothing.
  */
-type LeafPathOrPattern<T extends object> =
+export type LeafPathOrPattern<T extends object> =
   | LeafPath<T>
   // eslint-disable-next-line @typescript-eslint/ban-types
   | (string & {});

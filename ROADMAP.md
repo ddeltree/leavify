@@ -29,6 +29,20 @@ L0  addressing  →  LeafPath · LeafValue<T,P> · get/set/has/walkLeaves/toTree
 Steps 0–4 and the repositioning landed on 2026-07-27. Step 5 (the demo vertical)
 is open, and so is one refinement noted under step 3.
 
+**L1 path masking landed on 2026-09-16**, alongside the first benchmarks (`__bench__/`).
+`pickLeaves` / `omitLeaves` / `mask()` are the runtime twins of `PickLeaves` / `OmitLeaves`,
+and they are the piece every candidate vertical was missing — log redaction, field-level
+ACL, a public API view, and filtering a `diff` before rendering it are all one mask plus
+`allows()`. The same measurements forced a breaking change to `set`, which is now curried
+(trap 3 in `CLAUDE.md`).
+
+What the benchmarks say, so no one has to re-derive it: `LeafPath<T>` is **linear** at
+~286 type instantiations per leaf, stable from 20 to 800 leaves, and a `Record<LeafPath<T>, X>`
+mapped type costs +1.2 per entry — which makes an exhaustive per-leaf map (labels, policies,
+formatters) essentially free and is the cheapest thing in the library. Nesting depth is a
+non-issue: 24 levels is 28k instantiations and flat wall time. The cost lives at *call
+sites*, not in the model: each `get()` is O(model size), so a file is O(calls × leaves).
+
 ## Steps
 
 ### 0. ✅ Extract the path-space exclusion marker, then drop `leavify/changes`

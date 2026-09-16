@@ -7,6 +7,9 @@ import {
   fromPointer,
   get,
   has,
+  mask,
+  omitLeaves,
+  pickLeaves,
   set,
   toPointer,
   toTree,
@@ -32,7 +35,7 @@ test('accessors', () => {
   const newValue = 'someone else';
   if (has(book, path)) prevValue = get(book, path);
   expect(prevValue).not.toBeUndefined();
-  set(book, [path, newValue]);
+  set(book, path)(newValue);
   expect(has(book, path)).toBe(true);
   expect(get(book, path)).toBe(newValue);
 });
@@ -68,7 +71,7 @@ test('toTree gives the model back, not a bare object', () => {
 describe('diff', () => {
   test('reports the leaves that changed, with both values', () => {
     const before = snapshot();
-    set(book, [p('title'), 'a different title']);
+    set(book, p('title'))('a different title');
     const changes = [...diff(before, snapshot())];
     expect(changes).toEqual([['title', data.title, 'a different title']]);
   });
@@ -98,5 +101,35 @@ describe('JSON Pointer interop', () => {
     const path: 'chapters[0].title' = fromPointer('/chapters/0/title');
     expect(pointer).toBe('/author/name');
     expect(path).toBe('chapters[0].title');
+  });
+});
+
+describe('masking through the published package', () => {
+  test('pickLeaves keeps a subtree and drops everything else', () => {
+    expect(pickLeaves(book, 'author')).toEqual({
+      // Read through the library rather than through `book.author.id`, which
+      // is optional on the model — `get` is typed as the leaf at that path.
+      author: { id: get(book, 'author.id'), name: data.author },
+    });
+  });
+
+  test('omitLeaves keeps everything but the named leaf', () => {
+    const view = omitLeaves(book, 'title') as Partial<Book>;
+    expect(view.title).toBeUndefined();
+    expect(view.year).toBe(data.year);
+  });
+
+  test('a mask composes pick and omit, and omit wins', () => {
+    const m = mask<Book>().pick('author').omit('author.id');
+    expect(m.apply(book)).toEqual({ author: { name: data.author } });
+  });
+
+  test('the output is a plain object and a cyclic model terminates', () => {
+    // `Book` holds its `Author`, which holds the book back — the mask inherits
+    // the cycle guard from `walkLeaves`. The result is rebuilt from entries, so
+    // the prototype does not come with it.
+    const masked = pickLeaves(book, 'author');
+    expect(masked).not.toBeInstanceOf(Book);
+    expect(masked).not.toBeInstanceOf(Author);
   });
 });

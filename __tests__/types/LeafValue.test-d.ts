@@ -42,12 +42,20 @@ expectType<number>(get(order, 'items[0].qty'));
 expectType<boolean>(get(order, 'paid'));
 
 // ---------- set() checks the value against the path ----------
-set(order, ['customer.name', 'someone']);
-set(order, ['items[0].qty', 3]);
-set(order, ['paid', true]);
-expectError(set(order, ['customer.name', 42]));
-expectError(set(order, ['items[0].qty', 'three']));
-expectError(set(order, ['paid', 'yes']));
+set(order, 'customer.name')('someone');
+set(order, 'items[0].qty')(3);
+set(order, 'paid')(true);
+
+// The path is pinned first on purpose. `expectError` passes when *anything* in
+// the expression errors, so asserting on `set(order, 'customer.name')(42)` as
+// one expression would still pass with the value check gone — the path half
+// could be what failed. Split in two, only the value can fail here.
+const setName = set(order, 'customer.name');
+const setQty = set(order, 'items[0].qty');
+const setPaid = set(order, 'paid');
+expectError(setName(42));
+expectError(setQty('three'));
+expectError(setPaid('yes'));
 
 // setUnchecked is the escape hatch for runtime-built paths
 expectAssignable<object>(setUnchecked({} as object, ['a.b[0]', 1]));

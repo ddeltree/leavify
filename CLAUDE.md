@@ -62,7 +62,8 @@ Paths are strings mixing dot and bracket notation: `chapters[0].title`, `values[
 
 - `split()` splits on unescaped `.` then unescaped `[n]` groups; `[]` normalizes to `[0]`.
 - `parsePath()` returns groups of keys — one group per dot-segment, with the root key followed by its indices. `setUnchecked()` relies on this grouping to know whether to create `{}` or `[]` for a missing intermediate node.
-- `interpretPathHints()` strips the autocomplete hint suffixes (`$`, `#`) that `LeafPath<T, true>` emits for `Record<string, _>` / `Record<number, _>` index signatures. Every public accessor calls it, then tokenizes with `parsePath()` before walking the object.
+- `interpretPathHints()` normalizes a path by round-tripping it through `split()` — so `[]` resolves to `[0]`. It does **not** strip the `$`/`#` hint suffixes that `LeafPath<T, true>` emits for `Record<string, _>` / `Record<number, _>` index signatures, despite what this file and the README used to claim: `keyIndicesReg` keeps them inside the key. Nothing breaks, because every public accessor takes `LeafPath<T>` with `HINT = false`, so a suffix cannot legally reach one. A **mask rule** can carry one, and `utils/pathPattern.ts` strips it itself. Every public accessor calls `interpretPathHints()`, then tokenizes with `parsePath()` before walking the object.
+- `utils/pathPattern.ts` is the *matcher*, deliberately separate from the parser: `compileMatcher(rules)` turns a list of mask rules into a predicate over leaf paths. It compares tokens rather than strings, so a prefix rule stops at a segment boundary structurally — `customer` and `customerId` are simply different tokens, and there is no `startsWith` check that can be forgotten.
 
 `[]` is not typist's sugar — it is the only *completable* spelling of an index into a mutable
 array. `Arr` in `LeafPath.ts` emits `` `[${number | ''}]` `` for one, and TypeScript offers no
@@ -76,6 +77,14 @@ compromise that keeps the runtime consistent with a path the type space had to i
 readonly tuple needs none of this: its indices are literal, so `Arr` emits `[0]`, `[1]`, …
 directly.
 
+**`[]` means something different in a mask rule, and that is deliberate.** In an addressing
+context (`get`, `set`, `has`) a path denotes one leaf, so `split()` resolves `[]` to index 0.
+In a *matching* context a rule denotes a set, and `rows[]` is the only completable spelling
+for the whole family `` `rows[${number}]` `` — so `utils/pathPattern.ts` reads it as **any
+index**. Collapsing the two would make a mask redact row 0 and leak every other row, which
+is a security bug rather than an inconsistency. The divergence has its own test, named after
+itself, in `__tests__/accessors/pathPattern.test.ts` and `__tests__/accessors/mask.test.ts`.
+
 A "leaf" is any non-object value **plus `null`** — see the `switch` in `has()`. Functions and symbols are not leaves.
 
 `IsIndex` in `PointerString.ts` is digits-only on purpose: `` `${number}` `` also admits `-1`, `1.5` and `1e5`, which the runtime `/^\d+$/` reads as ordinary keys. Using the wider one would make the two halves disagree on `/a/-1`.
@@ -86,10 +95,11 @@ Two escaping layers exist and they reserve _different_ characters. Leavify's gra
 
 Runtime primitives, all path-based:
 
-- `accessors.ts` — `get` (typed as the leaf at that path), `has`, `set` (value checked against the path), `setUnchecked` (escape hatch for runtime-built paths; `set` delegates to it).
+- `accessors.ts` — `get` (typed as the leaf at that path), `has`, `set` (curried: `set(obj, path)(value)`, value checked against the path), `setUnchecked` (escape hatch for runtime-built paths; takes a `[path, value]` entry and is *not* curried; `set` delegates to it). The asymmetry is measured, not arbitrary — see trap 3.
 - `walkLeaves.ts` — generator over leaf entries, cycle-guarded by the `Branch` value stack. Yields `LeafEntry<T>`, a discriminated union over the path (same shape as `LeafDiff`), so the value narrows with the path.
 - `toTree.ts` — entries → new object; root is an array if the first path starts with `[`. Generic over the model, which must be passed explicitly (`toTree<Order>(…)`) because `LeafPath<T>` is not an inferable position. The `T = never` default routes unannotated calls to a plain `[string, Primitive]` entry, deliberately keeping `LeafEntry` off that path: `LeafEntry` of an index-signature model distributes over `` `${string}` `` and trips _"type instantiation is excessively deep"_ (trap 2 below). `diff` binds `walkLeaves` to `T` rather than `T | Fragment<T>` for the same reason.
 - `diff.ts` — yields `[path, before, after]` as `LeafDiff<T>`, a discriminated union over the path. Only visits leaves reachable in `after`, so removals are not reported; a leaf absent from `before` yields `undefined`.
+- `mask.ts` — `pickLeaves` / `omitLeaves` (runtime twins of `PickLeaves`/`OmitLeaves`) and the `mask()` builder. All three return `Fragment<T>` and never `undefined`: a projection that selects nothing is an empty view, so the root is seeded from `Array.isArray(obj)` rather than from `toTree`'s first-path heuristic. `mask()` carries no accumulated path union — see trap 4.
 - `pointer.ts` — `toPointer` / `fromPointer` for RFC 6901 interop. Both are generic over the string, and `src/types/PointerString.ts` mirrors the runtime step for step as template-literal types (`ToPointer` / `FromPointer`). The two halves are kept honest by one shared table in `__tests__/accessors/pointer.test.ts` that drives the runtime assertion and the type assertion, plus a negative pass — without it a conversion resolving to `never` would satisfy every type assertion silently.
 
 ### `src/types/`
@@ -109,10 +119,13 @@ Changes here are easy to get subtly wrong, and they are covered by **two** suite
 
 The second suite exists because the first one structurally cannot catch a missing completion. A type parameter constrained to `string` type-checks every call while offering no suggestion at all, so an assignability suite stays green while autocompletion — the headline feature — is broken. That is exactly how `PickLeaves`/`OmitLeaves` shipped with zero completions. Any new public API that takes a path needs a case in _both_.
 
-**Watch for two traps that already bit once:**
+**Watch for five traps that already bit once:**
 
 1. A loose overload on `set` (`[string & {}, Primitive]`) silently defeats value checking — every string matches it, so the strict signature never fails. That is why the escape hatch is a separate `setUnchecked` function, not an overload. `__tests__/types/LeafValue.test-d.ts` catches the regression.
 2. `LeafValue<T, P>` instantiated with `P` at its full constraint is O(paths × chains) and can trip _"type instantiation is excessively deep"_. Keep it inferred from a concrete argument.
+3. **The same instantiation also leaks as editor latency, with nothing failing.** Pairing a path with its value in one argument list makes TypeScript type the value against `LeafValue<T, P>` while `P` is still the full union. Measured on the synthetic 800-leaf model in `__bench__/`: completing a path took 5.2s as `set(o, [p, v])`, 5.2s as `set(o, p, v)`, and **0.8s** as `set(o, p)(v)` — which is the floor of a signature doing no value checking at all. Hence the curried `set`. Never reintroduce a form that takes the path and the value together.
+4. **An array in a type parameter's _constraint_ kills completions outright.** Measured across six shapes at a rest parameter: `<P extends readonly LeafPath<T>[]>(...p: P)` and `<const P extends …[]>(...p: P)` both offer `[""]` — nothing — while type-checking perfectly and staying green under `tsd`. `<P extends LeafPath<T>>(...p: P[])` keeps completions but unifies `P` across the arguments, so the *second* position then offers only the literal already typed in the first. Only a plain `(...p: LeafPathOrPattern<T>[])` offers every leaf path at every position, which is why `pickLeaves`/`omitLeaves`/`mask().pick` take that shape and `mask()` carries **no** accumulated path union. Anyone wanting the narrowed type writes `PickLeaves<Order, 'a' | 'b'>`, which is nearly free (+1.2 instantiations per member).
+5. **`Array.isArray()` applied directly to a `Fragment<T>` return trips trap 2.** `Fragment<T>` is `T | RecursivePartial<T>` and `Array.isArray` narrows through `any[]`, which forces `RecursivePartial` to resolve while `T` is still being inferred. Bind the result to a variable first. Not pinned as a `tsd` case — `expectError` cannot assert ts2589 — so this note and the comment in `__tests__/accessors/mask.test.ts` are the guard. Note that vitest would never catch it; `npm run typecheck` is what does.
 
 `PickLeaves`/`OmitLeaves` do use `LeafPath<T> | (string & {})`, which looks like trap 1 but is not it. The trap is a loose **overload** on a mutating call, where any string matches and the strict signature never gets to fail. Here the loose half sits in a **constraint** whose only job is to keep subtree patterns (`` `customer.${string}` ``) assignable while the `LeafPath<T>` half keeps completions alive — a bare `string` swallows the union and the editor offers nothing. The residual cost is narrow and documented in the JSDoc: `OmitLeaves` with a path that matches nothing removes nothing instead of failing. `PickLeaves` yields `never`, which is loud.
 

@@ -5,7 +5,17 @@ import { CURSOR, completionsAt, errorsIn } from './languageService.js';
  * position in the API should ever offer it. */
 const PRELUDE = `
 import type { Hidden, LeafPath, LeafValue, OmitLeaves, PickLeaves } from '@typings';
-import { get, set, setUnchecked, has, toPointer, toTree } from '@accessors';
+import {
+  get,
+  set,
+  setUnchecked,
+  has,
+  mask,
+  omitLeaves,
+  pickLeaves,
+  toPointer,
+  toTree,
+} from '@accessors';
 
 interface Order {
   id: string;
@@ -26,9 +36,16 @@ describe('editor completions for leaf paths', () => {
     ['PickLeaves<T, P>', `type P = PickLeaves<Order, '${CURSOR}'>;`],
     ['OmitLeaves<T, P>', `type O = OmitLeaves<Order, '${CURSOR}'>;`],
     ['get()', `const v = get(order, '${CURSOR}');`],
-    ['set()', `set(order, ['${CURSOR}', 'x']);`],
+    ['set()', `set(order, '${CURSOR}');`],
     ['has()', `const h = has(order, '${CURSOR}');`],
     ['toTree<T>()', `const t = toTree<Order>([['${CURSOR}', 'x']]);`],
+    ['pickLeaves()', `pickLeaves(order, '${CURSOR}');`],
+    ['omitLeaves()', `omitLeaves(order, '${CURSOR}');`],
+    ['mask().pick()', `mask<Order>().pick('${CURSOR}');`],
+    [
+      'mask().pick().omit()',
+      `mask<Order>().pick('customer.name').omit('${CURSOR}');`,
+    ],
   ])('%s', (_label, line) => {
     it('offers every leaf path of the model', () => {
       expect(completionsAt(snippet(line))).toEqual(LEAVES);

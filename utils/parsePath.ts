@@ -9,10 +9,10 @@ export default function parsePath(path: string) {
   );
 }
 
-const pointsReg = /(?<!\\)\./,
-  keyIndicesReg = /^(?<key>.*?)(?<indices>(?:(?<!\\)\[\d*(?<!\\)\])+)?$/,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  _bracketsReg = /(?<!\\)\[(\d*)(?<!\\)\]/g;
+export const pointsReg = /(?<!\\)\./;
+export const keyIndicesReg =
+  /^(?<key>.*?)(?<indices>(?:(?<!\\)\[\d*(?<!\\)\])+)?$/;
+export const bracketsReg = /(?<!\\)\[(\d*)(?<!\\)\]/g;
 
 /** Split path by dots and then bracket pairs, except when preceded by backslash
  * @returns each dotted subpath: the root key and its indices.

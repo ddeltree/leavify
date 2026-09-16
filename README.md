@@ -17,7 +17,7 @@ get(order, 'items[0].qty'); // number
 
 get(order, 'customer'); // ✗ not a leaf
 get(order, 'customer.addres.city'); // ✗ typo caught at compile time
-set(order, ['items[0].qty', 'three']); // ✗ wrong value type for this path
+set(order, 'items[0].qty')('three'); // ✗ wrong value type for this path
 ```
 
 `LeafPath<Order>` resolves to exactly this — leaves only, bracket notation,
@@ -64,14 +64,33 @@ Pure ESM, zero runtime dependencies.
 
 ```yaml
 get: read the leaf at a path — typed as that leaf, not as a union
-set: write the leaf at a path — the value is checked against that path
+set: write the leaf at a path — `set(obj, path)(value)`, the value checked against that path
 setUnchecked: escape hatch for paths only known at runtime
 has: truthy when the path refers to a leaf that exists
 walkLeaves: iterate the path-value entries inside an object
 toTree: rebuild the object from a list of path-value entries — the inverse of walkLeaves
 diff: compare two objects, yielding [path, before, after] per changed leaf
+pickLeaves / omitLeaves: project an object down to a set of paths
+mask: a reusable projection — pick, omit, compose, apply
 toPointer / fromPointer: convert between a leaf path and an RFC 6901 JSON Pointer, at the type level too
 ```
+
+### Writing
+
+`set` takes the value in a second call — `set(obj, path)(value)`:
+
+```ts
+set(order, 'customer.address.city')('Lisbon');
+set(order, 'items[0].qty')('three'); // ✗ number expected here
+```
+
+That is not a style choice. With the path and the value in one argument list,
+TypeScript has to type the value against `LeafValue<T, P>` while `P` is still the
+whole of `LeafPath<T>`, which is quadratic — completing a path here took 5.2s on
+an 800-leaf model as a `[path, value]` tuple, against 0.8s curried, the same cost
+as checking no value at all. Fixing `P` in the first call is what makes the
+second one cheap. `setUnchecked` keeps the `[path, value]` entry, since it has no
+value type to defer and it replays entries that already exist.
 
 ### Iterating and rebuilding
 
@@ -179,6 +198,57 @@ type Editable = PickLeaves<Order, `customer.${string}`>;
 type Public = OmitLeaves<Order, 'customer.taxId'>;
 ```
 
+### Masking: the same narrowing, at runtime
+
+`pickLeaves` and `omitLeaves` are the runtime twins of those two types. They
+project an object down to a set of paths and hand back a sparse `Fragment<T>`:
+
+```ts
+import { mask, omitLeaves, pickLeaves } from 'leavify';
+
+pickLeaves(order, 'customer.name'); // { customer: { name: 'someone' } }
+omitLeaves(order, 'customer.taxId'); // everything except that leaf
+```
+
+A rule names either one leaf or a whole branch, and `mask()` compiles a set of
+them once for reuse — `omit` always wins over `pick`, which is the shape a
+role-scoped view actually has:
+
+```ts
+const support = mask<Order>().pick('customer').omit('customer.taxId');
+
+support.apply(order); // { customer: { name: 'someone', … } }
+support.allows('customer.taxId'); // false
+```
+
+Masks are immutable, so a base can be specialised per role without the
+specialisation leaking back. `allows` also filters a diff into an audit log:
+
+```ts
+for (const [path, before, after] of diff(saved, edited))
+  if (support.allows(path)) console.log(`${path}: ${before} → ${after}`);
+```
+
+Three things worth knowing before you point one at a log:
+
+- **`[]` means _any_ index in a rule**, unlike everywhere else in the grammar,
+  where it resolves to `[0]`. `rows[]` is the only spelling an editor can offer
+  for the family `` `rows[${number}]` ``, and resolving it to element 0 in a mask
+  would redact one row and leak the rest. Name a concrete index — `rows[0]` — if
+  that is what you mean.
+- **Indices are preserved, so a skipped element leaves a hole.** Picking
+  `rows[1].sku` yields an array of length 2 whose first element is empty;
+  compacting it would renumber the rows and every path in the output would then
+  address a different leaf. `JSON.stringify` renders the hole as `null`.
+- **The output is a plain object.** It is rebuilt from entries, so a class
+  instance loses its prototype.
+
+**A mask is not redaction for `Hidden` fields.** It cannot see the marker — that
+is types-only. An allow-list of exact paths does drop them, but only because they
+are never offered as completions: naming one outright still works, and picking a
+whole *subtree* sweeps them back in. As above, keep data that must not leave the
+object out of it.
+
 ## Path grammar
 
 Dot and bracket notation mix freely: `chapters[0].title`, `values[]`, `[1][2]`.
@@ -189,8 +259,10 @@ so `values[]` is the literal an editor can actually suggest. A literal `.`, `[`,
 `]` or `\` in a key is escaped with a backslash.
 
 For index signatures, `LeafPath<T, true>` emits hint suffixes — `$` for
-`Record<string, _>` and `#` for `Record<number, _>` — which the accessors strip
-before resolving.
+`Record<string, _>` and `#` for `Record<number, _>`. Note that the accessors do
+_not_ strip them: `interpretPathHints` only resolves `[]`, and a suffix never
+reaches an accessor because they all take `LeafPath<T>` with hints off. A mask
+rule may carry one, and `pickLeaves`/`omitLeaves`/`mask` strip it themselves.
 
 ## License
 

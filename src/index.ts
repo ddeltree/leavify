@@ -1,4 +1,5 @@
-import { diff, get, has, set, toTree, walkLeaves } from '@accessors';
+import { diff, get, has, mask, set, toTree, walkLeaves } from '@accessors';
+import { omitLeaves, pickLeaves } from '@accessors';
 import { fromPointer, toPointer } from '@accessors';
 
 const leaves = {
@@ -6,6 +7,9 @@ const leaves = {
   fromPointer,
   get,
   has,
+  mask,
+  omitLeaves,
+  pickLeaves,
   set,
   toPointer,
   toTree,

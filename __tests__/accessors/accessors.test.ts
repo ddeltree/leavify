@@ -45,7 +45,7 @@ describe('get(), has(), set() integration', () => {
     // @ts-expect-error
     expect(get(branch, path)).not.toBe(value);
     // @ts-expect-error — `branch` is typed `object`, so its path space is empty
-    set(branch, [path, value]);
+    set(branch, path)(value);
     // @ts-expect-error
     expect(get(branch, path)).toBe(value);
   });
@@ -61,7 +61,7 @@ describe('get(), has(), set() integration', () => {
     const path = 'change[2].target',
       value = 13;
     // set new value
-    set(tree, [path, value]);
+    set(tree, path)(value);
     expect(get(tree, path)).toBe(value);
     // check that the previous values remain
     for (const key of Object.keys(tree)) {
@@ -78,7 +78,7 @@ describe('get(), has(), set() integration', () => {
     // @ts-expect-error
     expect(() => get(branch, path)).toThrow();
     // @ts-expect-error — `branch` is typed `object`, so its path space is empty
-    set(branch, [path, value]);
+    set(branch, path)(value);
     // @ts-expect-error
     expect(get(branch, path)).toBe(value);
   });
@@ -92,6 +92,6 @@ test('empty brackets index notation', () => {
   };
   expect(has(branch, 'a[].b[]')).toBe(true);
   expect(get(branch, 'a[].b[]')).toBe(leaf);
-  expect(() => set(branch, ['a[].b[]', newLeaf])).not.toThrowError();
+  expect(() => set(branch, 'a[].b[]')(newLeaf)).not.toThrowError();
   expect(get(branch, 'a[].b[]')).toBe(newLeaf);
 });

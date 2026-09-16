@@ -3,5 +3,7 @@ export * from './pointer.js';
 export { default as toTree } from './toTree.js';
 export { default as walkLeaves } from './walkLeaves.js';
 export type { LeafEntry } from './walkLeaves.js';
+export { default as mask, omitLeaves, pickLeaves } from './mask.js';
+export type { Mask } from './mask.js';
 export { default as diff } from './diff.js';
 export type { LeafDiff } from './diff.js';
