@@ -95,11 +95,22 @@ The marker extracted in step 0 is now public API, alongside `PickLeaves`/`OmitLe
 
 `Hidden<T>` hides a field everywhere; `OmitLeaves` hides it at one use site. This is the most original idea in the codebase — it was invented to serve one internal case in `changes`, and it outlived that module.
 
-### 5. One demo vertical — OPEN
+### 5. ✅ One demo vertical — audit log
 
 Pick **one**. Preference: audit log / "what changed" — it is visual, fits a README GIF, and everyone has suffered with it.
 
 This step is not marketing. A general-purpose primitive with no one-sentence "what is it for" gets adopted for nothing.
+
+Landed as the "An audit log, end to end" section of the README, verified by
+`__tests__/integration/integration.test.ts` against the built bundle: `diff` for what
+changed, `mask().allows` for what may be shown, and an exhaustive `Record<LeafPath<T>, string>`
+of labels for how to say it.
+
+Writing it found that the third piece did not work. The registry is keyed by the completable
+spelling (`items[].qty`) while `diff` yields a concrete index (`items[1].qty`), so the lookup
+type-checked and returned `undefined`. That is what `toTemplate` is for, and it is the one
+piece of API this step added — the alternative was every user rewriting the same
+escape-sensitive normalisation inline.
 
 ## ✅ Repositioning
 

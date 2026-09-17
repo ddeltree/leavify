@@ -12,6 +12,7 @@ import {
   pickLeaves,
   set,
   toPointer,
+  toTemplate,
   toTree,
   walkLeaves,
 } from 'leavify';
@@ -131,5 +132,80 @@ describe('masking through the published package', () => {
     const masked = pickLeaves(book, 'author');
     expect(masked).not.toBeInstanceOf(Book);
     expect(masked).not.toBeInstanceOf(Author);
+  });
+});
+
+describe('the audit log, end to end through the published package', () => {
+  // A registry of one label per leaf. Annotated rather than `satisfies`: both
+  // reject a missing key, but `satisfies` keeps only the literal keys in the
+  // resulting type, so indexing it with a path from `diff` would not compile.
+  const labels: Record<LeafPath<Book>, string> = {
+    id: 'Reference',
+    title: 'Title',
+    year: 'Year',
+    'author.id': 'Author reference',
+    'author.name': 'Author',
+    'chapters[].id': 'Chapter reference',
+    'chapters[].title': 'Chapter title',
+    'chapters[].author.id': 'Chapter author reference',
+    'chapters[].author.name': 'Chapter author',
+  };
+
+  const visible = mask<Book>().omit('author.id', 'chapters[].id', 'id');
+
+  const render = (through: typeof visible, before: Book, after: Book) =>
+    [...diff(before, after)]
+      .filter(([path]) => through.allows(path))
+      .map(([path, from, to]) => `${labels[toTemplate(path)]}: ${from} → ${to}`);
+
+  const auditLog = (before: Book, after: Book) =>
+    render(visible, before, after);
+
+  test('renders a changed leaf with its label', () => {
+    const before = snapshot();
+    set(book, p('title'))('a different title');
+    expect(auditLog(before, snapshot())).toEqual([
+      `Title: ${data.title} → a different title`,
+    ]);
+  });
+
+  test('labels a leaf inside an array, which is what toTemplate is for', () => {
+    const before = snapshot();
+    set(book, 'chapters[1].title')('a different chapter');
+    expect(auditLog(before, snapshot())).toEqual([
+      `Chapter title: ${data.chapters[1]} → a different chapter`,
+    ]);
+  });
+
+  test('without toTemplate the label is undefined, silently', () => {
+    // The registry is keyed `chapters[].title`; `diff` yields `chapters[1].title`.
+    // This type-checks — the interpolated member of `LeafPath<Book>` is an index
+    // signature on the annotated record — and misses at runtime.
+    const before = snapshot();
+    set(book, 'chapters[1].title')('another title');
+    const [[path]] = [...diff(before, snapshot())];
+    expect(labels[path]).toBeUndefined();
+    expect(labels[toTemplate(path)]).toBe('Chapter title');
+  });
+
+  test('a mask filters addresses, so an aliased field needs all of them', () => {
+    // The book's author is the same object every chapter points at, so the id
+    // is reachable as `author.id` AND as `chapters[].author.id`. Masking only
+    // the first still leaks it through the second: a mask narrows the path
+    // space, and two paths to one value are two things to narrow.
+    const before = snapshot();
+    const secret = '00000000-0000-0000-0000-00000000dead' as const;
+    set(book, 'author.id')(secret);
+
+    const partial = mask<Book>().omit('author.id');
+    expect(render(partial, before, snapshot()).join('\n')).toContain(secret);
+
+    const complete = mask<Book>().omit('author.id', 'chapters[].author.id');
+    expect(render(complete, before, snapshot())).toEqual([]);
+  });
+
+  test('the literal return type survives the declaration build', () => {
+    const template: 'chapters[].title' = toTemplate('chapters[0].title');
+    expect(template).toBe('chapters[].title');
   });
 });

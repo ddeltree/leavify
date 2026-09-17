@@ -72,6 +72,7 @@ toTree: rebuild the object from a list of path-value entries — the inverse of 
 diff: compare two objects, yielding [path, before, after] per changed leaf
 pickLeaves / omitLeaves: project an object down to a set of paths
 mask: a reusable projection — pick, omit, compose, apply
+toTemplate: collapse a concrete index into the completable `[]` spelling, for keying a per-leaf registry
 toPointer / fromPointer: convert between a leaf path and an RFC 6901 JSON Pointer, at the type level too
 ```
 
@@ -248,6 +249,57 @@ is types-only. An allow-list of exact paths does drop them, but only because the
 are never offered as completions: naming one outright still works, and picking a
 whole *subtree* sweeps them back in. As above, keep data that must not leave the
 object out of it.
+
+## An audit log, end to end
+
+The pieces above compose into the thing everyone has written badly at least
+once: a human-readable record of what changed, with fields nobody may see left
+out of it, and a compiler that will not let a new field ship unlabelled.
+
+```ts
+import { diff, mask, toTemplate } from 'leavify';
+import type { LeafPath } from 'leavify';
+
+// One label per leaf. Add a field to `Order` and this stops compiling until you
+// say what to call it — the registry is exhaustive by construction.
+const labels: Record<LeafPath<Order>, string> = {
+  id: 'Reference',
+  'customer.name': 'Customer',
+  'customer.taxId': 'Tax ID',
+  'items[].sku': 'Item',
+  'items[].qty': 'Quantity',
+};
+
+const visible = mask<Order>().omit('customer.taxId');
+
+for (const [path, before, after] of diff(saved, edited))
+  if (visible.allows(path))
+    console.log(`${labels[toTemplate(path)]}: ${before} → ${after}`);
+
+// Quantity: 1 → 3
+// Customer: someone → someone else
+```
+
+Three details that are load-bearing rather than decorative:
+
+**Annotate the registry; do not use `satisfies`.** Both reject a missing key, but
+`satisfies` keeps only the literal keys in the resulting type, so indexing it
+with a path from `diff` will not compile. The annotation keeps the interpolated
+member as an index signature, which is what makes the lookup legal.
+
+**`toTemplate` is not optional.** `diff` and `walkLeaves` yield a concrete index
+— `items[1].qty` — while the registry is keyed by the completable spelling,
+`items[].qty`. Looking one up with the other type-checks and returns `undefined`
+at runtime, silently. `toTemplate` collapses the index, and it does so at the
+type level too, so a literal path stays a literal key:
+
+```ts
+toTemplate('items[1].qty'); // 'items[].qty' — the type, not just the value
+```
+
+**A mask filters addresses, not values.** If two paths reach the same object —
+an author shared by every chapter, say — masking one of them leaves the other
+open. Narrow every address that reaches the value, or keep it out of the object.
 
 ## Path grammar
 

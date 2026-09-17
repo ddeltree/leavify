@@ -14,6 +14,7 @@ import {
   omitLeaves,
   pickLeaves,
   toPointer,
+  toTemplate,
   toTree,
 } from '@accessors';
 
@@ -72,6 +73,14 @@ describe('editor completions for leaf paths', () => {
     `);
     expect(offered).toContain('tags$');
     expect(offered).toContain('slots#');
+  });
+
+  it('offers nothing at toTemplate, which rewrites without a model', () => {
+    // Same rationale as toPointer below: it never sees `T`, so there is no path
+    // space to enumerate. The paths reaching it are already typed by whatever
+    // produced them — `diff`, `walkLeaves`, or a literal.
+    const offered = completionsAt(snippet(`toTemplate('${CURSOR}');`));
+    expect(offered.filter((name) => LEAVES.includes(name))).toEqual([]);
   });
 
   it('offers nothing at setUnchecked, which is the untyped escape hatch', () => {

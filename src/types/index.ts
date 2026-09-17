@@ -8,6 +8,7 @@ import type {
   PickLeaves,
 } from './LeafPath.js';
 import type { FromPointer, ToPointer } from './PointerString.js';
+import type { ToTemplate } from './TemplatePath.js';
 import type Primitive from './Primitive.js';
 
 export {
@@ -23,4 +24,5 @@ export {
   PickLeaves,
   Primitive,
   ToPointer,
+  ToTemplate,
 };
