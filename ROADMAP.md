@@ -26,8 +26,11 @@ L0  addressing  →  LeafPath · LeafValue<T,P> · get/set/has/walkLeaves/toTree
 
 ## Status
 
-Steps 0–4 and the repositioning landed on 2026-07-27. Step 5 (the demo vertical)
-is open, and so is one refinement noted under step 3.
+All steps (0–5) and the repositioning are done. `leavify@0.6.0` is published to npm —
+the roadmap as originally scoped is complete; anything past this point is new work,
+not a pending item from this document.
+
+Steps 0–4 and the repositioning landed on 2026-07-27.
 
 **L1 path masking landed on 2026-09-16**, alongside the first benchmarks (`__bench__/`).
 `pickLeaves` / `omitLeaves` / `mask()` are the runtime twins of `PickLeaves` / `OmitLeaves`,
@@ -118,13 +121,11 @@ escape-sensitive normalisation inline.
 - `package.json` `description` and `keywords` follow.
 - Main bundle went from 7.16 kB (shared chunk) + two entry points to a single entry: 4.22 kB at the time, 6.14 kB since the masking functions landed.
 
-## Before publishing
+## ✅ Before publishing
 
-Not done, and deliberately left for a human decision:
-
-- **Version.** Still `0.3.0`. Removing `leavify/changes` and renaming `findDifference` → `diff` are breaking, so this wants at least `0.4.0` (semver allows breaking in a minor at `0.x`), with the removal called out in `CHANGELOG.md`.
-- `engines` and `sideEffects: false` are still missing from `package.json`.
-- No benchmarks yet — worth having before making performance claims against `type-fest`.
+- **Version.** Bumped past the breaking removal of `leavify/changes` and the `findDifference` → `diff` rename; release-please has carried it from `0.4.0` through `0.6.0`, published to npm.
+- `engines` (`node >=18`) and `sideEffects: false` are set in `package.json`.
+- Benchmarks landed under `__bench__/` alongside the masking work (step 3 of Status above).
 
 ## `leavify/changes` — dropped
 
